@@ -1,0 +1,41 @@
+{
+  "name": "core",
+  "version": "0.0.0",
+  "description": "FaaS Framework - Core",
+  "main": "lib/index.js",
+  "readmeFilename": "README.md",
+  "keywords": [
+    "webfaas",
+    "faas",
+    "rpc",
+    "fog",
+    "web"
+  ],
+  "scripts": {
+    "test": "node test/runTest.js",
+    "build": "node node_modules/gulp/bin/gulp.js build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webfaas/core.git"
+  },
+  "dependencies": {
+    "semver": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^11.11.5",
+    "gulp": "^4.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^5.0.1",
+    "typescript": "^3.4.1",
+    "typescript-tslint-plugin": "^0.3.1"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "author": {
+    "name": "Rogério Dias Moreira",
+    "email": "rogeriodegoiania@gmail.com"
+  },
+  "license": "MIT"
+}

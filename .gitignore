@@ -1,0 +1,8 @@
+*~
+*.log
+bkp.eslintrc.js
+node_modules
+yarn.lock
+package-lock.json
+dist
+src/legacy
