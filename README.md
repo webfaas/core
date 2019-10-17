@@ -1,7 +1,16 @@
 # WebFaas Core
-## FaaS Micro Framework
-## work in progress...
+
 Minimalist FaaS framework for [node](http://nodejs.org).
+
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+[![Linux Build][travis-image]][travis-url]
+[![Windows Build][appveyor-image]][appveyor-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
+
+## work in progress...
+
+## FaaS Micro Framework
 
 ## Features
   * Focus on high performance
