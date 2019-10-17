@@ -6,8 +6,6 @@ import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 
-const log = Log.getInstance();
-
 const wrapper = [
     "(function (exports, require, module, __filename, __dirname) { ",
     "\n});"
@@ -17,8 +15,11 @@ const wrapper = [
  * ModuleCompile
  */
 export class ModuleCompile {
-    constructor() {
-        this.defaultRequireBuilder = new DefaultModuleCompileRequireBuilder();
+    private log: Log;
+
+    constructor(log?: Log) {
+        this.log = log || Log.getInstance();
+        this.defaultRequireBuilder = new DefaultModuleCompileRequireBuilder(this.log);
         this.defaultSandBoxContext = SandBox.SandBoxBuilderContext();
     }
 
@@ -66,7 +67,7 @@ export class ModuleCompile {
             logDetail.manifest = manifest;
             logDetail.delay = new Date().getTime() - timeInit;
     
-            log.write(LogLevelEnum.INFO, "compile", LogCodeEnum.COMPILE.toString(), "compiled", logDetail, __filename, invokeContext);
+            this.log.write(LogLevelEnum.INFO, "compile", LogCodeEnum.COMPILE.toString(), "compiled", logDetail, __filename, invokeContext);
     
             return newModule;
         }
@@ -75,7 +76,7 @@ export class ModuleCompile {
             var logDetail = {} as any;
             logDetail.manifest = manifest;
             
-            log.writeError("constructor", errTry, logDetail, __filename, invokeContext);
+            this.log.writeError("constructor", errTry, logDetail, __filename, invokeContext);
             throw errTry;
         }
     }

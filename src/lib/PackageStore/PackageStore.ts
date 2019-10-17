@@ -5,31 +5,32 @@ import { IManifest } from "../Manifest/IManifest";
  * PackageStore
  */
 export class PackageStore {
+    private packageBuffer: Buffer;
     private dataPackageItemDataMap: Map<string, IPackageStoreItemData>;
+    private manifest: IManifest | null = null;
+
     private name: string;
     private version: string;
     private etag: string;
     private size: number = 0;
     private length: number = 0;
     private lastAccess: number = new Date().getTime();
-    private packageBuffer: Buffer;
-    private manifest: IManifest | null = null;
 
     constructor(name: string, version: string, etag: string, packageBuffer: Buffer, dataPackageItemDataMap?: Map<string, IPackageStoreItemData>) {
         this.name = name;
         this.version = version;
         this.etag = etag;
         this.packageBuffer = packageBuffer;
+        this.size = packageBuffer.length;
         
         if (dataPackageItemDataMap){
-            dataPackageItemDataMap.forEach((value, key) => {
-                this.size += value.size;
-                this.length ++;
-            })
+            this.length = dataPackageItemDataMap.size;
         }
         else{
+            this.length = 0;
             dataPackageItemDataMap = new Map<string, IPackageStoreItemData>();
         }
+
         this.dataPackageItemDataMap = dataPackageItemDataMap;
     }
 
@@ -91,6 +92,14 @@ export class PackageStore {
         }
     }
 
+    getPackageBuffer(): Buffer{
+        return this.packageBuffer;
+    }
+
+    getDataPackageItemDataMap(): Map<string, IPackageStoreItemData>{
+        return this.dataPackageItemDataMap;
+    }
+
     addItemData(nameItem: string, itemData: IPackageStoreItemData){
         this.removeItemData(nameItem);
         this.dataPackageItemDataMap.set(nameItem, itemData);
@@ -109,21 +118,5 @@ export class PackageStore {
             }
             this.length --;
         }
-    }
-
-    static buildItemData(name: string, begin: number, size: number): IPackageStoreItemData{
-        var itemData = {} as IPackageStoreItemData;
-        itemData.begin = begin;
-        itemData.name = name;
-        itemData.size = size;
-        return itemData;
-    }
-
-    static buildPackageStoreSingleItemFromBuffer(name: string, version: string, etag: string, data: Buffer, nameItem: string): PackageStore{
-        var storeData: PackageStore;
-        var itemData = PackageStore.buildItemData(nameItem, 0, data.length);
-        storeData = new PackageStore(name, version, etag, data)
-        storeData.addItemData(nameItem, itemData);
-        return storeData;
     }
 }

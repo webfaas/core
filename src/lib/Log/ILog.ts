@@ -34,39 +34,31 @@ export interface IWriteLog {
 }
 
 export function parseLogLevel(level: LogLevelEnum | string): LogLevelEnum{
-    if (level){
-        if (typeof(level) === "string"){
-            level.toUpperCase();
-            if (level === "OFF"){
-                return LogLevelEnum.OFF;
-            }
-            else if (level === "FATAL"){
-                return LogLevelEnum.FATAL;
-            }
-            else if (level === "ERROR"){
-                return LogLevelEnum.ERROR;
-            }
-            else if (level === "WARN"){
-                return LogLevelEnum.WARN;
-            }
-            else if (level === "DEBUG"){
-                return LogLevelEnum.DEBUG;
-            }
-            else if (level === "TRACE"){
-                return LogLevelEnum.TRACE;
-            }
-            else {
-                return LogLevelEnum.INFO;
-            }
+    if (typeof(level) === "string"){
+        level.toUpperCase();
+        if (level === "OFF"){
+            return LogLevelEnum.OFF;
         }
-        else if (typeof(level) === "number"){
-            return level;
+        else if (level === "FATAL"){
+            return LogLevelEnum.FATAL;
         }
-        else{
+        else if (level === "ERROR"){
+            return LogLevelEnum.ERROR;
+        }
+        else if (level === "WARN"){
+            return LogLevelEnum.WARN;
+        }
+        else if (level === "DEBUG"){
+            return LogLevelEnum.DEBUG;
+        }
+        else if (level === "TRACE"){
+            return LogLevelEnum.TRACE;
+        }
+        else {
             return LogLevelEnum.INFO;
         }
     }
     else{
-        return LogLevelEnum.INFO;
+        return level;
     }
 };

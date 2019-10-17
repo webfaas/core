@@ -12,6 +12,11 @@ Minimalist FaaS framework for [node](http://nodejs.org).
 $ npm install @webfaas/core
 ```
 
+## Build
+```bash
+$ npm run build
+```
+
 ## Usage
 ### Create a subfolder in functions folder and generate package.json
 ```bash

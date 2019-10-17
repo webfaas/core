@@ -1,0 +1,26 @@
+{
+    "core":{
+        "log":{
+            "level":"INFO"
+        },
+        "cache":{
+            "blackListLocalModules":["functions-io-core", "functions-io"]
+        }
+    },
+    "registry":{
+        "requestTimeout": 5000,
+        "listRemoteRegistry":{
+            "default":{"master":"https://registry.npmjs.org", "slave":"https://registry.npmjs.org", "enabled":true}
+        },
+        "security":{
+            "client":{
+                "token":"HHH"
+            }
+        }
+    },
+    "env":{
+        "var1":"${VAR1}",
+        "var2":"${VAR2}",
+        "varmultiple":"TEST ${VAR1} TEST ${VAR1} TEST ${VAR2} TEST ${VAR2} TEST ${VARNOTFOUND:3}"
+    }
+}

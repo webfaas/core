@@ -8,15 +8,16 @@ import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { IncomingHttpHeaders } from "http";
 
-const log = Log.getInstance();
-
 export class ClientHTTP  {
     listHttpAgent: Map<string, http.Agent> = new Map<string, http.Agent>();
     listHttpsAgent: Map<string, https.Agent> = new Map<string, https.Agent>();
     
     private config: ClientHTTPConfig;
+    private log: Log;
 
-    constructor(config?: ClientHTTPConfig){
+    constructor(config?: ClientHTTPConfig, log?: Log){
+        this.log = log || Log.getInstance();
+
         if (config){
             this.config = config;
         }
@@ -33,39 +34,59 @@ export class ClientHTTP  {
     }
 
     /**
+     * destroy all agents
+     */
+    destroy(){
+        Array.from(this.listHttpAgent.keys()).forEach((key) => {
+            let agent = this.listHttpAgent.get(key);
+            if (agent){
+                agent.destroy();
+                this.listHttpAgent.delete(key);
+            }
+        });
+
+        Array.from(this.listHttpsAgent.keys()).forEach((key) => {
+            let agent = this.listHttpsAgent.get(key);
+            if (agent){
+                agent.destroy();
+                this.listHttpsAgent.delete(key);
+            }
+        });
+    }
+
+    /**
      * request http/https
      * @param url remote url
      * @param method methods http. ex: GET | POST | PUT | DELETE
      * @param headers headers http
      */
-    request(url: string, method?: string, data?: any, headers?: IncomingHttpHeaders, invokeContext?: IInvokeContext): Promise<IClientHTTPResponse>{
+    request(url: string, method?: string, dataRequestBuffer?: Buffer, headers?: IncomingHttpHeaders, invokeContext?: IInvokeContext): Promise<IClientHTTPResponse>{
+        var selfLog: Log = this.log;
+        
         return new Promise((resolve, reject) => {
             try {
-                var data = [] as any[];
+                var dataResponse = [] as any[];
                 var urlParsedObj = urlParse.parse(url);
                 var clientHTTPResponseObj = {} as IClientHTTPResponse;
                 var clientRequest: http.ClientRequest;
+                var startTime = new Date().getTime();
     
                 var handleResponse = function(responseHTTP: http.IncomingMessage){
                     responseHTTP.on("data", function(chunk){
-                        data.push(chunk);
+                        dataResponse.push(chunk);
                     });
                     responseHTTP.on("end", function(){
                         try {
-                            if (responseHTTP.statusCode){
-                                clientHTTPResponseObj.statusCode = responseHTTP.statusCode;
-                            }
-                            else{
-                                clientHTTPResponseObj.statusCode = 0;
-                            }
+                            clientHTTPResponseObj.statusCode = responseHTTP.statusCode || 0;
                             clientHTTPResponseObj.headers = responseHTTP.headers;
-                            clientHTTPResponseObj.data = Buffer.concat(data);
-    
-                            //log.info(__filename, "request", {method:option.method, url:url, statusCode:response.statusCode, responseTime:(new Date().getTime() - startTime), size:buffer.length});
+                            clientHTTPResponseObj.data = Buffer.concat(dataResponse);
+
+                            selfLog.write(LogLevelEnum.INFO, "request", LogCodeEnum.PROCESS.toString(), "reponse", {url:url, method: method, statusCode: clientHTTPResponseObj.statusCode, size: clientHTTPResponseObj.data.length, responseTime:(new Date().getTime() - startTime)}, __filename, invokeContext);
 
                             resolve(clientHTTPResponseObj);
                         }
                         catch (errTry) {
+                            selfLog.writeError("request", errTry, {method:method, url:url}, __filename, invokeContext);
                             reject(errTry);
                         }
                     });
@@ -86,18 +107,23 @@ export class ClientHTTP  {
                         httpsRequestOption.headers = headers;
                     }
                     httpsRequestOption.rejectUnauthorized = this.config.rejectUnauthorized;
+
+                    httpsRequestOption.key = this.config.key;
+                    httpsRequestOption.cert = this.config.cert;
+                    httpsRequestOption.pfx = this.config.pfx;
+                    httpsRequestOption.ca = this.config.ca;
                     
                     httpsRequestOption.host = urlParsedObj.host;
                     httpsRequestOption.hostname = urlParsedObj.hostname;
                     httpsRequestOption.path = urlParsedObj.path;
                     httpsRequestOption.port = urlParsedObj.port;
-        
+                    
                     var httpsAgent: https.Agent | undefined = this.listHttpsAgent.get(httpsRequestOption.hostname || "");
                     if (!httpsAgent){
                         httpsAgent = new https.Agent({ keepAlive: this.config.keepAlive, maxSockets:this.config.maxSockets });
                         this.listHttpsAgent.set(httpsRequestOption.hostname || "", httpsAgent);
                         
-                        log.write(LogLevelEnum.INFO, "request", LogCodeEnum.PROCESS.toString(), "new agent", {protocol:"https", hostname: httpsRequestOption.hostname, keepAlive: this.config.keepAlive, maxSockets:this.config.maxSockets}, __filename, invokeContext);
+                        selfLog.write(LogLevelEnum.INFO, "request", LogCodeEnum.PROCESS.toString(), "new agent", {protocol:"https", hostname: httpsRequestOption.hostname, keepAlive: this.config.keepAlive, maxSockets:this.config.maxSockets}, __filename, invokeContext);
                     }
                     httpsRequestOption.agent = httpsAgent;
     
@@ -121,7 +147,7 @@ export class ClientHTTP  {
                         httpAgent = new http.Agent({ keepAlive: this.config.keepAlive, maxSockets:this.config.maxSockets });
                         this.listHttpAgent.set(httpRequestOption.hostname || "", httpAgent);
 
-                        log.write(LogLevelEnum.INFO, "request", LogCodeEnum.PROCESS.toString(), "new agent", {protocol:"http", hostname: httpRequestOption.hostname, keepAlive: this.config.keepAlive, maxSockets:this.config.maxSockets}, __filename, invokeContext);
+                        selfLog.write(LogLevelEnum.INFO, "request", LogCodeEnum.PROCESS.toString(), "new agent", {protocol:"http", hostname: httpRequestOption.hostname, keepAlive: this.config.keepAlive, maxSockets:this.config.maxSockets}, __filename, invokeContext);
                     }
                     httpRequestOption.agent = httpAgent;
         
@@ -133,17 +159,18 @@ export class ClientHTTP  {
                 });
 
                 clientRequest.on("error", function(err) {
-                    //log.error(__filename, "request", {code:err.code, message:err.message, url:url, maxTime:self.config.requestTimeout});
+                    selfLog.writeError("request", err, {method:method, url:url}, __filename, invokeContext);
                     reject(err);
                 });
 
-                if (data){
-                    clientRequest.write(data);
+                if (dataRequestBuffer){
+                    clientRequest.write(dataRequestBuffer);
                 }
                 
                 clientRequest.end();
             }
             catch (errTry) {
+                selfLog.writeError("request", errTry, {method:method, url:url}, __filename, invokeContext);
                 reject(errTry);
             }
         })

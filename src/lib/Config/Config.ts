@@ -3,7 +3,7 @@ import * as path from "path";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 
-const log = Log.getInstance();
+const valueEnvironmentRegex = /\${[a-zA-Z0-9_:]*}/g
 
 /**
  * Configuration. Automatic search file config and load
@@ -11,26 +11,22 @@ const log = Log.getInstance();
 export class Config {
     private originalConfigObj: any;
     private configByKey: any;
-    
-    nameFolderConfig: string = "data-config";
-    
+    private log: Log;
+
     /**
      * 
      * @param fileOrObject file string or object
      */
-    constructor(fileOrObject?: any, nameFolderConfig?: string) {
+    constructor(fileOrObject?: any, log?: Log) {
         this.originalConfigObj = null;
         this.configByKey = {};
-
-        if (nameFolderConfig){
-            this.nameFolderConfig = nameFolderConfig;
-        }
+        this.log = log || Log.getInstance();
 
         try {
             this.open(fileOrObject);
         }
         catch (errTry) {
-            log.writeError("constructor", errTry, null, __filename);
+            this.log.writeError("constructor", errTry, null, __filename);
         }
     }
 
@@ -45,31 +41,37 @@ export class Config {
     }
 
     /**
-     * find folder config
+     * parse value. ex: environment variables
      */
-    private findFolderConfig = (): string | null => {
-        let folderScript:string;
-        let folderConfig:string;
-    
-        folderScript = path.dirname((<NodeModule> require.main).filename);
+    private parseValue(value: any){
+        if (typeof(value) === "object"){
+            return value;
+        }
+        else if (typeof(value) === "string"){
+            let valueText: string = value.toString();
+            let selfLog = this.log;
 
-        folderConfig = path.join(folderScript, this.nameFolderConfig);
-        if (fs.existsSync(folderConfig)){
-            return folderConfig;
+            let valueTextParsed: string = valueText.replace(valueEnvironmentRegex, function(matchText: string, ...args: any[]) {
+                let keyEnvArray = matchText.substring(2, matchText.length - 1).split(":");
+                let keyEnv: string = keyEnvArray[0];
+                let keyEnvDefaultValue = keyEnvArray[1] || "";
+
+                let envValue: any = process.env[keyEnv];
+                if (envValue){
+                    selfLog.write(LogLevelEnum.DEBUG, "parseValue", LogCodeEnum.PROCESS.toString(), "keyEnv: " + keyEnv + ", envValue: " + envValue, null, __filename);
+                    return envValue;
+                }
+                else{
+                    return keyEnvDefaultValue;
+                }
+            });
+            
+            return valueTextParsed;
         }
-    
-        folderConfig = path.join(folderScript, "../", this.nameFolderConfig);
-        if (fs.existsSync(folderConfig)){
-            return folderConfig;
+        else{
+            return value;
         }
-    
-        folderConfig = path.join(folderScript, "../../", this.nameFolderConfig);
-        if (fs.existsSync(folderConfig)){
-            return folderConfig;
-        }
-    
-        return null;
-    };
+    }
 
     /**
      * process object config
@@ -86,7 +88,8 @@ export class Config {
                 let envValue: any;
 
                 key = keys[i];
-                item = node[key];
+                item = this.parseValue(node[key]);
+                node[key] = item;
     
                 if (prefix){
                     fullKey = prefix + "." + key;
@@ -94,43 +97,21 @@ export class Config {
                 else{
                     fullKey = key;
                 }
+
+                this.configByKey[fullKey] = item;
     
                 if (typeof(item) === "object"){
-                    this.configByKey[fullKey] = item;
                     this.processConfig(item, fullKey);
                 }
+                else if (typeof(item) === "string"){
+                    
+                }
                 else{
-                    keyEnv = fullKey.toUpperCase().replace(/\./g, "_");
-                    envValue = process.env[keyEnv];
-                    if (envValue !== undefined){
-                        if (typeof(node[key]) === "boolean"){
-                            if ((envValue === "true") || (envValue === "TRUE")){
-                                envValue = true;
-                            }
-                            if ((envValue === "false") || (envValue === "FALSE")){
-                                envValue = false;
-                            }
-                            if (envValue === "0"){
-                                envValue = false;
-                            }
-                            if (envValue === "1"){
-                                envValue = true;
-                            }
-                        }
-                        else if (typeof(node[key]) === "number"){
-                            envValue = parseInt(envValue);
-                        }
-    
-                        this.configByKey[fullKey] = envValue;
-                        node[key] = envValue;
-                    }
-                    else{
-                        this.configByKey[fullKey] = item;
-                    }
+                    this.configByKey[fullKey] = item;
                 }                
             }
             catch (errTry) {
-                log.writeError("processConfig", errTry, null, __filename);
+                this.log.writeError("processConfig", errTry, null, __filename);
             }
         }
     }
@@ -140,50 +121,42 @@ export class Config {
      * @param fileOrObject file string or object
      */
     private open(fileOrObject: any): void {
-        let filePath:string = "";
-        let configFolderPath = this.findFolderConfig();
-        
-        if (fileOrObject){
-            if (typeof(fileOrObject) === "object"){
-                this.originalConfigObj = fileOrObject;
-            }
-            else{
-                filePath = fileOrObject;
-                if (fs.existsSync(filePath) === false){
-                    if (configFolderPath){
-                        if (fileOrObject.indexOf(".") === -1){
-                            filePath = path.join(configFolderPath, fileOrObject + ".json");
-                        }
-                        else{
-                            filePath = path.join(configFolderPath, fileOrObject);
-                        }
-                    }
-                }
-            }
+        if (!fileOrObject){
+            fileOrObject = path.join(path.dirname((<NodeModule> require.main).filename), "data-config");
+        }
+
+        if (typeof(fileOrObject) === "object"){
+            this.originalConfigObj = fileOrObject;
         }
         else{
-            if (configFolderPath){
-                filePath = path.join(configFolderPath, "default.json");
-            }
-        }
+            let filePath:string = fileOrObject;
+            try {
+                let stats: fs.Stats = fs.statSync(filePath);
 
-        if (!this.originalConfigObj){
-            if (filePath && fs.existsSync(filePath)){
+                if (stats.isDirectory()){
+                    filePath = path.join(filePath, "default.json");
+                }
+
                 this.originalConfigObj = require(filePath);
 
-                log.write(LogLevelEnum.INFO, "open", LogCodeEnum.OPENFILE.toString(), "config file [" + path.relative(process.cwd(), filePath) + "] loaded", null, __filename);
+                this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.OPENFILE.toString(), "config file [" + filePath + "] loaded", null, __filename);
             }
-            else{
-                log.write(LogLevelEnum.INFO, "open", LogCodeEnum.OPENFILE.toString(), "config file not found [" + filePath + "]", null, __filename);
+            catch (errTry) {
+                if (errTry.code === "ENOENT"){
+                    this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.OPENFILE.toString(), "config file not found [" + filePath + "]", null, __filename);
+                }
+                else{
+                    this.log.writeError("open", errTry, null, __filename);
+                }
             }
         }
 
         if (this.originalConfigObj){
             this.processConfig(this.originalConfigObj, null);
-            log.write(LogLevelEnum.INFO, "open", LogCodeEnum.PROCESS.toString(), "config object processed", null, __filename);
+            this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.PROCESS.toString(), "config object processed", null, __filename);
         }
         else{
-            log.write(LogLevelEnum.INFO, "open", LogCodeEnum.PROCESS.toString(), "config object not processed", null, __filename);
+            this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.PROCESS.toString(), "config object not processed", null, __filename);
         }
     }
 
@@ -200,8 +173,6 @@ export class Config {
         else{
             return value;
         }
-
-        return value;
     }
 }
 

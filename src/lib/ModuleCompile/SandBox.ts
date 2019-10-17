@@ -12,7 +12,7 @@ export class SandBoxProcess {
     pid = process.pid;
     platform = process.platform;
     cwd = function(){
-        return "";
+        return process.cwd();
     };
     //sandBox.process.on
     //sandBox.process.once

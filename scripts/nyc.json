@@ -1,0 +1,8 @@
+{
+    "all": false,
+    "cache": false,
+    "sourceMap": false,
+    "instrument": true,
+    "clean": true,
+    "reporter": ["text","html"]
+}

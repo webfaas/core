@@ -1,11 +1,9 @@
-export enum PackageRegistryResponseFormatEnum {
-    MANIFEST_UNCOMPRESSED = "MANIFEST_UNCOMPRESSED",
-    BUNDLE_TAR_UNCOMPRESSED = "BUNDLE_TAR_UNCOMPRESSED",
-    BUNDLE_TAR_COMPRESSED = "BUNDLE_TAR_COMPRESSED",
-}
+import { PackageStore } from "../PackageStore/PackageStore";
 
+/**
+ * PackageRegistryResponse interface
+ */
 export interface IPackageRegistryResponse {
     etag: string
-    format: string
-    data: Buffer | null
+    packageStore: PackageStore | null
 }

@@ -78,11 +78,15 @@ export class Log {
      */
     write(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:any){
         try {
-            if (this.currentLevel >= level){
+            if ((this.currentLevel !== LogLevelEnum.OFF) && (this.currentLevel >= level)){
                 var logData: ILogData;
                 logData = this.parseLog(level, method, code, message, detail, filename, invokeContext);
                 this.currentWriteLog.write(logData);
-            }            
+            }
+            else{
+                //not write
+                return;
+            }
         }
         catch (errTry) {
             console.error(errTry);
@@ -99,12 +103,16 @@ export class Log {
      */
     writeError(method:string, error:Error, detail?:any, filename?:string, invokeContext?:any){
         try {
-            if (this.currentLevel >= LogLevelEnum.ERROR){
+            if ((this.currentLevel !== LogLevelEnum.OFF) && (this.currentLevel >= LogLevelEnum.ERROR)){
                 var logData: ILogData;
                 logData = this.parseLog(LogLevelEnum.ERROR, method, error.name, error.message, null, filename, invokeContext);
                 logData.stack = error.stack;
                 this.currentWriteLog.write(logData);
-            }            
+            }
+            else{
+                //not write
+                return;
+            }
         }
         catch (errTry) {
             console.error(errTry);

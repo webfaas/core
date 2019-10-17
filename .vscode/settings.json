@@ -1,0 +1,6 @@
+{
+    "npm.exclude": "**/dist/**",
+    "npm.packageManager": "npm",
+    "npm.autoDetect": "off",
+    "npm.enableScriptExplorer": false,
+}

@@ -1,0 +1,15 @@
+{
+    "core":{
+        "log":{
+            "level":"INFO"
+        },
+        "cache":{
+            "blackListLocalModules":["functions-io-core", "functions-io"]
+        }
+    },
+    "env2":{
+        "var1":"${VAR1}",
+        "var2":"${VAR2}",
+        "varmultiple":"TEST ${VAR1} TEST ${VAR1} TEST ${VAR2} TEST ${VAR2} TEST ${VARNOTFOUND:3}"
+    }
+}

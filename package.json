@@ -1,6 +1,6 @@
 {
   "name": "core",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha",
   "description": "FaaS Framework - Core",
   "main": "lib/index.js",
   "readmeFilename": "README.md",
@@ -12,23 +12,33 @@
     "web"
   ],
   "scripts": {
-    "test": "node test/runTest.js",
-    "build": "node node_modules/gulp/bin/gulp.js build"
+    "test": "mocha --config scripts/mocha.json",
+    "test:coverage": "nyc --nycrc-path scripts/nyc.json npm run test",
+    "build": "node node_modules/gulp/bin/gulp.js --gulpfile scripts/gulpfile.js build",
+    "build:all": "node node_modules/gulp/bin/gulp.js --gulpfile scripts/gulpfile.js build:all",
+    "build:test": "node node_modules/gulp/bin/gulp.js --gulpfile scripts/gulpfile.js build:test",
+    "build:examples": "node node_modules/gulp/bin/gulp.js --gulpfile scripts/gulpfile.js build:test",
+    "buildAndTest": "npm run build:all && npm run test:coverage"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/webfaas/core.git"
   },
   "dependencies": {
-    "semver": "^6.0.0"
+    "semver": "6.*"
   },
   "devDependencies": {
-    "@types/node": "^11.11.5",
-    "gulp": "^4.0.0",
-    "gulp-sourcemaps": "^2.6.5",
-    "gulp-typescript": "^5.0.1",
-    "typescript": "^3.4.1",
-    "typescript-tslint-plugin": "^0.3.1"
+    "@types/chai": "4.*",
+    "@types/mocha": "5.*",
+    "@types/node": "12.*",
+    "chai": "4.*",
+    "gulp": "4.*",
+    "gulp-sourcemaps": "2.*",
+    "gulp-typescript": "5.*",
+    "mocha": "6.*",
+    "nyc": "14.*",
+    "typescript": "3.*",
+    "typescript-tslint-plugin": "0.*"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -37,5 +47,23 @@
     "name": "Rogério Dias Moreira",
     "email": "rogeriodegoiania@gmail.com"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "oldmocha": {
+    "spec": "dist/test/**/*.test.js"
+  },
+  "oldnyc2": {
+    "all": false,
+    "cache": false,
+    "sourceMap": false,
+    "instrument": true
+  },
+  "oldnyc": {
+    "all": true,
+    "include": [
+      "dist/test/**/*.js"
+    ],
+    "exclude": [
+      "**/*.spec.js"
+    ]
+  }
 }
