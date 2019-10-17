@@ -2,10 +2,7 @@
 
 Minimalist FaaS framework for [node](http://nodejs.org).
 
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
 [![Linux Build][travis-image]][travis-url]
-[![Windows Build][appveyor-image]][appveyor-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
 ## work in progress...
@@ -71,3 +68,8 @@ moduleFactory.requireAsync("uuid", "3.2.1")
         console.log("erro", err);
     });
 ```
+
+[travis-image]: https://img.shields.io/travis/webfaas/core/master.svg?label=linux
+[travis-url]: https://travis-ci.org/webfaas/core
+[coveralls-image]: https://img.shields.io/coveralls/github/webfaas/core/master.svg
+[coveralls-url]: https://coveralls.io/github/webfaas/core?branch=master
