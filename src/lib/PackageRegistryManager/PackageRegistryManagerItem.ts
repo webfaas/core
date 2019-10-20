@@ -33,18 +33,14 @@ export class PackageRegistryManagerItemError {
  */
 export class PackageRegistryManagerItem {
     name: string;
-    enableCache: boolean = false;    
     enableSeekNextRegistryWhenPackageStoreNotFound: boolean = false;
     error: PackageRegistryManagerItemError | null = null;
     status: PackageRegistryManagerItemStatusEnum = PackageRegistryManagerItemStatusEnum.ENABLED;
     registry: IPackageRegistry;
 
-    constructor(name: string, registry: IPackageRegistry, enableCache?: boolean, enableSeekNextRegistryWhenPackageStoreNotFound?: boolean){
+    constructor(name: string, registry: IPackageRegistry, enableSeekNextRegistryWhenPackageStoreNotFound?: boolean){
         this.name = name;
         this.registry = registry;
-        if (enableCache !== undefined){
-            this.enableCache = enableCache;
-        }
         if (enableSeekNextRegistryWhenPackageStoreNotFound !== undefined){
             this.enableSeekNextRegistryWhenPackageStoreNotFound = enableSeekNextRegistryWhenPackageStoreNotFound;
         }

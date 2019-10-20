@@ -1,28 +1,28 @@
-import { IPackageRegistryManagerCache } from "../../IPackageRegistryManagerCache";
-import { PackageStore } from "../../../PackageStore/PackageStore";
-import { PackageRegistryManagerCacheDiskConfig } from "./PackageRegistryManagerCacheDiskConfig";
+import { IPackageStoreCache } from "../IPackageStoreCache";
+import { PackageStore } from "../../PackageStore/PackageStore";
+import { PackageStoreCacheDiskConfig } from "./PackageStoreCacheDiskConfig";
 import * as fs from "fs";
 import * as path from "path";
-import { Log } from "../../../Log/Log";
-import { LogLevelEnum, LogCodeEnum } from "../../../Log/ILog";
-import { IPackageStoreItemData } from "../../../PackageStore/IPackageStoreItemData";
-import { PackageRegistryManagerCacheDiskMetadata } from "./PackageRegistryManagerCacheDiskMetadata";
+import { Log } from "../../Log/Log";
+import { LogLevelEnum, LogCodeEnum } from "../../Log/ILog";
+import { IPackageStoreItemData } from "../../PackageStore/IPackageStoreItemData";
+import { PackageStoreCacheDiskMetadata } from "./PackageStoreCacheDiskMetadata";
 
 const log = Log.getInstance();
 const FORMAT_VERSION = "V1";
 
 /**
- * Cache PackageRegistry in disk
+ * Cache PackageStore in disk
  */
-export class PackageRegistryManagerCacheDisk implements IPackageRegistryManagerCache {
-    config: PackageRegistryManagerCacheDiskConfig;
+export class PackageStoreCacheDisk implements IPackageStoreCache {
+    config: PackageStoreCacheDiskConfig;
 
-    constructor(config?: PackageRegistryManagerCacheDiskConfig){
+    constructor(config?: PackageStoreCacheDiskConfig){
         if (config){
             this.config = config;
         }
         else{
-            this.config = new PackageRegistryManagerCacheDiskConfig();
+            this.config = new PackageStoreCacheDiskConfig();
         }
     }
 
@@ -87,7 +87,7 @@ export class PackageRegistryManagerCacheDisk implements IPackageRegistryManagerC
 
                         var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
                         
-                        var metaData: PackageRegistryManagerCacheDiskMetadata = JSON.parse(metadataBuffer.toString("utf8"));
+                        var metaData: PackageStoreCacheDiskMetadata = JSON.parse(metadataBuffer.toString("utf8"));
                         if (metaData.formatVersion === FORMAT_VERSION){
                             metaData.listItem.forEach(function(item: IPackageStoreItemData){
                                 dataPackageItemDataMap.set(item.name, item);
@@ -130,7 +130,7 @@ export class PackageRegistryManagerCacheDisk implements IPackageRegistryManagerC
 
                 await this.checkExistsAndCreateDirectory(basePathPackage);
 
-                var metaData: PackageRegistryManagerCacheDiskMetadata = new PackageRegistryManagerCacheDiskMetadata();
+                var metaData: PackageStoreCacheDiskMetadata = new PackageStoreCacheDiskMetadata();
                 metaData.formatVersion = FORMAT_VERSION;
                 metaData.packageName = packageStore.getName();
                 metaData.packageVersion = packageStore.getVersion();

@@ -5,7 +5,7 @@ import * as fs from "fs";
 /**
  * Config
  */
-export class PackageRegistryManagerCacheDiskConfig  {
+export class PackageStoreCacheDiskConfig  {
     base: string
     
     constructor(base?: string){

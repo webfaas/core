@@ -1,9 +1,9 @@
 import { PackageStore } from "../PackageStore/PackageStore";
 
 /**
- * PackageRegistryManagerCache interface
+ * PackageStoreCache interface
  */
-export interface IPackageRegistryManagerCache {
+export interface IPackageStoreCache {
     getPackageStore(name: string, version?: string): Promise<PackageStore | null>
     putPackageStore(packageStore: PackageStore): Promise<PackageStore | null>
 }

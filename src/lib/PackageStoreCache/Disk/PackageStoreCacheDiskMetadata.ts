@@ -1,6 +1,6 @@
-import { IPackageStoreItemData } from "../../../PackageStore/IPackageStoreItemData";
+import { IPackageStoreItemData } from "../../PackageStore/IPackageStoreItemData";
 
-export class PackageRegistryManagerCacheDiskMetadata  {
+export class PackageStoreCacheDiskMetadata  {
     formatVersion: string = "";
     packageName: string = "";
     packageVersion: string = "";

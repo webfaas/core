@@ -44,7 +44,7 @@ describe("Package Registry Manager", () => {
         item.status = PackageRegistryManagerItemStatusEnum.DISABLED;
     })
     
-    it("should return package item on call - packageRegistryManager_1", function(done){
+    it("should return package item on call - loadDefaultRegistries", function(done){
         packageRegistryManager_1.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
             if (packageStore){
@@ -70,7 +70,7 @@ describe("Package Registry Manager", () => {
         })
     })
 
-    it("should return error - packageRegistryManager_2", function(done){
+    it("should return error - registry not configured", function(done){
         packageRegistryManager_2.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.null;
             done();
@@ -85,7 +85,7 @@ describe("Package Registry Manager", () => {
         })
     })
 
-    it("should return error - packageRegistryManager_3", function(done){
+    it("should return error - loadDefaultRegistries", function(done){
         packageRegistryManager_3.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.null;
             done();
@@ -100,7 +100,7 @@ describe("Package Registry Manager", () => {
         })
     })
 
-    it("should return error - packageRegistryManager_4", function(done){
+    it("should return error - custom Registry", function(done){
         packageRegistryManager_4.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.null;
             done();

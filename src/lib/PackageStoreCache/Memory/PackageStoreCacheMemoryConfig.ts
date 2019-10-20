@@ -1,7 +1,7 @@
 /**
  * Config
  */
-export class PackageRegistryManagerCacheMemoryConfig  {
+export class PackageStoreCacheMemoryConfig  {
     maxMemory: Number = -1;
     maxEntry: Number = -1;
 

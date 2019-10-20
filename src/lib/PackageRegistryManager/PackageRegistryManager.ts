@@ -4,7 +4,6 @@ import { PackageRegistryManagerItem, PackageRegistryManagerItemStatusEnum, Packa
 import { PackageRegistryNPM } from "../PackageRegistry/Registries/NPM/PackageRegistryNPM";
 import { PackageRegistryNPMConfig } from "../PackageRegistry/Registries/NPM/PackageRegistryNPMConfig";
 import { PackageStore } from "../PackageStore/PackageStore";
-import { IPackageRegistryManagerCache } from "./IPackageRegistryManagerCache";
 import { Log } from "../Log/Log";
 
 /**
@@ -14,8 +13,7 @@ export class PackageRegistryManager {
     private log: Log;
     
     listRegistry: Array<PackageRegistryManagerItem> = [];
-    cache: IPackageRegistryManagerCache | null = null;
-
+    
     constructor(log?: Log){
         this.log = log || Log.getInstance();
     }
@@ -24,18 +22,17 @@ export class PackageRegistryManager {
      * load default registries
      */
     loadDefaultRegistries(){
-        this.addRegistry("npm", new PackageRegistryNPM(undefined, this.log), true, false);
+        this.addRegistry("npm", new PackageRegistryNPM(undefined, this.log), false);
     }
 
     /**
      * add registrie
      * @param name registry
      * @param registry registry object
-     * @param enableCache enable caching of a getPackageStore response
      * @param enableSeekNextRegistryWhenPackageStoreNotFound enable seek next registry item when PackageStore not found in getPackageStore
      */
-    addRegistry(name: string, registry: IPackageRegistry, enableCache?: boolean, enableSeekNextRegistryWhenPackageStoreNotFound?: boolean){
-        var item: PackageRegistryManagerItem = new PackageRegistryManagerItem(name, registry, enableCache, enableSeekNextRegistryWhenPackageStoreNotFound);
+    addRegistry(name: string, registry: IPackageRegistry, enableSeekNextRegistryWhenPackageStoreNotFound?: boolean){
+        var item: PackageRegistryManagerItem = new PackageRegistryManagerItem(name, registry, enableSeekNextRegistryWhenPackageStoreNotFound);
         this.listRegistry.push(item);
     }
 
@@ -49,6 +46,18 @@ export class PackageRegistryManager {
         return new Promise(async (resolve, reject) => {
             var packageRegistryResponseObj: IPackageRegistryResponse;
             var lastError = null;
+
+            //cache
+            /*
+            if (etag === undefined && this.cache){
+                let packageStore: PackageStore | null = await this.cache.getPackageStore(name, version);
+                if (packageStore){
+                    resolve(packageStore);
+                    return;
+                }
+            }
+            */
+
             if (this.listRegistry.length){
                 for (var i = 0; i < this.listRegistry.length; i++){
                     var item: PackageRegistryManagerItem = this.listRegistry[i];

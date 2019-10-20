@@ -1,25 +1,25 @@
-import { IPackageRegistryManagerCache } from "../../IPackageRegistryManagerCache";
-import { PackageStore } from "../../../PackageStore/PackageStore";
-import { PackageRegistryManagerCacheMemoryConfig } from "./PackageRegistryManagerCacheMemoryConfig";
-import { Log } from "../../../Log/Log";
-import { LogLevelEnum, LogCodeEnum } from "../../../Log/ILog";
+import { IPackageStoreCache } from "../IPackageStoreCache";
+import { PackageStore } from "../../PackageStore/PackageStore";
+import { PackageStoreCacheMemoryConfig } from "./PackageStoreCacheMemoryConfig";
+import { Log } from "../../Log/Log";
+import { LogLevelEnum, LogCodeEnum } from "../../Log/ILog";
 
 const log = Log.getInstance();
 
 /**
- * Cache PackageRegistry in memory
+ * Cache PackageStore in memory
  */
-export class PackageRegistryManagerCacheMemory implements IPackageRegistryManagerCache {
-    config: PackageRegistryManagerCacheMemoryConfig;
+export class PackageStoreCacheMemory implements IPackageStoreCache {
+    config: PackageStoreCacheMemoryConfig;
     private listCacheItem: Map<string, PackageStore> = new Map<string, PackageStore>();
     private totalSize: number = 0;
     
-    constructor(config?: PackageRegistryManagerCacheMemoryConfig){
+    constructor(config?: PackageStoreCacheMemoryConfig){
         if (config){
             this.config = config;
         }
         else{
-            this.config = new PackageRegistryManagerCacheMemoryConfig();
+            this.config = new PackageStoreCacheMemoryConfig();
         }
     }
 

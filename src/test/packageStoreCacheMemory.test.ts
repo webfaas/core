@@ -8,8 +8,8 @@ import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageReg
 import { PackageRegistryDiskTarball } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
 import { PackageRegistryDiskTarballConfig } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarballConfig";
 
-import { PackageRegistryManagerCacheMemory } from "../lib/PackageRegistryManager/Caches/Memory/PackageRegistryManagerCacheMemory";
-import { PackageRegistryManagerCacheMemoryConfig } from "../lib/PackageRegistryManager/Caches/Memory/PackageRegistryManagerCacheMemoryConfig";
+import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
+import { PackageStoreCacheMemoryConfig } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemoryConfig";
 
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
@@ -17,19 +17,19 @@ import { LogLevelEnum } from "../lib/Log/ILog";
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
-describe("Package Registry Manager Cache Memory", () => {
+describe("PackageStore Cache Memory", () => {
     it("should return object on call", function(){
-        var packageRegistryManagerCacheMemory1 = new PackageRegistryManagerCacheMemory();
-        var packageRegistryManagerCacheMemory2 = new PackageRegistryManagerCacheMemory(new PackageRegistryManagerCacheMemoryConfig());
-        chai.expect(packageRegistryManagerCacheMemory1.config).to.be.an.instanceof(Object);
-        chai.expect(packageRegistryManagerCacheMemory2.config).to.be.an.instanceof(Object);
+        var packageStoreCacheMemory1 = new PackageStoreCacheMemory();
+        var packageStoreCacheMemory2 = new PackageStoreCacheMemory(new PackageStoreCacheMemoryConfig());
+        chai.expect(packageStoreCacheMemory1.config).to.be.an.instanceof(Object);
+        chai.expect(packageStoreCacheMemory2.config).to.be.an.instanceof(Object);
     })
 })
 
-describe("Package Registry Manager Cache Memory Config", () => {
+describe("PackageStore Cache Memory Config", () => {
     it("should return object on call", function(){
-        var config1 = new PackageRegistryManagerCacheMemoryConfig();
-        var config2 = new PackageRegistryManagerCacheMemoryConfig(10, 20);
+        var config1 = new PackageStoreCacheMemoryConfig();
+        var config2 = new PackageStoreCacheMemoryConfig(10, 20);
         chai.expect(config1.maxMemory).to.eq(-1);
         chai.expect(config1.maxEntry).to.eq(-1);
         chai.expect(config2.maxMemory).to.eq(10);
@@ -37,7 +37,7 @@ describe("Package Registry Manager Cache Memory Config", () => {
     })
 })
 
-describe("Package Registry Manager Cache Memory Manifest", () => {
+describe("PackageStore Cache Memory Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
     packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
@@ -51,17 +51,17 @@ describe("Package Registry Manager Cache Memory Manifest", () => {
                 chai.expect(packageStore1).to.be.an.instanceof(Object);
             
                 if (packageStore1){
-                    var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
+                    var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
     
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
 
-                    await packageRegistryManagerCacheMemory.putPackageStore(packageStore1);
+                    await packageStoreCacheMemory.putPackageStore(packageStore1);
 
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(1);
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(packageStore1.getSize());
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStore1.getSize());
             
-                    packageStore2 = await packageRegistryManagerCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
+                    packageStore2 = await packageStoreCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
                     chai.expect(packageStore2).to.be.an.instanceof(Object);
             
                     if (packageStore2){
@@ -76,9 +76,9 @@ describe("Package Registry Manager Cache Memory Manifest", () => {
                         }
                     }
 
-                    packageRegistryManagerCacheMemory.deletePackageStore("semver");
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
+                    packageStoreCacheMemory.deletePackageStore("semver");
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
                 }
 
                 done();
@@ -92,8 +92,8 @@ describe("Package Registry Manager Cache Memory Manifest", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
-                var packageStore1: PackageStore | null = await packageRegistryManagerCacheMemory.getPackageStore("notfound***");
+                var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
+                var packageStore1: PackageStore | null = await packageStoreCacheMemory.getPackageStore("notfound***");
                 chai.expect(packageStore1).to.be.null;
 
                 done();
@@ -105,7 +105,7 @@ describe("Package Registry Manager Cache Memory Manifest", () => {
     })
 })
 
-describe("Package Registry Manager Cache Memory Package", () => {
+describe("PackageStore Cache Memory Package", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
     packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
@@ -119,17 +119,17 @@ describe("Package Registry Manager Cache Memory Package", () => {
                 chai.expect(packageStore1).to.be.an.instanceof(Object);
             
                 if (packageStore1){
-                    var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
+                    var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
     
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
 
-                    await packageRegistryManagerCacheMemory.putPackageStore(packageStore1);
+                    await packageStoreCacheMemory.putPackageStore(packageStore1);
 
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(1);
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(packageStore1.getSize());
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStore1.getSize());
             
-                    packageStore2 = await packageRegistryManagerCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
+                    packageStore2 = await packageStoreCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
                     chai.expect(packageStore2).to.be.an.instanceof(Object);
 
                     if (packageStore2){
@@ -152,9 +152,9 @@ describe("Package Registry Manager Cache Memory Package", () => {
                         }
                     }
 
-                    packageRegistryManagerCacheMemory.deletePackageStore("semver", "5.6.0");
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
-                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
+                    packageStoreCacheMemory.deletePackageStore("semver", "5.6.0");
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
                 }
 
                 done();
@@ -168,8 +168,8 @@ describe("Package Registry Manager Cache Memory Package", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
-                var packageStore1: PackageStore | null = await packageRegistryManagerCacheMemory.getPackageStore("notfound***", "5.6.0");
+                var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
+                var packageStore1: PackageStore | null = await packageStoreCacheMemory.getPackageStore("notfound***", "5.6.0");
                 chai.expect(packageStore1).to.be.null;
 
                 done();
