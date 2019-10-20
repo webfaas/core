@@ -13,7 +13,7 @@ export class PackageRegistryManagerCacheMemory implements IPackageRegistryManage
     config: PackageRegistryManagerCacheMemoryConfig;
     private listCacheItem: Map<string, PackageStore> = new Map<string, PackageStore>();
     private totalSize: number = 0;
-
+    
     constructor(config?: PackageRegistryManagerCacheMemoryConfig){
         if (config){
             this.config = config;
@@ -30,6 +30,14 @@ export class PackageRegistryManagerCacheMemory implements IPackageRegistryManage
         else{
             return name;
         }
+    }
+
+    getTotalSize(): number {
+        return this.totalSize;
+    }
+
+    getTotalEntry(): number {
+        return this.listCacheItem.size;
     }
 
     getPackageStore(name: string, version?: string): Promise<PackageStore | null> {

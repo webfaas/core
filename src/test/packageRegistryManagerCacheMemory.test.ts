@@ -53,7 +53,13 @@ describe("Package Registry Manager Cache Memory Manifest", () => {
                 if (packageStore1){
                     var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
     
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
+
                     await packageRegistryManagerCacheMemory.putPackageStore(packageStore1);
+
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(1);
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(packageStore1.getSize());
             
                     packageStore2 = await packageRegistryManagerCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
                     chai.expect(packageStore2).to.be.an.instanceof(Object);
@@ -69,6 +75,10 @@ describe("Package Registry Manager Cache Memory Manifest", () => {
                             }
                         }
                     }
+
+                    packageRegistryManagerCacheMemory.deletePackageStore("semver");
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
                 }
 
                 done();
@@ -111,7 +121,13 @@ describe("Package Registry Manager Cache Memory Package", () => {
                 if (packageStore1){
                     var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
     
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
+
                     await packageRegistryManagerCacheMemory.putPackageStore(packageStore1);
+
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(1);
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(packageStore1.getSize());
             
                     packageStore2 = await packageRegistryManagerCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
                     chai.expect(packageStore2).to.be.an.instanceof(Object);
@@ -135,6 +151,10 @@ describe("Package Registry Manager Cache Memory Package", () => {
                             }
                         }
                     }
+
+                    packageRegistryManagerCacheMemory.deletePackageStore("semver", "5.6.0");
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageRegistryManagerCacheMemory.getTotalSize()).to.eq(0);
                 }
 
                 done();
