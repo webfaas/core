@@ -4,6 +4,7 @@ import { PackageRegistryManagerItem, PackageRegistryManagerItemStatusEnum, Packa
 import { PackageRegistryNPM } from "../PackageRegistry/Registries/NPM/PackageRegistryNPM";
 import { PackageRegistryNPMConfig } from "../PackageRegistry/Registries/NPM/PackageRegistryNPMConfig";
 import { PackageStore } from "../PackageStore/PackageStore";
+import { IPackageRegistryManagerCache } from "./IPackageRegistryManagerCache";
 import { Log } from "../Log/Log";
 
 /**
@@ -13,6 +14,7 @@ export class PackageRegistryManager {
     private log: Log;
     
     listRegistry: Array<PackageRegistryManagerItem> = [];
+    cache: IPackageRegistryManagerCache | null = null;
 
     constructor(log?: Log){
         this.log = log || Log.getInstance();
@@ -45,7 +47,7 @@ export class PackageRegistryManager {
      */
     getPackageStore(name: string, version?: string, etag?: string): Promise<PackageStore | null>{
         return new Promise(async (resolve, reject) => {
-            var manifestResponseObj: IPackageRegistryResponse;
+            var packageRegistryResponseObj: IPackageRegistryResponse;
             var lastError = null;
             if (this.listRegistry.length){
                 for (var i = 0; i < this.listRegistry.length; i++){
@@ -53,17 +55,17 @@ export class PackageRegistryManager {
                     if (item.status !== PackageRegistryManagerItemStatusEnum.DISABLED){
                         try {
                             if (version){
-                                manifestResponseObj = await item.registry.getPackage(name, version, etag);
+                                packageRegistryResponseObj = await item.registry.getPackage(name, version, etag);
                             }
                             else{
-                                manifestResponseObj = await item.registry.getManifest(name, etag);
+                                packageRegistryResponseObj = await item.registry.getManifest(name, etag);
                             }
 
-                            if (!manifestResponseObj.packageStore && !manifestResponseObj.etag && item.enableSeekNextRegistryWhenPackageStoreNotFound) {
+                            if (!packageRegistryResponseObj.packageStore && !packageRegistryResponseObj.etag && item.enableSeekNextRegistryWhenPackageStoreNotFound) {
                                 //not found packageStore. Seek Next Item!
                             }
                             else{
-                                resolve(manifestResponseObj.packageStore);
+                                resolve(packageRegistryResponseObj.packageStore);
                                 return;
                             }
                         }

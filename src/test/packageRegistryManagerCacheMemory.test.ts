@@ -8,8 +8,8 @@ import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageReg
 import { PackageRegistryDiskTarball } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
 import { PackageRegistryDiskTarballConfig } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarballConfig";
 
-import { PackageRegistryManagerCacheDisk } from "../lib/PackageRegistryManager/Caches/Disk/PackageRegistryManagerCacheDisk";
-import { PackageRegistryManagerCacheDiskConfig } from "../lib/PackageRegistryManager/Caches/Disk/PackageRegistryManagerCacheDiskConfig";
+import { PackageRegistryManagerCacheMemory } from "../lib/PackageRegistryManager/Caches/Memory/PackageRegistryManagerCacheMemory";
+import { PackageRegistryManagerCacheMemoryConfig } from "../lib/PackageRegistryManager/Caches/Memory/PackageRegistryManagerCacheMemoryConfig";
 
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
@@ -17,25 +17,27 @@ import { LogLevelEnum } from "../lib/Log/ILog";
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
-describe("Package Registry Manager Cache Disk", () => {
+describe("Package Registry Manager Cache Memory", () => {
     it("should return object on call", function(){
-        var packageRegistryManagerCacheDisk1 = new PackageRegistryManagerCacheDisk();
-        var packageRegistryManagerCacheDisk2 = new PackageRegistryManagerCacheDisk(new PackageRegistryManagerCacheDiskConfig());
-        chai.expect(packageRegistryManagerCacheDisk1.config).to.be.an.instanceof(Object);
-        chai.expect(packageRegistryManagerCacheDisk2.config).to.be.an.instanceof(Object);
+        var packageRegistryManagerCacheMemory1 = new PackageRegistryManagerCacheMemory();
+        var packageRegistryManagerCacheMemory2 = new PackageRegistryManagerCacheMemory(new PackageRegistryManagerCacheMemoryConfig());
+        chai.expect(packageRegistryManagerCacheMemory1.config).to.be.an.instanceof(Object);
+        chai.expect(packageRegistryManagerCacheMemory2.config).to.be.an.instanceof(Object);
     })
 })
 
-describe("Package Registry Manager Cache Disk Config", () => {
+describe("Package Registry Manager Cache Memory Config", () => {
     it("should return object on call", function(){
-        var config1 = new PackageRegistryManagerCacheDiskConfig();
-        var config2 = new PackageRegistryManagerCacheDiskConfig("/path");
-        chai.expect(config1.base.length > 0).to.eq(true);
-        chai.expect(config2.base).to.eq("/path");
+        var config1 = new PackageRegistryManagerCacheMemoryConfig();
+        var config2 = new PackageRegistryManagerCacheMemoryConfig(10, 20);
+        chai.expect(config1.maxMemory).to.eq(-1);
+        chai.expect(config1.maxEntry).to.eq(-1);
+        chai.expect(config2.maxMemory).to.eq(10);
+        chai.expect(config2.maxEntry).to.eq(20);
     })
 })
 
-describe("Package Registry Manager Cache Disk Manifest", () => {
+describe("Package Registry Manager Cache Memory Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
     packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
@@ -49,11 +51,11 @@ describe("Package Registry Manager Cache Disk Manifest", () => {
                 chai.expect(packageStore1).to.be.an.instanceof(Object);
             
                 if (packageStore1){
-                    var packageRegistryManagerCacheDisk: PackageRegistryManagerCacheDisk = new PackageRegistryManagerCacheDisk();
+                    var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
     
-                    await packageRegistryManagerCacheDisk.putPackageStore(packageStore1);
+                    await packageRegistryManagerCacheMemory.putPackageStore(packageStore1);
             
-                    packageStore2 = await packageRegistryManagerCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
+                    packageStore2 = await packageRegistryManagerCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
                     chai.expect(packageStore2).to.be.an.instanceof(Object);
             
                     if (packageStore2){
@@ -80,8 +82,8 @@ describe("Package Registry Manager Cache Disk Manifest", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageRegistryManagerCacheDisk: PackageRegistryManagerCacheDisk = new PackageRegistryManagerCacheDisk();
-                var packageStore1: PackageStore | null = await packageRegistryManagerCacheDisk.getPackageStore("notfound***");
+                var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
+                var packageStore1: PackageStore | null = await packageRegistryManagerCacheMemory.getPackageStore("notfound***");
                 chai.expect(packageStore1).to.be.null;
 
                 done();
@@ -93,7 +95,7 @@ describe("Package Registry Manager Cache Disk Manifest", () => {
     })
 })
 
-describe("Package Registry Manager Cache Disk Package", () => {
+describe("Package Registry Manager Cache Memory Package", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
     packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
@@ -107,11 +109,11 @@ describe("Package Registry Manager Cache Disk Package", () => {
                 chai.expect(packageStore1).to.be.an.instanceof(Object);
             
                 if (packageStore1){
-                    var packageRegistryManagerCacheDisk: PackageRegistryManagerCacheDisk = new PackageRegistryManagerCacheDisk();
+                    var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
     
-                    await packageRegistryManagerCacheDisk.putPackageStore(packageStore1);
+                    await packageRegistryManagerCacheMemory.putPackageStore(packageStore1);
             
-                    packageStore2 = await packageRegistryManagerCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
+                    packageStore2 = await packageRegistryManagerCacheMemory.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
                     chai.expect(packageStore2).to.be.an.instanceof(Object);
 
                     if (packageStore2){
@@ -146,8 +148,8 @@ describe("Package Registry Manager Cache Disk Package", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageRegistryManagerCacheDisk: PackageRegistryManagerCacheDisk = new PackageRegistryManagerCacheDisk();
-                var packageStore1: PackageStore | null = await packageRegistryManagerCacheDisk.getPackageStore("notfound***", "5.6.0");
+                var packageRegistryManagerCacheMemory: PackageRegistryManagerCacheMemory = new PackageRegistryManagerCacheMemory();
+                var packageStore1: PackageStore | null = await packageRegistryManagerCacheMemory.getPackageStore("notfound***", "5.6.0");
                 chai.expect(packageStore1).to.be.null;
 
                 done();

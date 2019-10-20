@@ -54,7 +54,7 @@ export class PackageRegistryManagerCacheDisk implements IPackageRegistryManagerC
         });
     }
 
-    getPackageStore(name: string, version?: string): Promise<PackageStore> {
+    getPackageStore(name: string, version?: string): Promise<PackageStore | null> {
         return new Promise(async (resolve, reject) => {
             try {
                 // FORMAT =>
@@ -72,7 +72,12 @@ export class PackageRegistryManagerCacheDisk implements IPackageRegistryManagerC
 
                 fs.readFile(filePath, function(err, fileBuffer){
                     if (err){
-                        reject(err);
+                        if (err.code === "ENOENT"){
+                            resolve(null);
+                        }
+                        else{
+                            reject(err);
+                        }
                     }
                     else{
                         var metadataBuffer = Buffer.alloc(fileBuffer.readInt32LE(0));
