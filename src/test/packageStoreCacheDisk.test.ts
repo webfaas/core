@@ -3,6 +3,8 @@ import * as mocha from "mocha";
 
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
+
 import { PackageStore } from "../lib/PackageStore/PackageStore";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryDiskTarball } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
@@ -19,10 +21,39 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("PackageStore Cache Disk", () => {
     it("should return object on call", function(){
-        var packageStoreCacheDisk1 = new PackageStoreCacheDisk();
-        var packageStoreCacheDisk2 = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig());
+        var packageStoreCacheDisk1 = new PackageStoreCacheDisk(undefined, log);
+        var packageStoreCacheDisk2 = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(), log);
         chai.expect(packageStoreCacheDisk1.config).to.be.an.instanceof(Object);
         chai.expect(packageStoreCacheDisk2.config).to.be.an.instanceof(Object);
+    })
+
+    it("should return error in putPackageStore", function(done){
+        (async function(){
+            let tempFolder = path.join(os.tmpdir(), "notexist-" + new Date().getTime(), "-webfaas-core-manifest-" + new Date().getTime()); //force nonexistent folder
+            try {
+                var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
+                var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
+                packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+
+                var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
+                var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
+                
+                if (packageStore1){
+                    await packageStoreCacheDisk.putPackageStore(packageStore1);
+                }
+                
+                throw new Error("expected catch");
+            }
+            catch (errTry) {
+                try {
+                    chai.expect(errTry.message).to.not.eq("expected catch");
+                    done();
+                }
+                catch (errTry2) {
+                    done(errTry2);
+                }
+            }
+        })();
     })
 })
 
@@ -38,6 +69,7 @@ describe("PackageStore Cache Disk Config", () => {
 describe("PackageStore Cache Disk Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
+    var tempFolder = path.join(os.tmpdir(), "webfaas-core-manifest-" + new Date().getTime()); //force nonexistent folder
     packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
 
     it("should return object on call", function(done){
@@ -49,7 +81,7 @@ describe("PackageStore Cache Disk Manifest", () => {
                 chai.expect(packageStore1).to.be.an.instanceof(Object);
             
                 if (packageStore1){
-                    var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk();
+                    var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
     
                     await packageStoreCacheDisk.putPackageStore(packageStore1);
             
@@ -67,6 +99,11 @@ describe("PackageStore Cache Disk Manifest", () => {
                             }
                         }
                     }
+
+                    //replace
+                    await packageStoreCacheDisk.putPackageStore(packageStore1);
+                    packageStore2 = await packageStoreCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
+                    chai.expect(packageStore2).to.be.an.instanceof(Object);
                 }
 
                 done();
@@ -80,7 +117,7 @@ describe("PackageStore Cache Disk Manifest", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk();
+                var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(undefined, log);
                 var packageStore1: PackageStore | null = await packageStoreCacheDisk.getPackageStore("notfound***");
                 chai.expect(packageStore1).to.be.null;
 
@@ -96,6 +133,7 @@ describe("PackageStore Cache Disk Manifest", () => {
 describe("PackageStore Cache Disk Package", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
+    var tempFolder = path.join(os.tmpdir(), "webfaas-core-package-" + new Date().getTime()); //force nonexistent folder
     packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
 
     it("should return object on call", function(done){
@@ -107,7 +145,7 @@ describe("PackageStore Cache Disk Package", () => {
                 chai.expect(packageStore1).to.be.an.instanceof(Object);
             
                 if (packageStore1){
-                    var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk();
+                    var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
     
                     await packageStoreCacheDisk.putPackageStore(packageStore1);
             
@@ -133,6 +171,11 @@ describe("PackageStore Cache Disk Package", () => {
                             }
                         }
                     }
+
+                    //replace
+                    await packageStoreCacheDisk.putPackageStore(packageStore1);
+                    packageStore2 = await packageStoreCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
+                    chai.expect(packageStore2).to.be.an.instanceof(Object);
                 }
 
                 done();
@@ -146,7 +189,7 @@ describe("PackageStore Cache Disk Package", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk();
+                var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(undefined, log);
                 var packageStore1: PackageStore | null = await packageStoreCacheDisk.getPackageStore("notfound***", "5.6.0");
                 chai.expect(packageStore1).to.be.null;
 

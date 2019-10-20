@@ -8,7 +8,6 @@ import { LogLevelEnum, LogCodeEnum } from "../../Log/ILog";
 import { IPackageStoreItemData } from "../../PackageStore/IPackageStoreItemData";
 import { PackageStoreCacheDiskMetadata } from "./PackageStoreCacheDiskMetadata";
 
-const log = Log.getInstance();
 const FORMAT_VERSION = "V1";
 
 /**
@@ -16,8 +15,11 @@ const FORMAT_VERSION = "V1";
  */
 export class PackageStoreCacheDisk implements IPackageStoreCache {
     config: PackageStoreCacheDiskConfig;
+    private log: Log;
 
-    constructor(config?: PackageStoreCacheDiskConfig){
+    constructor(config?: PackageStoreCacheDiskConfig, log?: Log){
+        this.log = log || Log.getInstance();
+
         if (config){
             this.config = config;
         }
@@ -28,22 +30,22 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
 
     private checkExistsAndCreateDirectory(path: string): Promise<boolean>{
         return new Promise((resolve, reject) => {
-            fs.stat(path, function(err, stats){
+            fs.stat(path, (err, stats) => {
                 if (err){
                     if (err.code === "ENOENT"){
-                        fs.mkdir(path, function(err){
+                        fs.mkdir(path, (err) => {
                             if (err){
-                                log.writeError("checkExistsAndCreateDirectory", err, {path:path}, __filename);
+                                this.log.writeError("checkExistsAndCreateDirectory", err, {path:path}, __filename);
                                 reject(err);
                             }
                             else{
-                                log.write(LogLevelEnum.INFO, "checkExistsAndCreateDirectory", LogCodeEnum.WRITEFILE.toString(), "directory created", {path:path}, __filename);
+                                this.log.write(LogLevelEnum.INFO, "checkExistsAndCreateDirectory", LogCodeEnum.WRITEFILE.toString(), "directory created", {path:path}, __filename);
                                 resolve(true);
                             }
                         })
                     }
                     else{
-                        log.writeError("checkExistsAndCreateDirectory", err, {path:path}, __filename);
+                        this.log.writeError("checkExistsAndCreateDirectory", err, {path:path}, __filename);
                         reject(err);
                     }
                 }
@@ -70,7 +72,7 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                     filePath = path.join(basePathPackage, "package.json");
                 }
 
-                fs.readFile(filePath, function(err, fileBuffer){
+                fs.readFile(filePath, (err, fileBuffer) => {
                     if (err){
                         if (err.code === "ENOENT"){
                             resolve(null);
@@ -147,7 +149,7 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                 metadataBuffer.copy(fileBuffer, 4);
                 packageStore.getPackageBuffer().copy(fileBuffer, 4 + metadataBuffer.length);
 
-                fs.writeFile(filePath, fileBuffer, function(err){
+                fs.writeFile(filePath, fileBuffer, (err) => {
                     if (err){
                         reject(err);
                     }

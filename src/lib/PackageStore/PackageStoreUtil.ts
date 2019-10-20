@@ -19,6 +19,7 @@ export class PackageStoreUtil  {
         return storeData;
     }
     
+    /*
     public static unzipAsync(bufferGZ: Buffer): Promise< Buffer > {
         return new Promise(function(resolve, reject) {
             try {
@@ -36,7 +37,8 @@ export class PackageStoreUtil  {
             }
         });
     };
-
+    */
+   
     public static unzipSync(bufferGZ: Buffer): Buffer {
         var bufferDecompressed: Buffer = zlib.unzipSync(bufferGZ, { finishFlush: zlib.constants.Z_SYNC_FLUSH });
         return bufferDecompressed;
