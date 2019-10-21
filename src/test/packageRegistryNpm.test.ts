@@ -10,6 +10,7 @@ import { PackageRegistryNPMConfig } from "../lib/PackageRegistry/Registries/NPM/
 
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
+import { ClientHTTPConfig } from "../lib/ClientHTTP/ClientHTTPConfig";
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
@@ -24,6 +25,11 @@ describe("Package Registry NPM", () => {
 
     packageRegistryNPM_1 = new PackageRegistryNPM(undefined, log);
     packageRegistryManager_1.addRegistry("npm", packageRegistryNPM_1);
+
+    var config_1 = new PackageRegistryNPMConfig("url1", new ClientHTTPConfig(), "token1");
+    chai.expect(config_1.url).to.eq("url1");
+    chai.expect(config_1.token).to.eq("token1");
+    chai.expect(config_1.httpConfig).to.be.an.instanceof(Object);
 
     var config_2 = new PackageRegistryNPMConfig();
     config_2.url = "https://registry.npmjs.org";

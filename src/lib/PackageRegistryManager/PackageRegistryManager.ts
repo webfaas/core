@@ -7,7 +7,7 @@ import { PackageStore } from "../PackageStore/PackageStore";
 import { Log } from "../Log/Log";
 
 /**
- * manage PackageRegistry pool
+ * manager PackageRegistry pool
  */
 export class PackageRegistryManager {
     private log: Log;
@@ -46,17 +46,6 @@ export class PackageRegistryManager {
         return new Promise(async (resolve, reject) => {
             var packageRegistryResponseObj: IPackageRegistryResponse;
             var lastError = null;
-
-            //cache
-            /*
-            if (etag === undefined && this.cache){
-                let packageStore: PackageStore | null = await this.cache.getPackageStore(name, version);
-                if (packageStore){
-                    resolve(packageStore);
-                    return;
-                }
-            }
-            */
 
             if (this.listRegistry.length){
                 for (var i = 0; i < this.listRegistry.length; i++){
