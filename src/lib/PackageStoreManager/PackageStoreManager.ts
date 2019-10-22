@@ -9,12 +9,12 @@ import { PackageStoreCacheMemory } from "../PackageStoreCache/Memory/PackageStor
  */
 export class PackageStoreManager {
     private log: Log;
-    
-    packageRegistryManager: PackageRegistryManager | null;
-    cache: IPackageStoreCache | null;
+    private cache: IPackageStoreCache | null;
+    private packageRegistryManager: PackageRegistryManager;
     
     constructor(packageRegistryManager?: PackageRegistryManager, cache?: IPackageStoreCache, log?: Log){
         this.log = log || Log.getInstance();
+        this.cache = cache || null;
 
         if (packageRegistryManager){
             this.packageRegistryManager = packageRegistryManager;
@@ -23,13 +23,20 @@ export class PackageStoreManager {
             this.packageRegistryManager = new PackageRegistryManager(this.log);
             this.packageRegistryManager.loadDefaultRegistries();
         }
+    }
 
-        if (cache){
-            this.cache = cache;
-        }
-        else{
-            this.cache = new PackageStoreCacheMemory();
-        }
+    /**
+     * return packageRegistryManager
+     */
+    getPackageRegistryManager(): PackageRegistryManager{
+        return this.packageRegistryManager;
+    }
+
+    /**
+     * return default cache
+     */
+    getCache(): IPackageStoreCache | null{
+        return this.cache;
     }
 
     /**
@@ -41,7 +48,7 @@ export class PackageStoreManager {
     getPackageStore(name: string, version?: string, etag?: string): Promise<PackageStore | null>{
         return new Promise(async (resolve, reject) => {
             var packageStore: PackageStore | null;
-
+            
             //cache get
             if (this.cache && etag === undefined){
                 packageStore = await this.cache.getPackageStore(name, version);
@@ -51,19 +58,14 @@ export class PackageStoreManager {
                 }
             }
 
-            if (this.packageRegistryManager){
-                packageStore = await this.packageRegistryManager.getPackageStore(name, version, etag);
+            packageStore = await this.packageRegistryManager.getPackageStore(name, version, etag);
 
-                //cache put
-                if (this.cache && packageStore){
-                    await this.cache.putPackageStore(packageStore);
-                }
-    
-                resolve(packageStore);
+            //cache put
+            if (this.cache && packageStore !== null){
+                await this.cache.putPackageStore(packageStore);
             }
-            else{
-                resolve(null);
-            }
+
+            resolve(packageStore);
         })
     }
 }

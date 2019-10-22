@@ -26,7 +26,6 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("Package Registry Manager", () => {
     var packageRegistryManager_1: PackageRegistryManager = new PackageRegistryManager(log);
-    var packageRegistryManager_2: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryManager_3: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryManager_4: PackageRegistryManager = new PackageRegistryManager(log);
     
@@ -35,7 +34,6 @@ describe("Package Registry Manager", () => {
     packageRegistryManager_4.addRegistry("registry1", new PackageRegistryError());
 
     chai.expect(packageRegistryManager_1.listRegistry.length > 0).to.eq(true);
-    chai.expect(packageRegistryManager_2.listRegistry.length === 0).to.eq(true);
     chai.expect(packageRegistryManager_3.listRegistry.length > 0).to.eq(true);
     chai.expect(packageRegistryManager_4.listRegistry.length === 1).to.eq(true);
 
@@ -67,21 +65,6 @@ describe("Package Registry Manager", () => {
             done();
         }).catch(function(error){
             done(error);
-        })
-    })
-
-    it("should return error - registry not configured", function(done){
-        packageRegistryManager_2.getPackageStore("semver", "5.6.0").then(function(packageStore){
-            chai.expect(packageStore).to.be.null;
-            done();
-        }).catch(function(error){
-            try {
-                chai.expect(error.toString()).to.eq("PackageRegistryManager not configured");
-                done();
-            }
-            catch (error2) {
-                done(error2);
-            }
         })
     })
 

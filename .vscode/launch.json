@@ -14,6 +14,7 @@
             "name": "Launch Program",
             "trace": false,
             "program": "${file}",
+            "preLaunchTask": "build:all",
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

@@ -15,30 +15,28 @@ var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("Package Store Manager", () => {
-    var packageStoreManager_1: PackageStoreManager = new PackageStoreManager(undefined, undefined, log);
-    chai.expect(packageStoreManager_1.cache).to.be.an.instanceof(Object);
-    chai.expect(packageStoreManager_1.packageRegistryManager).to.be.an.instanceof(Object);
+    var packageStoreManager_withoutcache: PackageStoreManager = new PackageStoreManager(undefined, undefined, log);
+    chai.expect(packageStoreManager_withoutcache.getCache()).to.null;
+    chai.expect(packageStoreManager_withoutcache.getPackageRegistryManager()).to.be.an.instanceof(Object);
+
+    var packageStoreManager_withcache: PackageStoreManager = new PackageStoreManager(undefined, new PackageStoreCacheMemory(), log);
+    chai.expect(packageStoreManager_withcache.getCache()).to.be.an.instanceof(Object);
+    chai.expect(packageStoreManager_withcache.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
     var packageStoreManager_2: PackageStoreManager = new PackageStoreManager(new PackageRegistryManager(), undefined, log);
-    chai.expect(packageStoreManager_2.cache).to.be.an.instanceof(Object);
-    chai.expect(packageStoreManager_2.packageRegistryManager).to.be.an.instanceof(Object);
+    chai.expect(packageStoreManager_2.getCache()).to.null;
+    chai.expect(packageStoreManager_2.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
     var packageStoreManager_3: PackageStoreManager = new PackageStoreManager(new PackageRegistryManager(), new PackageStoreCacheMemory(), log);
-    chai.expect(packageStoreManager_3.cache).to.be.an.instanceof(Object);
-    chai.expect(packageStoreManager_3.packageRegistryManager).to.be.an.instanceof(Object);
+    chai.expect(packageStoreManager_3.getCache()).to.be.an.instanceof(Object);
+    chai.expect(packageStoreManager_3.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
     var packageStoreManager_4: PackageStoreManager = new PackageStoreManager();
-    chai.expect(packageStoreManager_4.cache).to.be.an.instanceof(Object);
-    chai.expect(packageStoreManager_4.packageRegistryManager).to.be.an.instanceof(Object);
+    chai.expect(packageStoreManager_4.getCache()).to.null;
+    chai.expect(packageStoreManager_4.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
-    var packageStoreManager_not_cache: PackageStoreManager = new PackageStoreManager();
-    packageStoreManager_not_cache.cache = null;
-
-    var packageStoreManager_not_packageRegistryManager: PackageStoreManager = new PackageStoreManager();
-    packageStoreManager_not_packageRegistryManager.packageRegistryManager = null;
-    
-    it("should return package item on call", function(done){
-        packageStoreManager_1.getPackageStore("semver", "5.6.0").then(function(packageStore){
+    it("should return package item on call - without cache configured", function(done){
+        packageStoreManager_withoutcache.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
             if (packageStore){
                 var manifest = packageStore.getManifest();
@@ -58,10 +56,10 @@ describe("Package Store Manager", () => {
             }
 
             //force pass in cache
-            packageStoreManager_1.getPackageStore("semver", "5.6.0").then(function(packageStore){
-                chai.expect(packageStore).to.be.an.instanceof(Object);
-                if (packageStore){
-                    var manifest = packageStore.getManifest();
+            packageStoreManager_withoutcache.getPackageStore("semver", "5.6.0").then(function(packageStore2){
+                chai.expect(packageStore2).to.be.an.instanceof(Object);
+                if (packageStore2){
+                    var manifest = packageStore2.getManifest();
                     chai.expect(manifest).to.be.an.instanceof(Object);
                     if (manifest){
                         chai.expect(manifest.name).to.eq("semver");
@@ -70,7 +68,7 @@ describe("Package Store Manager", () => {
                         chai.expect(manifest.notfound).to.eq(undefined);
                     }
     
-                    var fileBuffer = packageStore.getItemBuffer("semver.js");
+                    var fileBuffer = packageStore2.getItemBuffer("semver.js");
                     chai.expect(typeof(fileBuffer)).to.eq("object");
                     if (fileBuffer){
                         chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
@@ -86,8 +84,8 @@ describe("Package Store Manager", () => {
         })
     })
 
-    it("should return package item on call - not cache", function(done){
-        packageStoreManager_not_cache.getPackageStore("semver", "5.6.0").then(function(packageStore){
+    it("should return package item on call - with cache configured", function(done){
+        packageStoreManager_withcache.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
             if (packageStore){
                 var manifest = packageStore.getManifest();
@@ -106,17 +104,30 @@ describe("Package Store Manager", () => {
                 }
             }
 
-            done();
-        }).catch(function(error){
-            done(error);
-        })
-    })
-
-    it("should return package item on call - not packageRegistryManager", function(done){
-        packageStoreManager_not_packageRegistryManager.getPackageStore("semver", "5.6.0").then(function(packageStore){
-            chai.expect(packageStore).to.be.null;
-
-            done();
+            //force pass in cache
+            packageStoreManager_withcache.getPackageStore("semver", "5.6.0").then(function(packageStore2){
+                chai.expect(packageStore2).to.be.an.instanceof(Object);
+                if (packageStore2){
+                    var manifest = packageStore2.getManifest();
+                    chai.expect(manifest).to.be.an.instanceof(Object);
+                    if (manifest){
+                        chai.expect(manifest.name).to.eq("semver");
+                        chai.expect(manifest.version).to.eq("5.6.0");
+                        chai.expect(manifest.description).to.eq("The semantic version parser used by npm.");
+                        chai.expect(manifest.notfound).to.eq(undefined);
+                    }
+    
+                    var fileBuffer = packageStore2.getItemBuffer("semver.js");
+                    chai.expect(typeof(fileBuffer)).to.eq("object");
+                    if (fileBuffer){
+                        chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                    }
+                }
+    
+                done();
+            }).catch(function(error){
+                done(error);
+            })
         }).catch(function(error){
             done(error);
         })
