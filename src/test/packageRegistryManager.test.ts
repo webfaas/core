@@ -25,6 +25,7 @@ var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("Package Registry Manager", () => {
+    var packageRegistryManager_withoutconfigregistries: PackageRegistryManager  = new PackageRegistryManager(log);
     var packageRegistryManager_1: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryManager_3: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryManager_4: PackageRegistryManager = new PackageRegistryManager(log);
@@ -41,7 +42,7 @@ describe("Package Registry Manager", () => {
     packageRegistryManager_3.listRegistry.forEach(function(item){
         item.status = PackageRegistryManagerItemStatusEnum.DISABLED;
     })
-    
+
     it("should return package item on call - loadDefaultRegistries", function(done){
         packageRegistryManager_1.getPackageStore("semver", "5.6.0").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
@@ -74,7 +75,7 @@ describe("Package Registry Manager", () => {
             done();
         }).catch(function(error){
             try {
-                chai.expect(error.toString()).to.eq("PackageRegistryManagerItem not available");
+                chai.expect(error.message).to.eq("PackageRegistryManagerItem not available");
                 done();
             }
             catch (error2) {
@@ -90,6 +91,22 @@ describe("Package Registry Manager", () => {
         }).catch(function(error){
             try {
                 chai.expect(error.message).to.eq("getPackage not implemented.");
+                done();
+            }
+            catch (error2) {
+                done(error2);
+            }
+        })
+    })
+
+    it("should return package item on call - withoutconfigregistries", function(done){
+        packageRegistryManager_withoutconfigregistries.getPackageStore("semver", "5.6.0").then(function(packageStore){
+            chai.expect(packageStore).to.be.null;
+            done();
+        }).catch(function(error){
+            try {
+                console.log("********error.message => ", error.message);
+                chai.expect(error.message).to.eq("PackageRegistryManager not configured");
                 done();
             }
             catch (error2) {

@@ -48,6 +48,12 @@ export class PackageStoreCacheMemory implements IPackageStoreCache {
         });
     }
 
+    getPackageStoreSync(name: string, version?: string): PackageStore | null {
+        var key: string = this.getKey(name, version);
+
+        return this.listCacheItem.get(key) || null;
+    }
+
     putPackageStore(packageStore: PackageStore): Promise<PackageStore> {
         return new Promise(async (resolve, reject) => {
             var key: string = this.getKey(packageStore.getName(), packageStore.getVersion());

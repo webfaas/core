@@ -76,10 +76,10 @@ export class PackageRegistryManager {
                     }
                 }
 
-                reject(lastError || "PackageRegistryManagerItem not available");
+                reject(lastError || new Error("PackageRegistryManagerItem not available"));
             }
             else{
-                reject(lastError || "PackageRegistryManager not configured");
+                reject(new Error("PackageRegistryManager not configured"));
             }
         })
     }

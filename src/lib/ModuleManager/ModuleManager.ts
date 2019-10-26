@@ -54,6 +54,7 @@ export class ModuleManager {
                 await this.importDependencies(packageStore, contextCache);
     
                 //compile
+                console.log("compilar", contextCache.getTotalEntry());
     
                 resolve(null);
             }
@@ -65,25 +66,30 @@ export class ModuleManager {
 
     private importDependencies(packageStore: PackageStore, contextCache?: IPackageStoreCache): Promise<null>{
         return new Promise(async (resolve, reject) => {
-            var packageStoreDependency: PackageStore | null;
-            
             var packageManifestObj: IManifest | null = packageStore.getManifest();
 
             if (packageManifestObj && packageManifestObj.dependencies){
                 var dependencyKeys = Object.keys(packageManifestObj.dependencies);
 
                 for (var i = 0; i < dependencyKeys.length; i++){
-                    var name = dependencyKeys[i];
-                    var version = packageManifestObj.dependencies[name];
+                    var nameDependency: string = dependencyKeys[i];
+                    var versionDependency: string = packageManifestObj.dependencies[nameDependency];
+
+                    console.log("*** dependency", packageStore.getName(), " => ", nameDependency + ":" + versionDependency);
+
+                    var packageStoreDependency: PackageStore | null = await this.packageStoreManager.getPackageStore(nameDependency, versionDependency);
+                    if (packageStoreDependency){
+                        //cache
+                        if (contextCache){
+                            contextCache.putPackageStore(packageStoreDependency);
+                        }
     
-                    console.log("*** dependency", name, version);
-    
-                    //packageStoreDependency = await this.packageStoreManager.getPackageStore(name, version, undefined, contextCache);
-                    /*
-                    if (!packageStoreDependency){
-                        reject("Package " + name + ":" + version + " not found");
+                        await this.importDependencies(packageStoreDependency, contextCache);
                     }
-                    */
+                    else{
+                        reject("Package " + packageStore.getName() + ". Dependency " + nameDependency + ":" + versionDependency + " not found.");
+                        return;
+                    }
                 }
             }
 

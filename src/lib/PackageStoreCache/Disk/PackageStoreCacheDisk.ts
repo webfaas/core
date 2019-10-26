@@ -56,22 +56,76 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
         });
     }
 
+    private bufferToPackageStore(fileBuffer: Buffer): PackageStore {
+        // FORMAT =>
+        // |0000|METADATA|PACKAGE
+
+        var metadataBuffer = Buffer.alloc(fileBuffer.readInt32LE(0));
+        var packageBuffer = Buffer.alloc(fileBuffer.length - metadataBuffer.length - 4);
+        fileBuffer.copy(metadataBuffer, 0, 4);
+        fileBuffer.copy(packageBuffer, 0, 4 + metadataBuffer.length);
+
+        var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+        
+        var metaData: PackageStoreCacheDiskMetadata = JSON.parse(metadataBuffer.toString("utf8"));
+        if (metaData.formatVersion === FORMAT_VERSION){
+            metaData.listItem.forEach(function(item: IPackageStoreItemData){
+                dataPackageItemDataMap.set(item.name, item);
+            });
+
+            var packageStore: PackageStore;
+            packageStore = new PackageStore(metaData.packageName, metaData.packageVersion, metaData.packageEtag, packageBuffer, dataPackageItemDataMap);
+
+            return packageStore;
+        }
+        else{
+            throw new Error("Format version not supported")
+        }
+    }
+
+    private PackageStoreTobuffer(packageStore: PackageStore): Buffer {
+        // FORMAT =>
+        // |0000|METADATA|PACKAGE
+
+        var metaData: PackageStoreCacheDiskMetadata = new PackageStoreCacheDiskMetadata();
+        metaData.formatVersion = FORMAT_VERSION;
+        metaData.packageName = packageStore.getName();
+        metaData.packageVersion = packageStore.getVersion();
+        metaData.packageEtag = packageStore.getEtag();
+
+        packageStore.getDataPackageItemDataMap().forEach(function(item){
+            metaData.listItem.push(item);
+        })
+        var metadataBuffer = Buffer.from(JSON.stringify(metaData), "utf8");
+
+        var fileBuffer = Buffer.alloc(4 + metadataBuffer.length + packageStore.getPackageBuffer().length);
+        
+        fileBuffer.writeInt32LE(metadataBuffer.length, 0);
+        metadataBuffer.copy(fileBuffer, 4);
+        packageStore.getPackageBuffer().copy(fileBuffer, 4 + metadataBuffer.length);
+
+        return fileBuffer;
+    }
+
+    private getFilePath(name: string, version?: string){
+        var basePathPackage = path.join(this.config.base, name);
+        var filePath: string;
+        
+        if (version){
+            filePath = path.join(basePathPackage, name + "-" + version + ".dat");
+        }
+        else{
+            filePath = path.join(basePathPackage, "package.json");
+        }
+
+        return filePath;
+    }
+
     getPackageStore(name: string, version?: string): Promise<PackageStore | null> {
         return new Promise(async (resolve, reject) => {
             try {
-                // FORMAT =>
-                // |0000|METADATA|PACKAGE
-
-                var basePathPackage = path.join(this.config.base, name);
-                var filePath: string;
+                var filePath: string = this.getFilePath(name, version);
                 
-                if (version){
-                    filePath = path.join(basePathPackage, name + "-" + version + ".dat");
-                }
-                else{
-                    filePath = path.join(basePathPackage, "package.json");
-                }
-
                 fs.readFile(filePath, (err, fileBuffer) => {
                     if (err){
                         if (err.code === "ENOENT"){
@@ -82,27 +136,8 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                         }
                     }
                     else{
-                        var metadataBuffer = Buffer.alloc(fileBuffer.readInt32LE(0));
-                        var packageBuffer = Buffer.alloc(fileBuffer.length - metadataBuffer.length - 4);
-                        fileBuffer.copy(metadataBuffer, 0, 4);
-                        fileBuffer.copy(packageBuffer, 0, 4 + metadataBuffer.length);
-
-                        var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
-                        
-                        var metaData: PackageStoreCacheDiskMetadata = JSON.parse(metadataBuffer.toString("utf8"));
-                        if (metaData.formatVersion === FORMAT_VERSION){
-                            metaData.listItem.forEach(function(item: IPackageStoreItemData){
-                                dataPackageItemDataMap.set(item.name, item);
-                            });
-    
-                            var packageStore: PackageStore;
-                            packageStore = new PackageStore(metaData.packageName, metaData.packageVersion, metaData.packageEtag, packageBuffer, dataPackageItemDataMap);
-    
-                            resolve(packageStore);
-                        }
-                        else{
-                            reject("Format version not supported");
-                        }
+                        var packageStore = this.bufferToPackageStore(fileBuffer);
+                        resolve(packageStore);
                     }
                 })
             }
@@ -112,6 +147,24 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
         });
     }
 
+    getPackageStoreSync(name: string, version?: string): PackageStore | null {
+        try {
+            var filePath: string = this.getFilePath(name, version);
+            
+            var fileBuffer: Buffer = fs.readFileSync(filePath);
+            var packageStore = this.bufferToPackageStore(fileBuffer);
+            return packageStore;
+        }
+        catch (errTry) {
+            if (errTry.code === "ENOENT"){
+                return null;
+            }
+            else{
+                throw errTry;
+            }
+        }
+    }
+
     putPackageStore(packageStore: PackageStore): Promise<PackageStore> {
         return new Promise(async (resolve, reject) => {
             try {
@@ -119,36 +172,14 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                 // |0000|METADATA|PACKAGE
 
                 var basePathPackage = path.join(this.config.base, packageStore.getName());
-                var filePath: string;
+                var filePath: string = this.getFilePath(packageStore.getName(), packageStore.getVersion());
                 
-                if (packageStore.getVersion()){
-                    filePath = path.join(basePathPackage, packageStore.getName() + "-" + packageStore.getVersion() + ".dat");
-                }
-                else{
-                    filePath = path.join(basePathPackage, "package.json");
-                }
-
                 await this.checkExistsAndCreateDirectory(this.config.base);
 
                 await this.checkExistsAndCreateDirectory(basePathPackage);
 
-                var metaData: PackageStoreCacheDiskMetadata = new PackageStoreCacheDiskMetadata();
-                metaData.formatVersion = FORMAT_VERSION;
-                metaData.packageName = packageStore.getName();
-                metaData.packageVersion = packageStore.getVersion();
-                metaData.packageEtag = packageStore.getEtag();
-
-                packageStore.getDataPackageItemDataMap().forEach(function(item){
-                    metaData.listItem.push(item);
-                })
-                var metadataBuffer = Buffer.from(JSON.stringify(metaData), "utf8");
-
-                var fileBuffer = Buffer.alloc(4 + metadataBuffer.length + packageStore.getPackageBuffer().length);
+                var fileBuffer: Buffer = this.PackageStoreTobuffer(packageStore);
                 
-                fileBuffer.writeInt32LE(metadataBuffer.length, 0);
-                metadataBuffer.copy(fileBuffer, 4);
-                packageStore.getPackageBuffer().copy(fileBuffer, 4 + metadataBuffer.length);
-
                 fs.writeFile(filePath, fileBuffer, (err) => {
                     if (err){
                         reject(err);

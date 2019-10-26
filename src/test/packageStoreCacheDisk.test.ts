@@ -75,35 +75,49 @@ describe("PackageStore Cache Disk Manifest", () => {
     it("should return object on call", function(done){
         (async function(){
             try {
-                var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
-                var packageStore2: PackageStore | null;
+                var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
+                var packageStoreCacheMemoryAsync: PackageStore | null;
+                var packageStoreCacheMemorySync: PackageStore | null;
 
-                chai.expect(packageStore1).to.be.an.instanceof(Object);
+                chai.expect(packageStoreBase).to.be.an.instanceof(Object);
             
-                if (packageStore1){
+                if (packageStoreBase){
                     var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
     
-                    await packageStoreCacheDisk.putPackageStore(packageStore1);
+                    await packageStoreCacheDisk.putPackageStore(packageStoreBase);
             
-                    packageStore2 = await packageStoreCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
-                    chai.expect(packageStore2).to.be.an.instanceof(Object);
+                    //async
+                    packageStoreCacheMemoryAsync = await packageStoreCacheDisk.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    chai.expect(packageStoreCacheMemoryAsync).to.be.an.instanceof(Object);
+
+                    //sync
+                    packageStoreCacheMemorySync = packageStoreCacheDisk.getPackageStoreSync(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    chai.expect(packageStoreCacheMemorySync).to.be.an.instanceof(Object);
             
-                    if (packageStore2){
-                        var buffer1 = packageStore1.getItemBuffer("package.json");
-                        chai.expect(buffer1).to.be.an.instanceof(Buffer);
-                        if (buffer1){
-                            var buffer2 = packageStore2.getItemBuffer("package.json");
-                            chai.expect(buffer2).to.be.an.instanceof(Buffer);
-                            if (buffer2){
-                                chai.expect(buffer1.equals(buffer2)).to.eq(true);
+                    if (packageStoreCacheMemoryAsync && packageStoreCacheMemorySync){
+                        var bufferBase = packageStoreBase.getItemBuffer("package.json");
+                        chai.expect(bufferBase).to.be.an.instanceof(Buffer);
+                        if (bufferBase){
+                            //async
+                            var bufferMemoryAsync = packageStoreCacheMemoryAsync.getItemBuffer("package.json");
+                            chai.expect(bufferMemoryAsync).to.be.an.instanceof(Buffer);
+                            if (bufferMemoryAsync){
+                                chai.expect(bufferBase.equals(bufferMemoryAsync)).to.eq(true);
+                            }
+
+                            //sync
+                            var bufferMemorySync = packageStoreCacheMemorySync.getItemBuffer("package.json");
+                            chai.expect(bufferMemorySync).to.be.an.instanceof(Buffer);
+                            if (bufferMemorySync){
+                                chai.expect(bufferBase.equals(bufferMemorySync)).to.eq(true);
                             }
                         }
                     }
 
                     //replace
-                    await packageStoreCacheDisk.putPackageStore(packageStore1);
-                    packageStore2 = await packageStoreCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
-                    chai.expect(packageStore2).to.be.an.instanceof(Object);
+                    await packageStoreCacheDisk.putPackageStore(packageStoreBase);
+                    packageStoreCacheMemoryAsync = await packageStoreCacheDisk.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    chai.expect(packageStoreCacheMemoryAsync).to.be.an.instanceof(Object);
                 }
 
                 done();
@@ -118,8 +132,14 @@ describe("PackageStore Cache Disk Manifest", () => {
         (async function(){
             try {
                 var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(undefined, log);
-                var packageStore1: PackageStore | null = await packageStoreCacheDisk.getPackageStore("notfound***");
-                chai.expect(packageStore1).to.be.null;
+
+                //async
+                var packageStoreAsync: PackageStore | null = await packageStoreCacheDisk.getPackageStore("notfound***");
+                chai.expect(packageStoreAsync).to.be.null;
+
+                //sync
+                var packageStoreSync: PackageStore | null = packageStoreCacheDisk.getPackageStoreSync("notfound***");
+                chai.expect(packageStoreSync).to.be.null;
 
                 done();
             }
@@ -139,43 +159,57 @@ describe("PackageStore Cache Disk Package", () => {
     it("should return object on call", function(done){
         (async function(){
             try {
-                var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver", "5.6.0");
-                var packageStore2: PackageStore | null;
+                var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("semver", "5.6.0");
+                var packageStoreCacheMemoryAsync: PackageStore | null;
+                var packageStoreCacheMemorySync: PackageStore | null;
 
-                chai.expect(packageStore1).to.be.an.instanceof(Object);
+                chai.expect(packageStoreBase).to.be.an.instanceof(Object);
             
-                if (packageStore1){
+                if (packageStoreBase){
                     var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
     
-                    await packageStoreCacheDisk.putPackageStore(packageStore1);
+                    await packageStoreCacheDisk.putPackageStore(packageStoreBase);
             
-                    packageStore2 = await packageStoreCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
-                    chai.expect(packageStore2).to.be.an.instanceof(Object);
+                    //async
+                    packageStoreCacheMemoryAsync = await packageStoreCacheDisk.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    chai.expect(packageStoreCacheMemoryAsync).to.be.an.instanceof(Object);
 
-                    if (packageStore2){
+                    //sync
+                    packageStoreCacheMemorySync = packageStoreCacheDisk.getPackageStoreSync(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    chai.expect(packageStoreCacheMemorySync).to.be.an.instanceof(Object);
+
+                    if (packageStoreCacheMemoryAsync && packageStoreCacheMemorySync){
                         var keys: Array<string> = [];
-                        packageStore1.getDataPackageItemDataMap().forEach(function(item){
+                        packageStoreBase.getDataPackageItemDataMap().forEach(function(item){
                             keys.push(item.name);
                         })
     
                         for (var i = 0; i < keys.length; i++){
                             var key: string = keys[i];
-                            var buffer1 = packageStore1.getItemBuffer(key);
-                            chai.expect(buffer1).to.be.an.instanceof(Buffer);
-                            if (buffer1){
-                                var buffer2 = packageStore2.getItemBuffer(key);
-                                chai.expect(buffer2).to.be.an.instanceof(Buffer);
-                                if (buffer2){
-                                    chai.expect(buffer1.equals(buffer2)).to.eq(true);
+                            var bufferBase = packageStoreBase.getItemBuffer(key);
+                            chai.expect(bufferBase).to.be.an.instanceof(Buffer);
+                            if (bufferBase){
+                                //async
+                                var bufferMemoryAsync = packageStoreCacheMemoryAsync.getItemBuffer(key);
+                                chai.expect(bufferMemoryAsync).to.be.an.instanceof(Buffer);
+                                if (bufferMemoryAsync){
+                                    chai.expect(bufferBase.equals(bufferMemoryAsync)).to.eq(true);
+                                }
+
+                                //sync
+                                var bufferMemorySync = packageStoreCacheMemorySync.getItemBuffer(key);
+                                chai.expect(bufferMemorySync).to.be.an.instanceof(Buffer);
+                                if (bufferMemorySync){
+                                    chai.expect(bufferBase.equals(bufferMemorySync)).to.eq(true);
                                 }
                             }
                         }
                     }
 
                     //replace
-                    await packageStoreCacheDisk.putPackageStore(packageStore1);
-                    packageStore2 = await packageStoreCacheDisk.getPackageStore(packageStore1.getName(), packageStore1.getVersion());
-                    chai.expect(packageStore2).to.be.an.instanceof(Object);
+                    await packageStoreCacheDisk.putPackageStore(packageStoreBase);
+                    packageStoreCacheMemoryAsync = await packageStoreCacheDisk.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    chai.expect(packageStoreCacheMemoryAsync).to.be.an.instanceof(Object);
                 }
 
                 done();
@@ -190,8 +224,14 @@ describe("PackageStore Cache Disk Package", () => {
         (async function(){
             try {
                 var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(undefined, log);
-                var packageStore1: PackageStore | null = await packageStoreCacheDisk.getPackageStore("notfound***", "5.6.0");
-                chai.expect(packageStore1).to.be.null;
+
+                //async
+                var packageStoreAsync: PackageStore | null = await packageStoreCacheDisk.getPackageStore("notfound***", "5.6.0");
+                chai.expect(packageStoreAsync).to.be.null;
+
+                //sync
+                var packageStoreSync: PackageStore | null = packageStoreCacheDisk.getPackageStoreSync("notfound***", "5.6.0");
+                chai.expect(packageStoreSync).to.be.null;
 
                 done();
             }
