@@ -1,10 +1,9 @@
 import * as vm from "vm";
-import { IModuleCompile, IModuleCompileRequireBuilder, IModuleCompileManifestData } from "./IModuleCompile";
-import { DefaultModuleCompileRequireBuilder } from "./DefaultModuleCompileRequire";
 import { SandBox } from "./SandBox";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 import { IInvokeContext } from "../InvokeContext/IInvokeContext";
+import { ModuleCompileManifestData } from "./ModuleCompileManifestData";
 
 const wrapper = [
     "(function (exports, require, module, __filename, __dirname) { ",
@@ -16,10 +15,10 @@ const wrapper = [
  */
 export class ModuleCompile {
     private log: Log;
+    private defaultSandBoxContext: vm.Context;
 
     constructor(log?: Log) {
         this.log = log || Log.getInstance();
-        this.defaultRequireBuilder = new DefaultModuleCompileRequireBuilder(this.log);
         this.defaultSandBoxContext = SandBox.SandBoxBuilderContext();
     }
 
@@ -30,8 +29,14 @@ export class ModuleCompile {
         return moduleCompileInstance;
     }
 
-    defaultRequireBuilder: IModuleCompileRequireBuilder
-    defaultSandBoxContext: vm.Context
+    private defaultGlobalRequire = (path: string): any => {
+        this.log.write(LogLevelEnum.DEBUG, "defaultGlobalRequire", LogCodeEnum.PROCESS.toString(), path, null, __filename);
+        return require(path);
+    }
+
+    getLog(): Log{
+        return this.log;
+    }
 
     /**
      * return a code compiled
@@ -40,7 +45,7 @@ export class ModuleCompile {
      * @param sandboxContext sadbox context
      * @param invokeContext context invoke
      */
-    compile(code: string, manifest: IModuleCompileManifestData, sandboxContext?: vm.Context, invokeContext?: IInvokeContext): any{
+    compile(code: string, moduleCompileManifestData: ModuleCompileManifestData, sandboxContext?: vm.Context, globalRequire?: Function): any{
         try {
             var timeInit: number = new Date().getTime();
 
@@ -51,32 +56,30 @@ export class ModuleCompile {
             }
             
             var compiledWrapper = vm.runInNewContext(codeWrapper, sandboxContext, {
-                filename: manifest.filePath,
+                filename: moduleCompileManifestData.mainFileFullPath,
                 lineOffset: 0,
                 displayErrors: true
             });
     
-            var newModule = {} as IModuleCompile;
-            newModule.exports = {};
-            var newRequire: Function = this.defaultRequireBuilder.requireBuilder(manifest);
+            var newModule = {} as Object;
             
-            compiledWrapper(newModule.exports, newRequire, newModule, manifest.filePath || manifest.name, "");
+            compiledWrapper(newModule, globalRequire || this.defaultGlobalRequire, newModule, moduleCompileManifestData.mainFileFullPath, moduleCompileManifestData.mainFileDirName);
     
             //logDetail
             var logDetail = {} as any;
-            logDetail.manifest = manifest;
+            logDetail.manifest = moduleCompileManifestData;
             logDetail.delay = new Date().getTime() - timeInit;
     
-            this.log.write(LogLevelEnum.INFO, "compile", LogCodeEnum.COMPILE.toString(), "compiled", logDetail, __filename, invokeContext);
+            this.log.write(LogLevelEnum.INFO, "compile", LogCodeEnum.COMPILE.toString(), "compiled", logDetail, __filename);
     
             return newModule;
         }
         catch (errTry) {
             //logDetail
             var logDetail = {} as any;
-            logDetail.manifest = manifest;
+            logDetail.manifest = moduleCompileManifestData;
             
-            this.log.writeError("constructor", errTry, logDetail, __filename, invokeContext);
+            this.log.writeError("constructor", errTry, logDetail, __filename);
             throw errTry;
         }
     }

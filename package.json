@@ -25,6 +25,7 @@
     "url": "https://github.com/webfaas/core.git"
   },
   "dependencies": {
+    "@types/semver": "^6.2.0",
     "semver": "6.*"
   },
   "devDependencies": {

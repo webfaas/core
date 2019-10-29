@@ -31,6 +31,7 @@ describe("PackageStore", () => {
 
         chai.expect(packageStore.getName()).to.eq("package1");
         chai.expect(packageStore.getVersion()).to.eq("version1");
+        chai.expect(packageStore.getKey()).to.eq("package1:version1");
         chai.expect(packageStore.getEtag()).to.eq("etag1");
         chai.expect(packageStore.getSize()).to.eq(buffer1.length);
         chai.expect(packageStore.getLength()).to.eq(dataPackageItemDataMap.size);
@@ -86,6 +87,7 @@ describe("PackageStore", () => {
 
         chai.expect(packageStore.getName()).to.eq("package2");
         chai.expect(packageStore.getVersion()).to.eq("version2");
+        chai.expect(packageStore.getKey()).to.eq("package2:version2");
         chai.expect(packageStore.getEtag()).to.eq("etag2");
         chai.expect(packageStore.getSize()).to.eq(buffer1.length);
         chai.expect(packageStore.getLength()).to.eq(dataPackageItemDataMap.size);

@@ -105,7 +105,6 @@ describe("Package Registry Manager", () => {
             done();
         }).catch(function(error){
             try {
-                console.log("********error.message => ", error.message);
                 chai.expect(error.message).to.eq("PackageRegistryManager not configured");
                 done();
             }

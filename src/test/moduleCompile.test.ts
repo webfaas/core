@@ -2,11 +2,11 @@ import * as chai from "chai";
 import * as mocha from "mocha";
 
 import {ModuleCompile} from "../lib/ModuleCompile/ModuleCompile";
-import { IModuleCompileManifestData } from "../lib/ModuleCompile/IModuleCompile";
 import { SandBox } from "../lib/ModuleCompile/SandBox";
 import { Context } from "vm";
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
+import { ModuleCompileManifestData } from "../lib/ModuleCompile/ModuleCompileManifestData";
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
@@ -15,14 +15,12 @@ var moduleCompile = new ModuleCompile(log);
 
 describe("ModuleCompile", () => {
     it("should return response on call", () => {
-        var manifest = {} as IModuleCompileManifestData;
-        manifest.name = "moduleTest1";
-        manifest.filePath = "/moduleTest1";
+        chai.expect(typeof moduleCompile.getLog()).to.eq("object");
 
-        var manifest2 = {} as IModuleCompileManifestData;
-        manifest2.name = "moduleTest2";
-        manifest2.filePath = "";
-
+        var manifest: ModuleCompileManifestData = new ModuleCompileManifestData("moduleTest1", "1.0.0", "/moduleTest1.js");
+        
+        var manifest2: ModuleCompileManifestData = new ModuleCompileManifestData("moduleTest2", "2.0.0", "/moduleTest2.js");
+        
         var module1 = moduleCompile.compile("module.exports = function(){return 'value1'}", manifest);
         chai.expect(module1.exports()).to.eq("value1");
 
