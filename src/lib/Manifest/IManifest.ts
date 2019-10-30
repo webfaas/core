@@ -27,5 +27,4 @@ export interface IManifest {
     "maintainers"?: Array<IManifestMapString>;
     "license"?: string;
     [header: string]: any;
-    "versionsArray": string[];
 }

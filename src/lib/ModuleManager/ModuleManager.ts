@@ -16,6 +16,7 @@ import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { ModuleCompileManifestData } from "../ModuleCompile/ModuleCompileManifestData";
 import { ModuleManagerRequireContextData } from "./ModuleManagerRequireContextData";
 import { ModuleManagerCacheObjectItem } from "./ModuleManagerCacheObjectItem";
+import { SmallManifest } from "../Manifest/SmallManifest";
 
 /**
  * manager Module
@@ -57,48 +58,88 @@ export class ModuleManager {
         return this.packageStoreManager;
     }
 
-    private addObjectToCache(packageName: string, packageVersion: string, key: string, obj: Object){
-        var cacheModuleManagerItem = this.cacheObject.get(packageName + ":" + packageVersion);
+    private addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object){
+        var packageKey: string = packageName + ":" + packageVersion;
+        var cacheModuleManagerItem = this.cacheObject.get(packageKey);
         if (!cacheModuleManagerItem){
             cacheModuleManagerItem = new ModuleManagerCacheObjectItem(packageName, packageVersion);
+            this.cacheObject.set(packageKey, cacheModuleManagerItem);
         }
-        cacheModuleManagerItem.setObjectToCache(key, obj);
+        cacheModuleManagerItem.setObjectToCache(itemKey, obj);
     }
 
-    private getObjectFromCache(packageName: string, packageVersion: string, key: string): Object | null{
-        var cacheModuleManagerItem = this.cacheObject.get(packageName + ":" + packageVersion);
+    private getObjectFromCache(packageName: string, packageVersion: string, itemKey: string): Object | null{
+        var packageKey: string = packageName + ":" + packageVersion;
+        var cacheModuleManagerItem = this.cacheObject.get(packageKey);
         if (cacheModuleManagerItem){
-            return cacheModuleManagerItem.getObjectFromCache(key);
+            return cacheModuleManagerItem.getObjectFromCache(itemKey);
         }
         else{
             return null;
         }
     }
 
-    private getManifestFromCache(packageName: string): IManifest | null{
-        var obj: Object | null = this.getObjectFromCache(packageName, "", "manifest");
-        if (obj){
-            return <IManifest> obj;
-        }
-        else{
-            return null;
-        }
-    }
-
-    private updateManifestToCache(newManifest: IManifest) {
-        var currentManifest: IManifest | null = this.getManifestFromCache(newManifest.name);
-        if (currentManifest){
-            if (semver.gt(newManifest.version || "", currentManifest.version || "")){
-                this.addObjectToCache(name, "", "manifest", newManifest);
+    private getSmallManifest(packageName: string): Promise<SmallManifest | null>{
+        return new Promise(async (resolve, reject) => {
+            try {
+                var smallManifestResponse: SmallManifest | null = <SmallManifest | null> this.getObjectFromCache(packageName, "", "smallmanifest");
+                
+                if (smallManifestResponse){
+                    resolve(smallManifestResponse);
+                }
+                else{
+                    let packageStoreManifest: PackageStore | null = await this.packageStoreManager.getPackageStore(packageName);
+                    if (packageStoreManifest){
+                        let manifestResponse = packageStoreManifest.getManifest();
+                        if (manifestResponse){
+                            smallManifestResponse = new SmallManifest(manifestResponse.name, Object.keys(manifestResponse.versions || {}));
+                            this.addObjectToCache(packageName, "", "smallmanifest", smallManifestResponse);
+                            resolve(smallManifestResponse);
+                        }
+                        else{
+                            resolve(null);
+                        }
+                    }
+                    else{
+                        resolve(null);
+                    }
+                }                
             }
-        }
-        else{
-            this.addObjectToCache(name, "", "manifest", newManifest);
-        }
+            catch (errTry) {
+                reject(errTry);
+            }
+        })
+    }
+
+    private resolveVersion(packageName: string, packageVersion: string): Promise<string>{
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (semver.valid(packageVersion)){
+                    resolve(packageVersion);
+                }
+                else{
+                    var smallManifestResponse: SmallManifest | null = await this.getSmallManifest(packageName);
+                    if (smallManifestResponse){
+                        var versionTO: string = semver.maxSatisfying(smallManifestResponse.versionsArray, packageVersion) || "";
+                        if (versionTO){
+                            resolve(versionTO);
+                        }
+                        else{
+                            reject("Version not resolved: " + packageVersion);
+                        }
+                    }
+                    else{
+                        reject("Manifest " + packageName + " not found");
+                    }
+                }
+            }
+            catch (errTry) {
+                reject(errTry);
+            }
+        })
     }
 
     private requireSync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
-        
         //find packageStore in cache
         var cacheRootPackageStore: IPackageStoreCache | undefined = this.cacheByRootPackageStore.get(moduleManagerRequireContextData.rootPackageStoreKey);
         if (cacheRootPackageStore){
@@ -147,18 +188,6 @@ export class ModuleManager {
                         if (parentPackageManifest && parentPackageManifest.dependencies){
                             version = parentPackageManifest.dependencies[name] || "";
                         }
-                    }
-                }
-
-                if (semver.valid(version) === null){
-                    let manifest: IManifest | null;
-                    manifest = this.getManifestFromCache(name);
-                    if (manifest){
-                        //discovery real version
-                        version = semver.maxSatisfying(manifest.versionsArray, version) || "**notfound**";
-                    }
-                    else{
-                        return null;
                     }
                 }
 
@@ -223,64 +252,45 @@ export class ModuleManager {
      */
     import(name: string, version: string, etag?: string): Promise<Object | null>{
         return new Promise(async (resolve, reject) => {
-            var responseModuleObj : Object | null;
-            let manifest: IManifest | null;
+            try {
+                var responseModuleObj : Object | null;
 
-            manifest = this.getManifestFromCache(name);
-            if (!manifest){
-                let packageStoreManifest: PackageStore | null = await this.packageStoreManager.getPackageStore(name);
-                if (packageStoreManifest){
-                    //update manifest
-                    manifest = packageStoreManifest.getManifest();
-                    if (manifest){
-                        //build versions array
-                        manifest.versionsArray = Object.keys(manifest.versions || {});
-                        this.updateManifestToCache(manifest);
-                    }
-                }
-            }
+                var versionResolved: string = await this.resolveVersion(name, version);
 
-
-            if (manifest){
-                if (semver.valid(version) === null){
-                    //discovery real version
-                    version = semver.maxSatisfying(manifest.versionsArray, version) || "**notfound**";;
-                }
-    
                 //verify cache
-                responseModuleObj = this.getObjectFromCache(name, version, "");
+                responseModuleObj = this.getObjectFromCache(name, versionResolved, "");
                 if (responseModuleObj){
                     resolve(responseModuleObj);
                     return;
                 }
 
-                let packageStore: PackageStore | null = await this.packageStoreManager.getPackageStore(name, version, etag);
+                let packageStore: PackageStore | null = await this.packageStoreManager.getPackageStore(name, versionResolved, etag);
                 if (packageStore){
                     var rootPackageStoreKey: string = packageStore.getKey();
                     var contextCache: PackageStoreCacheMemory = new PackageStoreCacheMemory();
-    
+
                     await this.importDependencies(packageStore, contextCache);
-    
+
                     contextCache.putPackageStore(packageStore); //set rootPackageStore in cache
-    
+
                     var moduleManagerRequireContextData: ModuleManagerRequireContextData = new ModuleManagerRequireContextData(rootPackageStoreKey);
                     
                     //add temporary cache
                     this.cacheByRootPackageStore.set(rootPackageStoreKey, contextCache);
-    
-                    responseModuleObj = this.requireSync(name, version, moduleManagerRequireContextData);
-    
+
+                    responseModuleObj = this.requireSync(name, versionResolved, moduleManagerRequireContextData);
+
                     //remove temporary cache
                     this.cacheByRootPackageStore.delete(rootPackageStoreKey);
-        
+
                     resolve(responseModuleObj);
                 }
                 else{
                     resolve(null);
                 }
             }
-            else{
-                resolve(null);
+            catch (errTry) {
+                reject(errTry);
             }
         })
     }
@@ -292,34 +302,42 @@ export class ModuleManager {
      */
     private importDependencies(packageStore: PackageStore, contextCache?: IPackageStoreCache): Promise<null>{
         return new Promise(async (resolve, reject) => {
-            var packageManifestObj: IManifest | null = packageStore.getManifest();
+            try {
+                var packageManifestObj: IManifest | null = packageStore.getManifest();
 
-            if (packageManifestObj && packageManifestObj.dependencies){
-                var dependencyKeys = Object.keys(packageManifestObj.dependencies);
-
-                for (var i = 0; i < dependencyKeys.length; i++){
-                    var nameDependency: string = dependencyKeys[i];
-                    var versionDependency: string = packageManifestObj.dependencies[nameDependency];
-
-                    console.log("*** dependency", packageStore.getName(), " => ", nameDependency + ":" + versionDependency);
-
-                    var packageStoreDependency: PackageStore | null = await this.packageStoreManager.getPackageStore(nameDependency, versionDependency);
-                    if (packageStoreDependency){
-                        //cache
-                        if (contextCache){
-                            contextCache.putPackageStore(packageStoreDependency);
-                        }
+                if (packageManifestObj && packageManifestObj.dependencies){
+                    var dependencyKeys = Object.keys(packageManifestObj.dependencies);
     
-                        await this.importDependencies(packageStoreDependency, contextCache);
-                    }
-                    else{
-                        reject("Package " + packageStore.getName() + ". Dependency " + nameDependency + ":" + versionDependency + " not found.");
-                        return;
+                    for (var i = 0; i < dependencyKeys.length; i++){
+                        var nameDependency: string = dependencyKeys[i];
+                        var versionDependency: string = packageManifestObj.dependencies[nameDependency] || "";
+                        var versionDependencyResolved: string = await this.resolveVersion(nameDependency, versionDependency);
+    
+                        packageManifestObj.dependencies[nameDependency] = versionDependencyResolved //resolve version
+    
+                        var packageStoreDependency: PackageStore | null = await this.packageStoreManager.getPackageStore(nameDependency, versionDependencyResolved);
+                        if (packageStoreDependency){
+                            //cache
+                            if (contextCache){
+                                contextCache.putPackageStore(packageStoreDependency);
+                            }
+
+                            this.log.write(LogLevelEnum.INFO, "importDependencies", LogCodeEnum.PROCESS.toString(), packageStore.getName(), {nameDependency:nameDependency, versionDependency:versionDependencyResolved}, __filename);
+        
+                            await this.importDependencies(packageStoreDependency, contextCache);
+                        }
+                        else{
+                            reject("Package " + packageStore.getName() + ". Dependency " + nameDependency + ":" + versionDependencyResolved + " not found.");
+                            return;
+                        }
                     }
                 }
+    
+                resolve(null);                
             }
-
-            resolve(null);
+            catch (errTry) {
+                reject(errTry);
+            }
         })
     }
 }

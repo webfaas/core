@@ -17,7 +17,7 @@ var moduleManager = new ModuleManager(new PackageStoreManager(packageRegistryMan
 
 (async function(){
     try {
-        var moduleObj = await moduleManager.import("mathjs", "6.2.3");
+        var moduleObj = await moduleManager.import("chalk", "2");
         
         if (moduleObj){
             console.log("module loaded", moduleObj);
