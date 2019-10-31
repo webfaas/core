@@ -105,7 +105,7 @@ export class Log {
         try {
             if ((this.currentLevel !== LogLevelEnum.OFF) && (this.currentLevel >= LogLevelEnum.ERROR)){
                 var logData: ILogData;
-                logData = this.parseLog(LogLevelEnum.ERROR, method, error.name, error.message, null, filename, invokeContext);
+                logData = this.parseLog(LogLevelEnum.ERROR, method, error.name, error.message, detail, filename, invokeContext);
                 logData.stack = error.stack;
                 this.currentWriteLog.write(logData);
             }

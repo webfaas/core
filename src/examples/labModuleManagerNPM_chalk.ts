@@ -17,10 +17,11 @@ var moduleManager = new ModuleManager(new PackageStoreManager(packageRegistryMan
 
 (async function(){
     try {
-        var moduleObj = await moduleManager.import("chalk", "2");
+        var moduleObj: any = await moduleManager.import("chalk", "2");
         
         if (moduleObj){
             console.log("module loaded", moduleObj);
+            moduleObj.blue("Hello world!");
         }
         else{
             console.log("module not loaded");

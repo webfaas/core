@@ -1,9 +1,9 @@
 import * as vm from "vm";
-
 /**
  * SandBox
  */
 export class SandBoxProcess {
+    argv = ["webfaas"];
     env: any = {};
     hrtime = process.hrtime;
     memoryUsage = process.memoryUsage;

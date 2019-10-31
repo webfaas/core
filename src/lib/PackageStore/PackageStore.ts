@@ -51,6 +51,10 @@ export class PackageStore {
         manifest = this.getManifest();
 
         if (manifest && manifest.main){
+            if (manifest.main.substring(0,2) === "./"){
+                manifest.main = manifest.main.substring(2);
+            }
+
             if (this.dataPackageItemDataMap.has(manifest.main)){
                 tmpMainFileFullPath = manifest.main;
             }

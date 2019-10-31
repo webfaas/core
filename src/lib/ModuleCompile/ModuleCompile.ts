@@ -77,10 +77,14 @@ export class ModuleCompile {
         catch (errTry) {
             //logDetail
             var logDetail = {} as any;
-            logDetail.manifest = moduleCompileManifestData;
+            logDetail.moduleCompileManifestData = moduleCompileManifestData;
+            if (this.log.currentLevel === LogLevelEnum.DEBUG){
+                logDetail.code = code;
+            }
             
-            this.log.writeError("constructor", errTry, logDetail, __filename);
-            throw errTry;
+            this.log.writeError("compile", errTry, logDetail, __filename);
+
+            throw new Error(errTry.message);
         }
     }
 }
