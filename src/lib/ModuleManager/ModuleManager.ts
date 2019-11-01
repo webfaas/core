@@ -53,21 +53,25 @@ export class ModuleManager {
         this.sandBoxContext = SandBox.SandBoxBuilderContext();
     }
 
-    /**
-     * return packageStoreManager
-     */
-    getPackageStoreManager(): PackageStoreManager{
-        return this.packageStoreManager;
-    }
-
     private parsePackageName(name: string){
         //example: uuid/v1
+        //example: @namespace@uuid/v1
         var listName: string[] = name.split("/");
-        return {
-            name: listName[0],
-            subModuleName: listName[1] || null,
-            fullName: name
+        var packageNameObj: any = {};
+        
+        packageNameObj.fullName = name;
+        if (name.substring(0,1) === "@"){
+            packageNameObj.scope = listName[0].substring(1);
+            packageNameObj.name = "@" + packageNameObj.scope + "/" + listName[1];
+            packageNameObj.subModuleName = listName[2] || null;
         }
+        else{
+            packageNameObj.scope = "";
+            packageNameObj.name = listName[0];
+            packageNameObj.subModuleName = listName[1] || null;
+        }
+
+        return packageNameObj;
     }
 
     private addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object){
@@ -288,6 +292,59 @@ export class ModuleManager {
     }
 
     /**
+     * import dependencies in package
+     * @param packageStore 
+     * @param contextCache 
+     */
+    private importDependencies(packageStore: PackageStore, contextCache?: IPackageStoreCache): Promise<null>{
+        return new Promise(async (resolve, reject) => {
+            try {
+                var packageManifestObj: IManifest | null = packageStore.getManifest();
+
+                if (packageManifestObj && packageManifestObj.dependencies){
+                    var dependencyKeys = Object.keys(packageManifestObj.dependencies);
+    
+                    for (var i = 0; i < dependencyKeys.length; i++){
+                        var nameDependency: string = dependencyKeys[i];
+                        var versionDependency: string = packageManifestObj.dependencies[nameDependency] || "";
+                        var versionDependencyResolved: string = await this.resolveVersion(nameDependency, versionDependency);
+    
+                        packageManifestObj.dependencies[nameDependency] = versionDependencyResolved //resolve version
+    
+                        var packageStoreDependency: PackageStore | null = await this.packageStoreManager.getPackageStore(nameDependency, versionDependencyResolved);
+                        if (packageStoreDependency){
+                            //cache
+                            if (contextCache){
+                                contextCache.putPackageStore(packageStoreDependency);
+                            }
+
+                            this.log.write(LogLevelEnum.INFO, "importDependencies", LogCodeEnum.PROCESS.toString(), packageStore.getName(), {nameDependency:nameDependency, versionDependency:versionDependencyResolved}, __filename);
+        
+                            await this.importDependencies(packageStoreDependency, contextCache);
+                        }
+                        else{
+                            reject("Package " + packageStore.getName() + ". Dependency " + nameDependency + ":" + versionDependencyResolved + " not found.");
+                            return;
+                        }
+                    }
+                }
+    
+                resolve(null);                
+            }
+            catch (errTry) {
+                reject(errTry);
+            }
+        })
+    }
+
+    /**
+     * return packageStoreManager
+     */
+    getPackageStoreManager(): PackageStoreManager{
+        return this.packageStoreManager;
+    }
+
+    /**
      * 
      * @param name module name
      * @param version module version
@@ -331,52 +388,6 @@ export class ModuleManager {
                 else{
                     resolve(null);
                 }
-            }
-            catch (errTry) {
-                reject(errTry);
-            }
-        })
-    }
-
-    /**
-     * import dependencies in package
-     * @param packageStore 
-     * @param contextCache 
-     */
-    private importDependencies(packageStore: PackageStore, contextCache?: IPackageStoreCache): Promise<null>{
-        return new Promise(async (resolve, reject) => {
-            try {
-                var packageManifestObj: IManifest | null = packageStore.getManifest();
-
-                if (packageManifestObj && packageManifestObj.dependencies){
-                    var dependencyKeys = Object.keys(packageManifestObj.dependencies);
-    
-                    for (var i = 0; i < dependencyKeys.length; i++){
-                        var nameDependency: string = dependencyKeys[i];
-                        var versionDependency: string = packageManifestObj.dependencies[nameDependency] || "";
-                        var versionDependencyResolved: string = await this.resolveVersion(nameDependency, versionDependency);
-    
-                        packageManifestObj.dependencies[nameDependency] = versionDependencyResolved //resolve version
-    
-                        var packageStoreDependency: PackageStore | null = await this.packageStoreManager.getPackageStore(nameDependency, versionDependencyResolved);
-                        if (packageStoreDependency){
-                            //cache
-                            if (contextCache){
-                                contextCache.putPackageStore(packageStoreDependency);
-                            }
-
-                            this.log.write(LogLevelEnum.INFO, "importDependencies", LogCodeEnum.PROCESS.toString(), packageStore.getName(), {nameDependency:nameDependency, versionDependency:versionDependencyResolved}, __filename);
-        
-                            await this.importDependencies(packageStoreDependency, contextCache);
-                        }
-                        else{
-                            reject("Package " + packageStore.getName() + ". Dependency " + nameDependency + ":" + versionDependencyResolved + " not found.");
-                            return;
-                        }
-                    }
-                }
-    
-                resolve(null);                
             }
             catch (errTry) {
                 reject(errTry);

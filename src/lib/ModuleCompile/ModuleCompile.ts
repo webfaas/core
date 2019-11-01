@@ -78,9 +78,6 @@ export class ModuleCompile {
             //logDetail
             var logDetail = {} as any;
             logDetail.moduleCompileManifestData = moduleCompileManifestData;
-            if (this.log.currentLevel === LogLevelEnum.DEBUG){
-                logDetail.code = code;
-            }
             
             this.log.writeError("compile", errTry, logDetail, __filename);
 
