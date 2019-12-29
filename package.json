@@ -14,8 +14,8 @@
   "scripts": {
     "test": "mocha --config scripts/mocha.json",
     "test:coverage": "nyc --nycrc-path scripts/nyc.json npm run test",
-    "start": "tsc -w && npm run build:static",
-    "build": "npm run build:clean && tsc && npm run build:static",
+    "start": "node_modules/.bin/tsc -w && npm run build:static",
+    "build": "npm run build:clean && node_modules/.bin/tsc && npm run build:static",
     "build:clean": "rm -rf dist",
     "build:static": "cp package.json dist && cp README.md dist && cp .npmignore dist && cp src/test/data -R dist/test",
     "publisher": "cd dist && npm publisher --access public",
