@@ -11,6 +11,8 @@ cache:
     - node_modules
 
 script:
+  - npm install
+  - npm ls
   - npm run buildAndTest
 
 after_script:
