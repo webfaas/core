@@ -6,7 +6,7 @@ node_js:
   - '10'
 
 cache:
-  npm: true
+  npm: false
   directories:
     - node_modules
 
