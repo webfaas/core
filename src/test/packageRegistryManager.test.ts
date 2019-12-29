@@ -12,6 +12,10 @@ import { PackageRegistryManagerItemStatusEnum } from "../lib/PackageRegistryMana
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 
 export class PackageRegistryError implements IPackageRegistry {
+    getTypeName(): string{
+        return "test";
+    }
+
     getManifest(name: string, etag?: string): Promise<import("../lib/PackageRegistry/IPackageRegistryResponse").IPackageRegistryResponse> {
         throw new Error("getManifest not implemented.");
     }

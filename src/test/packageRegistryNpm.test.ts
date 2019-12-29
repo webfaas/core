@@ -24,8 +24,9 @@ describe("Package Registry NPM", () => {
     var packageRegistryNPM_3: PackageRegistryNPM;
 
     packageRegistryNPM_1 = new PackageRegistryNPM(undefined, log);
+    chai.expect(packageRegistryNPM_1.getTypeName()).to.eq("NPM");
     packageRegistryManager_1.addRegistry("npm", packageRegistryNPM_1);
-
+    
     var config_1 = new PackageRegistryNPMConfig("url1", new ClientHTTPConfig(), "token1");
     chai.expect(config_1.url).to.eq("url1");
     chai.expect(config_1.token).to.eq("token1");

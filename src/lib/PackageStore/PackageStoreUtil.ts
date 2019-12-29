@@ -59,9 +59,7 @@ export class PackageStoreUtil  {
             var nameBuffer = bufferTar.subarray(offset, offset + 100);
             item.name = nameBuffer.subarray(0, nameBuffer.indexOf(0)).toString();
             if (item.name){
-                if (item.name.substring(0,8) === "package/"){
-                    item.name = item.name.substring(8); //remove prefix package/
-                }
+                item.name = item.name.substring(item.name.indexOf("/") + 1); //remove prefix. ex: package/
                 item.size = parseInt(bufferTar.subarray(offset + 124, offset + 136).toString(), 8);
                 item.begin = offset + 512;
                 //item.payload = buffer.subarray(offset + 512, offset + 512 + item.size);

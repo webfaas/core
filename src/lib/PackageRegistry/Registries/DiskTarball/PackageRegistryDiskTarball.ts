@@ -22,6 +22,10 @@ export class PackageRegistryDiskTarball implements IPackageRegistry {
         }
     }
 
+    getTypeName(): string{
+        return "DiskTarball";
+    }
+
     /**
      * return config
      */

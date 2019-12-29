@@ -14,7 +14,7 @@
             "name": "Launch Program",
             "trace": false,
             "program": "${file}",
-            "preLaunchTask": "build:all",
+            //"preLaunchTask": "build",
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -23,7 +23,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Run Mocha",
+            "name": "Run Mocha All",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
                 "--inspect-brk",
@@ -31,6 +31,25 @@
                 "999999",
                 "--colors",
                 "${workspaceFolder}/dist/test/**/*.js"
+            ],
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/dist/test/**/*.js"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        }
+        ,
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run Mocha",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/dist/test/${fileBasenameNoExtension}.js"
             ],
             "sourceMaps": true,
             "outFiles": [

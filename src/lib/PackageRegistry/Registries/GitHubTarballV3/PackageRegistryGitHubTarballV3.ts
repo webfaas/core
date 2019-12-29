@@ -1,5 +1,5 @@
 import { IPackageRegistry } from "../../IPackageRegistry";
-import { PackageRegistryNPMConfig } from "./PackageRegistryNPMConfig";
+import { PackageRegistryGitHubTarballV3Config } from "./PackageRegistryGitHubTarballV3Config";
 import { ClientHTTP } from "../../../ClientHTTP/ClientHTTP";
 import { IClientHTTPResponse } from "../../../ClientHTTP/IClientHTTPResponse";
 import { IncomingHttpHeaders } from "http";
@@ -8,14 +8,19 @@ import { PackageStore } from "../../../PackageStore/PackageStore";
 import { PackageStoreUtil } from "../../../PackageStore/PackageStoreUtil";
 import { IPackageStoreItemData } from "../../../PackageStore/IPackageStoreItemData";
 import { Log } from "../../../Log/Log";
+import { IManifest } from "../../../Manifest/IManifest";
 
-export class PackageRegistryNPM implements IPackageRegistry {
-    private config: PackageRegistryNPMConfig;
+//doc api
+//https://developer.github.com/v3/
+//https://developer.github.com/v3/repos/contents/#get-archive-link
+
+export class PackageRegistryGitHubTarballV3 implements IPackageRegistry {
+    private config: PackageRegistryGitHubTarballV3Config;
     private clientHTTP: ClientHTTP;
     private log: Log;
     
-    constructor(config?: PackageRegistryNPMConfig, log?: Log){
-        this.config = config || new PackageRegistryNPMConfig();
+    constructor(config?: PackageRegistryGitHubTarballV3Config, log?: Log){
+        this.config = config || new PackageRegistryGitHubTarballV3Config();
         this.log = log || Log.getInstance();
 
         this.clientHTTP = new ClientHTTP(this.config.httpConfig, this.log);
@@ -28,6 +33,7 @@ export class PackageRegistryNPM implements IPackageRegistry {
         if (this.config.token){
             headers["authorization"] = "Bearer " + this.config.token;
         }
+        headers["accept"] = "application/vnd.github.v3+json";
         return headers;
     }
 
@@ -35,13 +41,13 @@ export class PackageRegistryNPM implements IPackageRegistry {
      * return type name
      */
     getTypeName(): string{
-        return "NPM";
+        return "GitHubTarballV3";
     }
 
     /**
      * return config
      */
-    getConfig(): PackageRegistryNPMConfig{
+    getConfig(): PackageRegistryGitHubTarballV3Config{
         return this.config;
     }
 
@@ -56,13 +62,13 @@ export class PackageRegistryNPM implements IPackageRegistry {
                 var headers: IncomingHttpHeaders = this.buildHeaders();
                 var manifestResponseObj = {} as IPackageRegistryResponse;
                 
-                //optimized npm package metadata response payload (https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md)
-                headers["accept"] = "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*";
                 if (etag){
                     headers["If-None-Match"] = etag;
                 }
 
-                var url = this.config.url + "/" + name;
+                //ex: https://api.github.com/repos/webfaaslabs/mathsum/tags
+                
+                var url = this.config.url + "/repos/" + name.replace("@", "") + "/tags";
 
                 var respHTTP: IClientHTTPResponse = await this.clientHTTP.request(url, "GET", undefined, headers);
 
@@ -74,7 +80,17 @@ export class PackageRegistryNPM implements IPackageRegistry {
                         header_etag = temp_header_etag.toString();
                     }
 
-                    manifestResponseObj.packageStore = PackageStoreUtil.buildPackageStoreSingleItemFromBuffer(name, "", header_etag, respHTTP.data, "package.json");
+                    var listTags: any = JSON.parse(respHTTP.data.toString());
+                    var versions = {} as any;
+                    for (var i = 0; i < listTags.length; i++){
+                        var itemTag: any = listTags[i];
+                        versions[itemTag.name] = {name:name,"version":itemTag.name, description: itemTag.commit.sha};
+                    }
+                    var manifestObj = {} as IManifest;
+                    manifestObj.name = name;
+                    manifestObj.versions = versions;
+                    var packageBuffer: Buffer = Buffer.from(JSON.stringify(manifestObj));
+                    manifestResponseObj.packageStore = PackageStoreUtil.buildPackageStoreSingleItemFromBuffer(name, "", header_etag, packageBuffer, "package.json");
 
                     resolve(manifestResponseObj);
                 }
@@ -112,30 +128,49 @@ export class PackageRegistryNPM implements IPackageRegistry {
                 var headers: IncomingHttpHeaders = this.buildHeaders();
                 var manifestResponseObj = {} as IPackageRegistryResponse;
                 
-                //optimized npm package metadata response payload (https://github.com/npm/registry/blob/master/docs/responses/package-metadata.md)
-                headers["accept"] = "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*";
+                //ex: https://api.github.com/repos/webfaaslabs/mathsum/tarball/0.0.1
+                
                 if (etag){
                     headers["If-None-Match"] = etag;
                 }
 
-                //let listURL = self.getListURLFromModuleName(name, "/" + name + "/-/" + name + "-" + versionTarget + ".tgz");
-                var url = this.config.url + "/" + name + "/-/" + name + "-" + version + ".tgz";
+                var versionDownload = version;
+                if (versionDownload.indexOf("0.0.0-") > -1){
+                    versionDownload = versionDownload.split("-")[1];
+                }
+                var url = this.config.url + "/repos/" + name.replace("@", "") + "/tarball/" + versionDownload;
 
-                var respHTTP: IClientHTTPResponse = await this.clientHTTP.request(url, "GET", undefined, headers);
+                var respHTTP: IClientHTTPResponse;
+
+                respHTTP = await this.clientHTTP.request(url, "GET", undefined, headers);
+
+                if ((respHTTP.statusCode === 302) && (respHTTP.headers.location)){ //redirect
+                    respHTTP = await this.clientHTTP.request(respHTTP.headers.location, "GET", undefined, headers);
+                }
                 
                 if (respHTTP.statusCode === 200){
                     var temp_header_etag = respHTTP.headers["etag"];
-                    var header_etag: string = "";
-                    var bufferDecompressed: Buffer = PackageStoreUtil.unzipSync(respHTTP.data);
-                    var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = PackageStoreUtil.converBufferTarFormatToMapPackageItemDataMap(bufferDecompressed);
 
-                    if (temp_header_etag){
-                        header_etag = temp_header_etag.toString();
+                    if (temp_header_etag === etag){ //github not support tarball etag ????
+                        //SIMULATE NOT MODIFIED
+                        manifestResponseObj.packageStore = null;
+                        manifestResponseObj.etag = etag || "";
+    
+                        resolve(manifestResponseObj);
                     }
-                    
-                    manifestResponseObj.packageStore = new PackageStore(name, version, header_etag, bufferDecompressed, dataPackageItemDataMap);
-
-                    resolve(manifestResponseObj);
+                    else{
+                        var header_etag: string = "";
+                        var bufferDecompressed: Buffer = PackageStoreUtil.unzipSync(respHTTP.data);
+                        var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = PackageStoreUtil.converBufferTarFormatToMapPackageItemDataMap(bufferDecompressed);
+    
+                        if (temp_header_etag){
+                            header_etag = temp_header_etag.toString();
+                        }
+                        
+                        manifestResponseObj.packageStore = new PackageStore(name, version, header_etag, bufferDecompressed, dataPackageItemDataMap);
+    
+                        resolve(manifestResponseObj);
+                    }
                 }
                 else if (respHTTP.statusCode === 304){ //NOT MODIFIED
                     manifestResponseObj.packageStore = null;
