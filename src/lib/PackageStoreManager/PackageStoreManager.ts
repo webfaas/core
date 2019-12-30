@@ -45,7 +45,7 @@ export class PackageStoreManager {
      * @param version package version
      * @param etag package etag 
      */
-    getPackageStore(name: string, version?: string, etag?: string): Promise<PackageStore | null>{
+    getPackageStore(name: string, version?: string, etag?: string, registryName?: string): Promise<PackageStore | null>{
         return new Promise(async (resolve, reject) => {
             var packageStore: PackageStore | null;
             
@@ -58,7 +58,7 @@ export class PackageStoreManager {
                 }
             }
 
-            packageStore = await this.packageRegistryManager.getPackageStore(name, version, etag);
+            packageStore = await this.packageRegistryManager.getPackageStore(name, version, etag, registryName);
 
             //cache put
             if (this.cache && packageStore !== null){

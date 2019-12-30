@@ -9,30 +9,10 @@ export enum PackageRegistryManagerItemStatusEnum {
 }
 
 /**
- * item of a PackageRegistryManager when in error state
- */
-export class PackageRegistryManagerItemError {
-    lastDate: Date
-    lastError: any
-
-    constructor(error: any, date?: Date){
-        this.lastError = error;
-        
-        if (date){
-            this.lastDate = date;
-        }
-        else{
-            this.lastDate = new Date();
-        }
-    }
-}
-
-/**
  * item of a PackageRegistryManager
  */
 export class PackageRegistryManagerItem {
     name: string;
-    error: PackageRegistryManagerItemError | null = null;
     status: PackageRegistryManagerItemStatusEnum = PackageRegistryManagerItemStatusEnum.ENABLED;
     registry: IPackageRegistry;
 

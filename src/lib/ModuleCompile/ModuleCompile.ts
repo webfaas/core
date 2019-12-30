@@ -4,6 +4,7 @@ import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { ModuleCompileManifestData } from "./ModuleCompileManifestData";
+import { WebFaasError } from "../WebFaasError/WebFaasError";
 
 const wrapper = [
     "(function (exports, require, module, __filename, __dirname) { ",
@@ -81,7 +82,7 @@ export class ModuleCompile {
             
             this.log.writeError("compile", errTry, logDetail, __filename);
 
-            throw new Error(errTry.message);
+            throw new WebFaasError.CompileError(errTry);
         }
     }
 }

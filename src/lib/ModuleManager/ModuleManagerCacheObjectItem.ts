@@ -33,13 +33,19 @@ export class ModuleManagerCacheObjectItem {
     getLastAccess(): number{
         return this.lastAccess;
     }
+    getHitCount(): number{
+        return this.hitCount;
+    }
 
-    setObjectToCache(key: string, obj: Object){
+    setObjectToCache(key: string, obj: Object): void{
         this.cacheObject.set(key, obj);
+    }
+    removeObjectFromCache(key: string): void{
+        this.cacheObject.delete(key);
     }
     getObjectFromCache(key?: string): Object | null{
         if (key){
-            return this.cacheObject.get(key || "") || null;
+            return this.cacheObject.get(key) || null;
         }
         else{
             //access main module

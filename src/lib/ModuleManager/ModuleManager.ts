@@ -16,9 +16,13 @@ import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { ModuleCompileManifestData } from "../ModuleCompile/ModuleCompileManifestData";
 import { ModuleManagerRequireContextData } from "./ModuleManagerRequireContextData";
 import { ModuleManagerCacheObjectItem } from "./ModuleManagerCacheObjectItem";
+import { ModuleName } from "../ModuleName/ModuleName";
 import { SmallManifest } from "../Manifest/SmallManifest";
+import { IModuleNameData } from "../ModuleName/IModuleName";
+import { WebFaasError } from "../WebFaasError/WebFaasError";
 
 const nativeModule = require("module");
+const moduleName = ModuleName.getInstance();
 
 /**
  * manager Module
@@ -54,28 +58,7 @@ export class ModuleManager {
         this.sandBoxContext = SandBox.SandBoxBuilderContext();
     }
 
-    private parsePackageName(name: string){
-        //example: uuid/v1
-        //example: @namespace@uuid/v1
-        var listName: string[] = name.split("/");
-        var packageNameObj: any = {};
-        
-        packageNameObj.fullName = name;
-        if (name.substring(0,1) === "@"){
-            packageNameObj.scope = listName[0].substring(1);
-            packageNameObj.name = "@" + packageNameObj.scope + "/" + listName[1];
-            packageNameObj.subModuleName = listName[2] || null;
-        }
-        else{
-            packageNameObj.scope = "";
-            packageNameObj.name = listName[0];
-            packageNameObj.subModuleName = listName[1] || null;
-        }
-
-        return packageNameObj;
-    }
-
-    private addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object){
+    private addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object): void{
         var packageKey: string = packageName + ":" + packageVersion;
         var cacheModuleManagerItem = this.cacheObject.get(packageKey);
         if (!cacheModuleManagerItem){
@@ -142,11 +125,11 @@ export class ModuleManager {
                             resolve(versionTO);
                         }
                         else{
-                            reject("Version not resolved: " + packageVersion);
+                            reject(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.VERSION, packageName + ":" + packageVersion));
                         }
                     }
                     else{
-                        reject("Manifest " + packageName + " not found");
+                        reject(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.MANIFEST, packageName));
                     }
                 }
             }
@@ -202,15 +185,15 @@ export class ModuleManager {
             else{
                 //require external package
 
-                var nameParsedObj = this.parsePackageName(name);
-
+                var nameParsedObj: IModuleNameData = moduleName.parse(name, "");
+                
                 //if not version exist, seek version in parent package.json
                 if (version === "" && moduleManagerRequireContextData.parentPackageStoreName){
                     let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
                     if (parentPackageStore){
                         let parentPackageManifest: IManifest | null = parentPackageStore.getManifest();
                         if (parentPackageManifest && parentPackageManifest.dependencies){
-                            version = parentPackageManifest.dependencies[nameParsedObj.name] || "";
+                            version = parentPackageManifest.dependencies[nameParsedObj.moduleName] || "";
                         }
                     }
                 }
@@ -221,10 +204,10 @@ export class ModuleManager {
                     return responseObj;
                 }
 
-                let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(nameParsedObj.name, version);
+                let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(nameParsedObj.moduleName, version);
                 if (packageStore){
-                    if (nameParsedObj.subModuleName){
-                        codeBuffer = packageStore.getItemBuffer(nameParsedObj.subModuleName);
+                    if (nameParsedObj.fileName){
+                        codeBuffer = packageStore.getItemBuffer(nameParsedObj.fileName);
                     }
                     else{
                         codeBuffer = packageStore.getMainBuffer();
@@ -324,7 +307,7 @@ export class ModuleManager {
                             await this.importDependencies(packageStoreDependency, contextCache);
                         }
                         else{
-                            reject("Package " + packageStore.getName() + ". Dependency " + nameDependency + ":" + versionDependencyResolved + " not found.");
+                            reject(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.DEPENDENCY, packageStore.getName() + " => " + nameDependency + ":" + versionDependencyResolved));
                             return;
                         }
                     }
@@ -351,12 +334,12 @@ export class ModuleManager {
      * @param version module version
      * @param etag module etag 
      */
-    import(name: string, version: string, etag?: string): Promise<Object | null>{
+    import(name: string, version: string, etag?: string, registryName?: string): Promise<Object | null>{
         return new Promise(async (resolve, reject) => {
             try {
-                var nameParsedObj = this.parsePackageName(name);
+                var nameParsedObj: IModuleNameData = moduleName.parse(name, "");
                 var responseModuleObj : Object | null;
-                var versionResolved: string = await this.resolveVersion(nameParsedObj.name, version);
+                var versionResolved: string = await this.resolveVersion(nameParsedObj.moduleName, version);
 
                 //verify cache
                 responseModuleObj = this.getObjectFromCache(nameParsedObj.fullName, versionResolved, "");
@@ -365,7 +348,7 @@ export class ModuleManager {
                     return;
                 }
 
-                let packageStore: PackageStore | null = await this.packageStoreManager.getPackageStore(nameParsedObj.name, versionResolved, etag);
+                let packageStore: PackageStore | null = await this.packageStoreManager.getPackageStore(nameParsedObj.moduleName, versionResolved, etag, registryName);
                 if (packageStore){
                     var rootPackageStoreKey: string = packageStore.getKey();
                     var contextCache: PackageStoreCacheMemory = new PackageStoreCacheMemory();

@@ -7,6 +7,7 @@ import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { IncomingHttpHeaders } from "http";
+import { WebFaasError } from "../WebFaasError/WebFaasError";
 
 export class ClientHTTP  {
     listHttpAgent: Map<string, http.Agent> = new Map<string, http.Agent>();
@@ -87,7 +88,7 @@ export class ClientHTTP  {
                         }
                         catch (errTry) {
                             selfLog.writeError("request", errTry, {method:method, url:url}, __filename, invokeContext);
-                            reject(errTry);
+                            reject(new WebFaasError.ClientHttpError(errTry, url, method));
                         }
                     });
                 }
@@ -160,7 +161,7 @@ export class ClientHTTP  {
 
                 clientRequest.on("error", function(err) {
                     selfLog.writeError("request", err, {method:method, url:url}, __filename, invokeContext);
-                    reject(err);
+                    reject(new WebFaasError.ClientHttpError(err, url, method));
                 });
 
                 if (dataRequestBuffer){
@@ -171,7 +172,7 @@ export class ClientHTTP  {
             }
             catch (errTry) {
                 selfLog.writeError("request", errTry, {method:method, url:url}, __filename, invokeContext);
-                reject(errTry);
+                reject(new WebFaasError.ClientHttpError(errTry, url, method));
             }
         })
     }

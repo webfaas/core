@@ -1,6 +1,6 @@
 import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../PackageRegistry/IPackageRegistryResponse";
-import { PackageRegistryManagerItem, PackageRegistryManagerItemStatusEnum, PackageRegistryManagerItemError } from "./PackageRegistryManagerItem";
+import { PackageRegistryManagerItem, PackageRegistryManagerItemStatusEnum } from "./PackageRegistryManagerItem";
 import { PackageRegistryNPM } from "../PackageRegistry/Registries/NPM/PackageRegistryNPM";
 import { PackageRegistryGitHubTarballV3 } from "../PackageRegistry/Registries/GitHubTarballV3/PackageRegistryGitHubTarballV3";
 import { PackageRegistryDiskTarball } from "../PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
@@ -25,14 +25,14 @@ export class PackageRegistryManager {
     /**
      * return default registry name
      */
-    getDefaultRegistryName(){
+    getDefaultRegistryName(): string{
         return this.defaultRegistryName;
     }
     /**
      * set default registry name
      * @param name registry name
      */
-    setDefaultRegistryName(name: string){
+    setDefaultRegistryName(name: string): void{
         if (this.listRegistry.has(name)){
             this.defaultRegistryName = name;
         }
@@ -80,7 +80,7 @@ export class PackageRegistryManager {
     /**
      * load default registries
      */
-    loadDefaultRegistries(){
+    loadDefaultRegistries(): void{
         this.loadRegistry(PackageRegistryManagerRegistryTypeEnum.NPM);
         this.loadRegistry(PackageRegistryManagerRegistryTypeEnum.DISK);
         this.loadRegistry(PackageRegistryManagerRegistryTypeEnum.GITHUB);
@@ -89,7 +89,7 @@ export class PackageRegistryManager {
     /**
      * load registry
      */
-    loadRegistry(type: PackageRegistryManagerRegistryTypeEnum){
+    loadRegistry(type: PackageRegistryManagerRegistryTypeEnum): void{
         switch (type){
             case PackageRegistryManagerRegistryTypeEnum.NPM:
                 this.addRegistry(PackageRegistryManagerRegistryTypeEnum.NPM.toString(), new PackageRegistryNPM(undefined, this.log));
@@ -109,7 +109,7 @@ export class PackageRegistryManager {
      * @param registry registry object
      * @param status [ENABLED | DISABLED]
      */
-    addRegistry(name: string, registry: IPackageRegistry, status: PackageRegistryManagerItemStatusEnum = PackageRegistryManagerItemStatusEnum.ENABLED){
+    addRegistry(name: string, registry: IPackageRegistry, status: PackageRegistryManagerItemStatusEnum = PackageRegistryManagerItemStatusEnum.ENABLED): void{
         var item: PackageRegistryManagerItem = new PackageRegistryManagerItem(name, registry);
         item.status = status;
         this.listRegistry.set(name, item);
@@ -132,14 +132,14 @@ export class PackageRegistryManager {
      * @param scopeName scope name
      * @param registryName registry name
      */
-    addRouteByScope(scopeName: string, registryName: string){
+    addRouteByScope(scopeName: string, registryName: string): void{
         this.listRouteByScope.set(scopeName, registryName);
     }
     /**
      * remove route by scope name
      * @param scopeName scope name
      */
-    removeRouteByScope(scopeName: string){
+    removeRouteByScope(scopeName: string): void{
         this.listRouteByScope.delete(scopeName);
     }
 
@@ -149,25 +149,27 @@ export class PackageRegistryManager {
      * @param version package version
      * @param etag package etag 
      */
-    getPackageStore(name: string, version?: string, etag?: string): Promise<PackageStore | null>{
+    getPackageStore(name: string, version?: string, etag?: string, registryName?: string): Promise<PackageStore | null>{
         return new Promise(async (resolve, reject) => {
             var packageRegistryResponseObj: IPackageRegistryResponse;
-            var lastError = null;
 
             if (this.listRegistry.size){
-                let registryName: string;
-                let scopeName = this.getScopeByModuleName(name);
-
-                registryName = this.getRouteByScope(scopeName);
-                if (!registryName){
-                    registryName = this.defaultRegistryName;
+                let registryNameTarget: string;
+                
+                if (registryName){
+                    registryNameTarget = registryName;
+                }
+                else{
+                    let scopeName = this.getScopeByModuleName(name);
+                    registryNameTarget = this.getRouteByScope(scopeName);
+                    if (!registryNameTarget){
+                        registryNameTarget = this.defaultRegistryName;
+                    }
                 }
 
-                let item: PackageRegistryManagerItem | undefined = this.listRegistry.get(registryName);
+                let item: PackageRegistryManagerItem | undefined = this.listRegistry.get(registryNameTarget);
                 if (item && item.status === PackageRegistryManagerItemStatusEnum.ENABLED){
                     try {
-                        item.error = null;
-                        
                         if (version){
                             packageRegistryResponseObj = await item.registry.getPackage(name, version, etag);
                         }
@@ -183,13 +185,11 @@ export class PackageRegistryManager {
                         }
                     }
                     catch (errTryGetManifest) {
-                        lastError = errTryGetManifest;
-                        item.error = new PackageRegistryManagerItemError(errTryGetManifest);
                         reject(errTryGetManifest);
                     }
                 }
                 else{
-                    reject(lastError || new Error("PackageRegistryManagerItem not available"));
+                    reject(new Error("PackageRegistryManagerItem not available"));
                 }
             }
             else{

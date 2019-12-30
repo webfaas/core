@@ -23,9 +23,16 @@ export class ModuleName {
         var responseObj = {} as IModuleNameData;
         var listToken: Array<String> = moduleName.split("/");
     
-        fileName = fileName || "";
-    
+        if (fileName){
+            responseObj.fullName = moduleName + "/" + fileName;
+        }
+        else{
+            fileName = "";
+            responseObj.fullName = moduleName;
+        }
+        
         if (moduleName.substring(0,1) === "@"){
+            responseObj.scopeName = listToken[0].substring(1);
             if (listToken.length > 2){ //@my-company/module/v4
                 responseObj.moduleName = listToken[0].toString() + "/" + listToken[1];
                 if (fileName){
@@ -41,6 +48,7 @@ export class ModuleName {
             }
         }
         else{
+            responseObj.scopeName = "default";
             if (listToken.length > 1){ //module/v4
                 responseObj.moduleName = listToken[0].toString();
                 if (fileName){

@@ -7,6 +7,7 @@ import { IPackageStoreItemData } from "../../../PackageStore/IPackageStoreItemDa
 import * as fs from "fs";
 import * as path from "path";
 import { Log } from "../../../Log/Log";
+import { WebFaasError } from "../../../WebFaasError/WebFaasError";
 
 /**
  * PackageRegistry Tarball in local disk
@@ -52,7 +53,7 @@ export class PackageRegistryDiskTarball implements IPackageRegistry {
                             resolve(packageResponseObj);
                         }
                         else{
-                            reject(err);
+                            reject(new WebFaasError.FileError(err));
                         }
                     }
                     else{
@@ -66,7 +67,7 @@ export class PackageRegistryDiskTarball implements IPackageRegistry {
                         else{
                             fs.readFile(filePath, function(err, buffer){
                                 if (err){
-                                    reject(err);
+                                    reject(new WebFaasError.FileError(err));
                                 }
                                 else{
                                     packageResponseObj.packageStore = PackageStoreUtil.buildPackageStoreSingleItemFromBuffer(name, "", fileEtag, buffer, "package.json");
@@ -105,7 +106,7 @@ export class PackageRegistryDiskTarball implements IPackageRegistry {
                             resolve(packageResponseObj);
                         }
                         else{
-                            reject(err);
+                            reject(new WebFaasError.FileError(err));
                         }
                     }
                     else{
@@ -119,7 +120,7 @@ export class PackageRegistryDiskTarball implements IPackageRegistry {
                         else{
                             fs.readFile(filePath, function(err, bufferCompressed){
                                 if (err){
-                                    reject(err);
+                                    reject(new WebFaasError.FileError(err));
                                 }
                                 else{
                                     var bufferDecompressed: Buffer = PackageStoreUtil.unzipSync(bufferCompressed);

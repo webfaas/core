@@ -141,36 +141,31 @@ export class PackageRegistryGitHubTarballV3 implements IPackageRegistry {
                 var url = this.config.url + "/repos/" + name.replace("@", "") + "/tarball/" + versionDownload;
 
                 var respHTTP: IClientHTTPResponse;
-
+                
                 respHTTP = await this.clientHTTP.request(url, "GET", undefined, headers);
 
                 if ((respHTTP.statusCode === 302) && (respHTTP.headers.location)){ //redirect
                     respHTTP = await this.clientHTTP.request(respHTTP.headers.location, "GET", undefined, headers);
                 }
+
+                var resp_header_etag: string = "";
+                if (respHTTP.headers["etag"]){
+                    resp_header_etag = respHTTP.headers["etag"].toString();
+                }
+
+                if ((respHTTP.statusCode === 200) && (resp_header_etag === etag)){
+                    //github not support tarball etag ????
+                    //SIMULATE NOT MODIFIED
+                    respHTTP.statusCode = 304;
+                }
                 
                 if (respHTTP.statusCode === 200){
-                    var temp_header_etag = respHTTP.headers["etag"];
+                    var bufferDecompressed: Buffer = PackageStoreUtil.unzipSync(respHTTP.data);
+                    var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = PackageStoreUtil.converBufferTarFormatToMapPackageItemDataMap(bufferDecompressed);
 
-                    if (temp_header_etag === etag){ //github not support tarball etag ????
-                        //SIMULATE NOT MODIFIED
-                        manifestResponseObj.packageStore = null;
-                        manifestResponseObj.etag = etag || "";
-    
-                        resolve(manifestResponseObj);
-                    }
-                    else{
-                        var header_etag: string = "";
-                        var bufferDecompressed: Buffer = PackageStoreUtil.unzipSync(respHTTP.data);
-                        var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = PackageStoreUtil.converBufferTarFormatToMapPackageItemDataMap(bufferDecompressed);
-    
-                        if (temp_header_etag){
-                            header_etag = temp_header_etag.toString();
-                        }
-                        
-                        manifestResponseObj.packageStore = new PackageStore(name, version, header_etag, bufferDecompressed, dataPackageItemDataMap);
-    
-                        resolve(manifestResponseObj);
-                    }
+                    manifestResponseObj.packageStore = new PackageStore(name, version, resp_header_etag, bufferDecompressed, dataPackageItemDataMap);
+
+                    resolve(manifestResponseObj);
                 }
                 else if (respHTTP.statusCode === 304){ //NOT MODIFIED
                     manifestResponseObj.packageStore = null;

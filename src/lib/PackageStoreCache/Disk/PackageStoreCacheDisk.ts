@@ -7,6 +7,7 @@ import { Log } from "../../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../../Log/ILog";
 import { IPackageStoreItemData } from "../../PackageStore/IPackageStoreItemData";
 import { PackageStoreCacheDiskMetadata } from "./PackageStoreCacheDiskMetadata";
+import { WebFaasError } from "../../WebFaasError/WebFaasError";
 
 const FORMAT_VERSION = "V1";
 
@@ -36,7 +37,7 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                         fs.mkdir(path, (err) => {
                             if (err){
                                 this.log.writeError("checkExistsAndCreateDirectory", err, {path:path}, __filename);
-                                reject(err);
+                                reject(new WebFaasError.FileError(err));
                             }
                             else{
                                 this.log.write(LogLevelEnum.INFO, "checkExistsAndCreateDirectory", LogCodeEnum.WRITEFILE.toString(), "directory created", {path:path}, __filename);
@@ -46,7 +47,7 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                     }
                     else{
                         this.log.writeError("checkExistsAndCreateDirectory", err, {path:path}, __filename);
-                        reject(err);
+                        reject(new WebFaasError.FileError(err));
                     }
                 }
                 else{
@@ -132,7 +133,7 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                             resolve(null);
                         }
                         else{
-                            reject(err);
+                            reject(new WebFaasError.FileError(err));
                         }
                     }
                     else{
@@ -182,7 +183,7 @@ export class PackageStoreCacheDisk implements IPackageStoreCache {
                 
                 fs.writeFile(filePath, fileBuffer, (err) => {
                     if (err){
-                        reject(err);
+                        reject(new WebFaasError.FileError(err));
                     }
                     else{
                         resolve();
