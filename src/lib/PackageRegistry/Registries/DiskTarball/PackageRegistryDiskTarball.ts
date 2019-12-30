@@ -6,20 +6,19 @@ import { PackageStoreUtil } from "../../../PackageStore/PackageStoreUtil";
 import { IPackageStoreItemData } from "../../../PackageStore/IPackageStoreItemData";
 import * as fs from "fs";
 import * as path from "path";
+import { Log } from "../../../Log/Log";
 
 /**
  * PackageRegistry Tarball in local disk
  */
 export class PackageRegistryDiskTarball implements IPackageRegistry {
     private config: PackageRegistryDiskTarballConfig;
+    private log: Log;
 
-    constructor(config?: PackageRegistryDiskTarballConfig){
-        if (config){
-            this.config = config;
-        }
-        else{
-            this.config = new PackageRegistryDiskTarballConfig();
-        }
+    constructor(config?: PackageRegistryDiskTarballConfig, log?: Log){
+        this.config = config || new PackageRegistryDiskTarballConfig();
+        
+        this.log = log || Log.getInstance();
     }
 
     getTypeName(): string{

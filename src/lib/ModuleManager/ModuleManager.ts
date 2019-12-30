@@ -43,9 +43,10 @@ export class ModuleManager {
             let packageRegistryManager = new PackageRegistryManager(this.log);
             packageRegistryManager.loadDefaultRegistries();
 
-            let diskPackageStore = new PackageStoreCacheDisk();
-            
-            this.packageStoreManager = new PackageStoreManager(packageRegistryManager, diskPackageStore, this.log);
+            this.packageStoreManager = new PackageStoreManager(packageRegistryManager, undefined, this.log);
+
+            //let diskPackageStore = new PackageStoreCacheDisk();
+            //this.packageStoreManager = new PackageStoreManager(packageRegistryManager, diskPackageStore, this.log);
         }
 
         this.moduleCompile = new ModuleCompile(this.log);

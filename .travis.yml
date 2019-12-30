@@ -6,12 +6,11 @@ node_js:
   - '10'
 
 cache:
-  npm: false
+  npm: true
   directories:
     - node_modules
 
 script:
-  - npm install
   - npm ls
   - npm run buildAndTest
 

@@ -1,5 +1,4 @@
 import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
-import { toUnicode } from "punycode";
 
 /**
  * state item of a PackageRegistryManager
@@ -33,16 +32,12 @@ export class PackageRegistryManagerItemError {
  */
 export class PackageRegistryManagerItem {
     name: string;
-    enableSeekNextRegistryWhenPackageStoreNotFound: boolean = false;
     error: PackageRegistryManagerItemError | null = null;
     status: PackageRegistryManagerItemStatusEnum = PackageRegistryManagerItemStatusEnum.ENABLED;
     registry: IPackageRegistry;
 
-    constructor(name: string, registry: IPackageRegistry, enableSeekNextRegistryWhenPackageStoreNotFound?: boolean){
+    constructor(name: string, registry: IPackageRegistry){
         this.name = name;
         this.registry = registry;
-        if (enableSeekNextRegistryWhenPackageStoreNotFound !== undefined){
-            this.enableSeekNextRegistryWhenPackageStoreNotFound = enableSeekNextRegistryWhenPackageStoreNotFound;
-        }
     }
 }

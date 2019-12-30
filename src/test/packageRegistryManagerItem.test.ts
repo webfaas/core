@@ -13,16 +13,6 @@ describe("Package Registry Manager Item", () => {
         chai.expect(packageRegistryManagerItem_1.name).to.eq("name1");
         chai.expect(packageRegistryManagerItem_1.error).to.eq(null);
         chai.expect(packageRegistryManagerItem_1.status).to.eq(PackageRegistryManagerItemStatusEnum.ENABLED);
-        chai.expect(packageRegistryManagerItem_1.enableSeekNextRegistryWhenPackageStoreNotFound).to.eq(false);
-    })
-
-    it("should return object on call - complete", function(){
-        var packageRegistryManagerItem_1 = new PackageRegistryManagerItem("name1", packageRegistryDiskTarball_1, true);
-        chai.expect(packageRegistryManagerItem_1).to.be.an.instanceof(Object);
-        chai.expect(packageRegistryManagerItem_1.name).to.eq("name1");
-        chai.expect(packageRegistryManagerItem_1.error).to.eq(null);
-        chai.expect(packageRegistryManagerItem_1.status).to.eq(PackageRegistryManagerItemStatusEnum.ENABLED);
-        chai.expect(packageRegistryManagerItem_1.enableSeekNextRegistryWhenPackageStoreNotFound).to.eq(true);
     })
 })
 
