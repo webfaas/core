@@ -150,7 +150,7 @@ describe("Package Registry GitHubTarballV3", () => {
                 var fileBuffer = packageStore.getItemBuffer("semver.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().indexOf("return x + y") > -1).to.eq(true);
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y") > -1).to.eq(true);
                 }
             }
 
@@ -198,7 +198,7 @@ describe("Package Registry GitHubTarballV3", () => {
                 var fileBuffer = packageStore.getItemBuffer("@webfaaslabs/mathsum.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().indexOf("return x + y") > -1).to.eq(true);
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y") > -1).to.eq(true);
                 }
             }
 
@@ -224,7 +224,7 @@ describe("Package Registry GitHubTarballV3", () => {
                 var fileBuffer = packageStore.getItemBuffer("@webfaaslabs/mathsum.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().indexOf("return x + y") > -1).to.eq(true);
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y") > -1).to.eq(true);
                 }
             }
 

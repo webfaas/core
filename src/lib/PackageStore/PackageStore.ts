@@ -1,5 +1,6 @@
 import { IPackageStoreItemData } from "./IPackageStoreItemData";
 import { IManifest } from "../Manifest/IManifest";
+import { PackageStoreItemBufferResponse } from "./PackageStoreItemBufferResponse";
 
 /**
  * PackageStore
@@ -22,7 +23,7 @@ export class PackageStore {
     constructor(name: string, version: string, etag: string, packageBuffer: Buffer, dataPackageItemDataMap?: Map<string, IPackageStoreItemData>) {
         this.name = name;
         this.version = version;
-        this.key = this.name + ":" + this.version;
+        this.key = PackageStore.parseKey(this.name, this.version);
         this.etag = etag;
         this.packageBuffer = packageBuffer;
         this.size = packageBuffer.length;
@@ -38,6 +39,10 @@ export class PackageStore {
         this.dataPackageItemDataMap = dataPackageItemDataMap;
 
         this.seekMainFile();
+    }
+
+    public static parseKey(name: string, version: string): string{
+        return name + ":" + version;
     }
 
     private updateMetricsAccess(){
@@ -112,32 +117,40 @@ export class PackageStore {
         return this.mainFileFullPath;
     }
 
-    getItemBuffer(key: string): Buffer | null{
+    getItemBuffer(key: string): PackageStoreItemBufferResponse | null{
         this.updateMetricsAccess();
         var item: IPackageStoreItemData | undefined = this.dataPackageItemDataMap.get(key);
+        var extension = key.substring(key.lastIndexOf("."));
 
         item = this.dataPackageItemDataMap.get(key);
 
         if (item === undefined){
             if (key.indexOf(".") === -1){
+                extension = ".js";
                 item = this.dataPackageItemDataMap.get(key + ".js");
 
                 if (item === undefined){
+                    extension = ".js";
                     item = this.dataPackageItemDataMap.get(key + "/index.js");
+                }
+
+                if (item === undefined){
+                    extension = ".json";
+                    item = this.dataPackageItemDataMap.get(key + ".json");
                 }
             }
         }
 
         if (item){
             var end = item.begin + item.size;
-            return this.packageBuffer.subarray(item.begin, end);
+            return new PackageStoreItemBufferResponse(key, extension, this.packageBuffer.subarray(item.begin, end));
         }
         else{
             return null;
         }
     }
 
-    getMainBuffer(): Buffer | null{
+    getMainBuffer(): PackageStoreItemBufferResponse | null{
         if (this.mainFileFullPath){
             return this.getItemBuffer(this.mainFileFullPath);
         }
@@ -155,7 +168,7 @@ export class PackageStore {
         else{
             var manifestBuffer = this.getItemBuffer("package.json");
             if (manifestBuffer){
-                this.manifest = JSON.parse(manifestBuffer.toString());
+                this.manifest = JSON.parse(manifestBuffer.buffer.toString());
                 return this.manifest;
             }
             else{

@@ -51,7 +51,7 @@ describe("Package Store Manager", () => {
                 var fileBuffer = packageStore.getItemBuffer("semver.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                    chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
                 }
             }
 
@@ -71,7 +71,7 @@ describe("Package Store Manager", () => {
                     var fileBuffer = packageStore2.getItemBuffer("semver.js");
                     chai.expect(typeof(fileBuffer)).to.eq("object");
                     if (fileBuffer){
-                        chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                        chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
                     }
                 }
     
@@ -100,7 +100,7 @@ describe("Package Store Manager", () => {
                 var fileBuffer = packageStore.getItemBuffer("semver.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                    chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
                 }
             }
 
@@ -120,7 +120,7 @@ describe("Package Store Manager", () => {
                     var fileBuffer = packageStore2.getItemBuffer("semver.js");
                     chai.expect(typeof(fileBuffer)).to.eq("object");
                     if (fileBuffer){
-                        chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                        chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
                     }
                 }
     

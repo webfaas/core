@@ -37,13 +37,13 @@ describe("PackageStore", () => {
         var bufferFile1 = packageStore.getItemBuffer("file1");
         chai.expect(bufferFile1).to.be.an.instanceof(Object);
         if (bufferFile1){
-            chai.expect(bufferFile1.toString()).to.eq("AAAAAA");
+            chai.expect(bufferFile1.buffer.toString()).to.eq("AAAAAA");
         }
 
         var bufferFile2 = packageStore.getItemBuffer("file2");
         chai.expect(bufferFile2).to.be.an.instanceof(Object);
         if (bufferFile2){
-            chai.expect(bufferFile2.toString()).to.eq("BBB");
+            chai.expect(bufferFile2.buffer.toString()).to.eq("BBB");
         }
 
         var manifest1: IManifest | null = packageStore.getManifest();
@@ -99,25 +99,25 @@ describe("PackageStore", () => {
         var bufferFile1 = packageStore.getItemBuffer("file1");
         chai.expect(bufferFile1).to.be.an.instanceof(Object);
         if (bufferFile1){
-            chai.expect(bufferFile1.toString()).to.eq("AAA");
+            chai.expect(bufferFile1.buffer.toString()).to.eq("AAA");
         }
 
         var bufferFile2 = packageStore.getItemBuffer("file2");
         chai.expect(bufferFile2).to.be.an.instanceof(Object);
         if (bufferFile2){
-            chai.expect(bufferFile2.toString()).to.eq("BBB");
+            chai.expect(bufferFile2.buffer.toString()).to.eq("BBB");
         }
 
         var bufferFile3 = packageStore.getItemBuffer("file3");
         chai.expect(bufferFile3).to.be.an.instanceof(Object);
         if (bufferFile3){
-            chai.expect(bufferFile3.toString()).to.eq("CCC");
+            chai.expect(bufferFile3.buffer.toString()).to.eq("CCC");
         }
 
         var bufferFile4 = packageStore.getMainBuffer();
         chai.expect(bufferFile4).to.be.an.instanceof(Object);
         if (bufferFile4){
-            chai.expect(bufferFile4.toString()).to.eq("AAA");
+            chai.expect(bufferFile4.buffer.toString()).to.eq("AAA");
         }
 
         var manifest1: IManifest | null = packageStore.getManifest();
@@ -170,25 +170,25 @@ describe("PackageStore", () => {
         var bufferFile1 = packageStore.getItemBuffer("file1");
         chai.expect(bufferFile1).to.be.an.instanceof(Object);
         if (bufferFile1){
-            chai.expect(bufferFile1.toString()).to.eq("AAA");
+            chai.expect(bufferFile1.buffer.toString()).to.eq("AAA");
         }
 
         var bufferFile2 = packageStore.getItemBuffer("file2");
         chai.expect(bufferFile2).to.be.an.instanceof(Object);
         if (bufferFile2){
-            chai.expect(bufferFile2.toString()).to.eq("BBB");
+            chai.expect(bufferFile2.buffer.toString()).to.eq("BBB");
         }
 
         var bufferFile3 = packageStore.getItemBuffer("file3");
         chai.expect(bufferFile3).to.be.an.instanceof(Object);
         if (bufferFile3){
-            chai.expect(bufferFile3.toString()).to.eq("CCC");
+            chai.expect(bufferFile3.buffer.toString()).to.eq("CCC");
         }
 
         var bufferFile4 = packageStore.getMainBuffer();
         chai.expect(bufferFile4).to.be.an.instanceof(Object);
         if (bufferFile4){
-            chai.expect(bufferFile4.toString()).to.eq("AAA");
+            chai.expect(bufferFile4.buffer.toString()).to.eq("AAA");
         }
 
         var manifest1: IManifest | null = packageStore.getManifest();
@@ -241,25 +241,25 @@ describe("PackageStore", () => {
         var bufferFile1 = packageStore.getItemBuffer("folder1");
         chai.expect(bufferFile1).to.be.an.instanceof(Object);
         if (bufferFile1){
-            chai.expect(bufferFile1.toString()).to.eq("AAA");
+            chai.expect(bufferFile1.buffer.toString()).to.eq("AAA");
         }
 
         var bufferFile2 = packageStore.getItemBuffer("file2");
         chai.expect(bufferFile2).to.be.an.instanceof(Object);
         if (bufferFile2){
-            chai.expect(bufferFile2.toString()).to.eq("BBB");
+            chai.expect(bufferFile2.buffer.toString()).to.eq("BBB");
         }
 
         var bufferFile3 = packageStore.getItemBuffer("file3");
         chai.expect(bufferFile3).to.be.an.instanceof(Object);
         if (bufferFile3){
-            chai.expect(bufferFile3.toString()).to.eq("CCC");
+            chai.expect(bufferFile3.buffer.toString()).to.eq("CCC");
         }
 
         var bufferFile4 = packageStore.getMainBuffer();
         chai.expect(bufferFile4).to.be.an.instanceof(Object);
         if (bufferFile4){
-            chai.expect(bufferFile4.toString()).to.eq("AAA");
+            chai.expect(bufferFile4.buffer.toString()).to.eq("AAA");
         }
 
         var manifest1: IManifest | null = packageStore.getManifest();
@@ -312,25 +312,25 @@ describe("PackageStore", () => {
         var bufferFile1 = packageStore.getItemBuffer("index");
         chai.expect(bufferFile1).to.be.an.instanceof(Object);
         if (bufferFile1){
-            chai.expect(bufferFile1.toString()).to.eq("AAA");
+            chai.expect(bufferFile1.buffer.toString()).to.eq("AAA");
         }
 
         var bufferFile2 = packageStore.getItemBuffer("file2");
         chai.expect(bufferFile2).to.be.an.instanceof(Object);
         if (bufferFile2){
-            chai.expect(bufferFile2.toString()).to.eq("BBB");
+            chai.expect(bufferFile2.buffer.toString()).to.eq("BBB");
         }
 
         var bufferFile3 = packageStore.getItemBuffer("file3");
         chai.expect(bufferFile3).to.be.an.instanceof(Object);
         if (bufferFile3){
-            chai.expect(bufferFile3.toString()).to.eq("CCC");
+            chai.expect(bufferFile3.buffer.toString()).to.eq("CCC");
         }
 
         var bufferFile4 = packageStore.getMainBuffer();
         chai.expect(bufferFile4).to.be.an.instanceof(Object);
         if (bufferFile4){
-            chai.expect(bufferFile4.toString()).to.eq("AAA");
+            chai.expect(bufferFile4.buffer.toString()).to.eq("AAA");
         }
 
         var manifest1: IManifest | null = packageStore.getManifest();

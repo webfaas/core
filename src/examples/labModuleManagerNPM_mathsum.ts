@@ -6,7 +6,7 @@ var moduleManager = new ModuleManager();
 
 (async function(){
     try {
-        var moduleObj: any = await moduleManager.import("@functions-io-labs/math.sum", "1");
+        var moduleObj: any = await moduleManager.import("@webfaaslabs/mathsum", "0.0.1");
         
         if (moduleObj){
             console.log("module loaded", moduleObj);

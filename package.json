@@ -18,8 +18,10 @@
     "build": "npm run build:clean && node_modules/.bin/tsc && npm run build:static",
     "build:clean": "rm -rf dist",
     "build:static": "cp package.json dist && cp README.md dist && cp .npmignore dist && cp src/test/data -R dist/test",
-    "publisher": "cd dist && npm publisher --access public",
+    "publish": "cd dist && npm publish --access public",
     "publisher:pack": "cd dist && npm pack",
+    "pack": "cd dist && npm pack",
+    "buildAndPublish": "npm run build && npm run publish",
     "buildAndTest": "npm run build && npm run test:coverage"
   },
   "repository": {

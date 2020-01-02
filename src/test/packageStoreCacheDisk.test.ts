@@ -96,20 +96,20 @@ describe("PackageStore Cache Disk Manifest", () => {
             
                     if (packageStoreCacheMemoryAsync && packageStoreCacheMemorySync){
                         var bufferBase = packageStoreBase.getItemBuffer("package.json");
-                        chai.expect(bufferBase).to.be.an.instanceof(Buffer);
+                        chai.expect(bufferBase?.buffer).to.be.an.instanceof(Buffer);
                         if (bufferBase){
                             //async
                             var bufferMemoryAsync = packageStoreCacheMemoryAsync.getItemBuffer("package.json");
-                            chai.expect(bufferMemoryAsync).to.be.an.instanceof(Buffer);
+                            chai.expect(bufferMemoryAsync?.buffer).to.be.an.instanceof(Buffer);
                             if (bufferMemoryAsync){
-                                chai.expect(bufferBase.equals(bufferMemoryAsync)).to.eq(true);
+                                chai.expect(bufferBase.buffer.equals(bufferMemoryAsync.buffer)).to.eq(true);
                             }
 
                             //sync
                             var bufferMemorySync = packageStoreCacheMemorySync.getItemBuffer("package.json");
-                            chai.expect(bufferMemorySync).to.be.an.instanceof(Buffer);
+                            chai.expect(bufferMemorySync?.buffer).to.be.an.instanceof(Buffer);
                             if (bufferMemorySync){
-                                chai.expect(bufferBase.equals(bufferMemorySync)).to.eq(true);
+                                chai.expect(bufferBase.buffer.equals(bufferMemorySync.buffer)).to.eq(true);
                             }
                         }
                     }
@@ -187,20 +187,20 @@ describe("PackageStore Cache Disk Package", () => {
                         for (var i = 0; i < keys.length; i++){
                             var key: string = keys[i];
                             var bufferBase = packageStoreBase.getItemBuffer(key);
-                            chai.expect(bufferBase).to.be.an.instanceof(Buffer);
+                            chai.expect(bufferBase?.buffer).to.be.an.instanceof(Buffer);
                             if (bufferBase){
                                 //async
                                 var bufferMemoryAsync = packageStoreCacheMemoryAsync.getItemBuffer(key);
-                                chai.expect(bufferMemoryAsync).to.be.an.instanceof(Buffer);
+                                chai.expect(bufferMemoryAsync?.buffer).to.be.an.instanceof(Buffer);
                                 if (bufferMemoryAsync){
-                                    chai.expect(bufferBase.equals(bufferMemoryAsync)).to.eq(true);
+                                    chai.expect(bufferBase.buffer.equals(bufferMemoryAsync.buffer)).to.eq(true);
                                 }
 
                                 //sync
                                 var bufferMemorySync = packageStoreCacheMemorySync.getItemBuffer(key);
-                                chai.expect(bufferMemorySync).to.be.an.instanceof(Buffer);
+                                chai.expect(bufferMemorySync?.buffer).to.be.an.instanceof(Buffer);
                                 if (bufferMemorySync){
-                                    chai.expect(bufferBase.equals(bufferMemorySync)).to.eq(true);
+                                    chai.expect(bufferBase.buffer.equals(bufferMemorySync.buffer)).to.eq(true);
                                 }
                             }
                         }

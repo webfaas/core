@@ -6,7 +6,8 @@ export namespace WebFaasError{
         TARBALL="TARBALL",
         MANIFEST="MANIFEST",
         VERSION="VERSION",
-        DEPENDENCY="DEPENDENCY"
+        DEPENDENCY="DEPENDENCY",
+        FUNCMETHOD="METHOD"
     }
 
     export class NotFoundError extends Error {
@@ -62,6 +63,20 @@ export namespace WebFaasError{
         constructor(err: any) {
             super(err.message || "");
             this.name = "FileError";
+            this.code = err.code || "";
+            this.stack = err.stack;
+        }
+    }
+
+    //
+    //InvokeError
+    //
+    export class InvokeError extends Error {
+        code: string;
+        
+        constructor(err: any) {
+            super(err.message || "");
+            this.name = "InvokeError";
             this.code = err.code || "";
             this.stack = err.stack;
         }

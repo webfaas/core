@@ -47,25 +47,30 @@ export class PackageStoreManager {
      */
     getPackageStore(name: string, version?: string, etag?: string, registryName?: string): Promise<PackageStore | null>{
         return new Promise(async (resolve, reject) => {
-            var packageStore: PackageStore | null;
+            try {
+                var packageStore: PackageStore | null;
             
-            //cache get
-            if (this.cache && etag === undefined){
-                packageStore = await this.cache.getPackageStore(name, version);
-                if (packageStore){
-                    resolve(packageStore);
-                    return;
+                //cache get
+                if (this.cache && etag === undefined){
+                    packageStore = await this.cache.getPackageStore(name, version);
+                    if (packageStore){
+                        resolve(packageStore);
+                        return;
+                    }
                 }
+    
+                packageStore = await this.packageRegistryManager.getPackageStore(name, version, etag, registryName);
+    
+                //cache put
+                if (this.cache && packageStore !== null){
+                    await this.cache.putPackageStore(packageStore);
+                }
+    
+                resolve(packageStore);                
             }
-
-            packageStore = await this.packageRegistryManager.getPackageStore(name, version, etag, registryName);
-
-            //cache put
-            if (this.cache && packageStore !== null){
-                await this.cache.putPackageStore(packageStore);
+            catch (errTry) {
+                reject(errTry);
             }
-
-            resolve(packageStore);
         })
     }
 }

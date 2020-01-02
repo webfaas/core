@@ -97,7 +97,7 @@ describe("Package Registry Manager", () => {
                 var fileBuffer = packageStore.getItemBuffer("semver.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                    chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
                 }
             }
 
@@ -123,7 +123,7 @@ describe("Package Registry Manager", () => {
                 var fileBuffer = packageStore.getItemBuffer("src/lib/index.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().indexOf("return x + y;") > 0).to.eq(true);
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y;") > 0).to.eq(true);
                 }
             }
 
@@ -149,7 +149,7 @@ describe("Package Registry Manager", () => {
                 var fileBuffer = packageStore.getItemBuffer("src/lib/index.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.toString().indexOf("return x + y;") > 0).to.eq(true);
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y;") > 0).to.eq(true);
                 }
             }
 

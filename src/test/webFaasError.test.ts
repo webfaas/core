@@ -76,4 +76,22 @@ describe("WebFaasError", () => {
         chai.expect(error1.message).to.eq("");
         chai.expect(error1.code).to.eq("CODE1");
     })
+
+    //
+    //InvokeError
+    //
+    it("InvokeError - complete - should return property", function(){
+        var error1 = new WebFaasError.InvokeError(new Error("message1"));
+
+        chai.expect(error1.name).to.eq("InvokeError");
+        chai.expect(error1.message).to.eq("message1");
+        chai.expect(error1.code).to.eq("");
+    })
+
+    it("InvokeError - icomplete - should return property", function(){
+        var error1 = new WebFaasError.InvokeError({code:"CODE1"});
+        chai.expect(error1.name).to.eq("InvokeError");
+        chai.expect(error1.message).to.eq("");
+        chai.expect(error1.code).to.eq("CODE1");
+    })
 })

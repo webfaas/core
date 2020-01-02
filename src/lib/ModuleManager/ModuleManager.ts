@@ -20,6 +20,9 @@ import { ModuleName } from "../ModuleName/ModuleName";
 import { SmallManifest } from "../Manifest/SmallManifest";
 import { IModuleNameData } from "../ModuleName/IModuleName";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
+import { types } from "util"
+import { type } from "os";
+import { PackageStoreItemBufferResponse } from "../PackageStore/PackageStoreItemBufferResponse";
 
 const nativeModule = require("module");
 const moduleName = ModuleName.getInstance();
@@ -148,7 +151,8 @@ export class ModuleManager {
         //find packageStore in cache
         var cacheRootPackageStore: IPackageStoreCache | undefined = this.cacheByRootPackageStore.get(moduleManagerRequireContextData.rootPackageStoreKey);
         if (cacheRootPackageStore){
-            var codeBuffer: Buffer | null = null;
+            let codeBufferResponse: PackageStoreItemBufferResponse | null = null;
+            //var codeBuffer: Buffer | null = null;
             var responseObj: Object | null = null;
             var moduleCompileManifestData: ModuleCompileManifestData | null = null;
 
@@ -165,7 +169,7 @@ export class ModuleManager {
 
                     let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
                     if (parentPackageStore){
-                        codeBuffer = parentPackageStore.getItemBuffer(internalFileFullPath);
+                        codeBufferResponse = parentPackageStore.getItemBuffer(internalFileFullPath);
                         moduleCompileManifestData = new ModuleCompileManifestData(
                             parentPackageStore.getName(),
                             parentPackageStore.getVersion(),
@@ -173,8 +177,13 @@ export class ModuleManager {
                         );
                     }
 
-                    if (moduleCompileManifestData && codeBuffer){
-                        responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, codeBuffer);
+                    if (moduleCompileManifestData && codeBufferResponse){
+                        if (codeBufferResponse.extension === ".json"){
+                            responseObj = JSON.parse(codeBufferResponse.buffer.toString());
+                        }
+                        else{
+                            responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, codeBufferResponse.buffer);
+                        }
                         if (responseObj){
                             this.addObjectToCache(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion, internalFileFullPath, responseObj);
                             return responseObj;
@@ -207,10 +216,10 @@ export class ModuleManager {
                 let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(nameParsedObj.moduleName, version);
                 if (packageStore){
                     if (nameParsedObj.fileName){
-                        codeBuffer = packageStore.getItemBuffer(nameParsedObj.fileName);
+                        codeBufferResponse = packageStore.getItemBuffer(nameParsedObj.fileName);
                     }
                     else{
-                        codeBuffer = packageStore.getMainBuffer();
+                        codeBufferResponse = packageStore.getMainBuffer();
                     }
                     moduleCompileManifestData = new ModuleCompileManifestData(
                         packageStore.getName(),
@@ -219,8 +228,13 @@ export class ModuleManager {
                     );
                 }
 
-                if (packageStore && moduleCompileManifestData && codeBuffer){
-                    responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, codeBuffer);
+                if (packageStore && moduleCompileManifestData && codeBufferResponse){
+                    if (codeBufferResponse.extension === ".json"){
+                        responseObj = JSON.parse(codeBufferResponse.buffer.toString());
+                    }
+                    else{
+                        responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, codeBufferResponse.buffer);
+                    }
                     if (responseObj){
                         this.addObjectToCache(nameParsedObj.fullName, version, "", responseObj);
                         return responseObj;
@@ -253,14 +267,31 @@ export class ModuleManager {
     
             var globalRequire = (path: string): any => {
                 this.log.write(LogLevelEnum.DEBUG, "processRequire", LogCodeEnum.PROCESS.toString(), path, moduleCompileManifestData, __filename);
-    
-                return this.requireSync(path, "", moduleManagerRequireContextDataDependency, moduleCompileManifestData);
+
+                let responseModule = this.requireSync(path, "", moduleManagerRequireContextDataDependency, moduleCompileManifestData);
+                if (responseModule){
+                    return responseModule;
+                }
+                else{
+                    this.log.write(LogLevelEnum.ERROR, "processRequire", LogCodeEnum.OPENFILE.toString(), path, moduleCompileManifestData, __filename);
+                    throw new Error("Cannot find module '" + path + "'");
+                }
             }
     
             if (codeBuffer){
                 var newModule = this.moduleCompile.compile(codeBuffer.toString(), moduleCompileManifestData, this.sandBoxContext, globalRequire);
                 codeBuffer = null; //clean memory!!!!!!!!! not remove!
-                return newModule.exports || null;
+                if (newModule.exports){
+                    return newModule.exports;
+                }
+                else{
+                    if (newModule.__esModule){
+                        return newModule;
+                    }
+                    else{
+                        return null;
+                    }
+                }
             }
             else{
                 return null;
@@ -329,12 +360,12 @@ export class ModuleManager {
     }
 
     /**
-     * 
+     * import module
      * @param name module name
      * @param version module version
      * @param etag module etag 
      */
-    import(name: string, version: string, etag?: string, registryName?: string): Promise<Object | null>{
+    import(name: string, version: string, etag?: string, registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<Object | null>{
         return new Promise(async (resolve, reject) => {
             try {
                 var nameParsedObj: IModuleNameData = moduleName.parse(name, "");
@@ -355,17 +386,20 @@ export class ModuleManager {
 
                     await this.importDependencies(packageStore, contextCache);
 
-                    contextCache.putPackageStore(packageStore); //set rootPackageStore in cache
+                    //set rootPackageStore in cache
+                    contextCache.putPackageStore(packageStore);
 
                     var moduleManagerRequireContextData: ModuleManagerRequireContextData = new ModuleManagerRequireContextData(rootPackageStoreKey);
                     
-                    //add temporary cache
+                    //add all files in temporary memory cache
                     this.cacheByRootPackageStore.set(rootPackageStoreKey, contextCache);
 
                     responseModuleObj = this.requireSync(nameParsedObj.fullName, versionResolved, moduleManagerRequireContextData);
 
-                    //remove temporary cache
-                    this.cacheByRootPackageStore.delete(rootPackageStoreKey);
+                    if (imediateCleanMemoryCacheModuleFiles){
+                        //remove temporary cache
+                        this.cleanMemoryCacheModuleFiles(name, version);
+                    }
 
                     resolve(responseModuleObj);
                 }
@@ -377,5 +411,102 @@ export class ModuleManager {
                 reject(errTry);
             }
         })
+    }
+
+    dynamicInvokeAsync(moduleObj: any, method?: string, parameter?: any[]): Promise<any>{
+        return new Promise((resolve, reject) => {
+            if (moduleObj){
+                let targetInvoke: any;
+                if (method){
+                    targetInvoke = moduleObj[method];
+                    if (targetInvoke === undefined){
+                        //method not found
+                        throw new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.FUNCMETHOD, method);
+                    }
+                }
+                else{
+                    targetInvoke = moduleObj;
+                }
+
+                if (typeof(targetInvoke) === "function"){
+                    let targetFuncInvoke: Function = targetInvoke;
+                    let responseCallInvoke: any;
+
+                    try {
+                        if (parameter){
+                            switch (parameter.length){ //performance
+                                case 1:
+                                    responseCallInvoke = targetFuncInvoke(parameter[0]);
+                                    break;
+                                case 2:
+                                    responseCallInvoke = targetFuncInvoke(parameter[0], parameter[1]);
+                                    break;
+                                default:
+                                    responseCallInvoke = targetFuncInvoke.call(moduleObj, ...parameter);
+                            }
+                        }
+                        else{
+                            responseCallInvoke = targetFuncInvoke();
+                        }
+    
+                        if (types.isPromise(responseCallInvoke)){
+                            Promise.resolve(responseCallInvoke).then((responseAsyncCallInvoke: any) => {
+                                resolve(responseAsyncCallInvoke);
+                            }).catch((errTryPromise) => {
+                                reject(new WebFaasError.InvokeError(errTryPromise));
+                            });
+                        }
+                        else{
+                            resolve(responseCallInvoke);
+                        }
+                    }
+                    catch (errTryInvoke) {
+                        reject(new WebFaasError.InvokeError(errTryInvoke));
+                    }
+                }
+                else{
+                    resolve(targetInvoke);
+                }
+            }
+            else{
+                resolve(null);
+            }
+        })
+    }
+
+    invokeAsync(name: string, version: string, method?: string, parameter?: any[], registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<any>{
+        return new Promise(async (resolve, reject) => {
+            this.import(name, version, undefined, registryName, false).then((moduleObj)=>{ //disable imediateCleanMemoryCacheModuleFiles in import
+                if (moduleObj){
+                    this.dynamicInvokeAsync(moduleObj, method, parameter).then((responseInvokeAsync)=>{
+                        resolve(responseInvokeAsync);
+
+                        //remove temporary cache
+                        if (imediateCleanMemoryCacheModuleFiles) this.cleanMemoryCacheModuleFiles(name, version);
+                    }).catch((errInvokeAsync) => {
+                        //remove temporary cache
+                        if (imediateCleanMemoryCacheModuleFiles) this.cleanMemoryCacheModuleFiles(name, version);
+
+                        reject(errInvokeAsync);
+                    });
+                }
+                else{
+                    //remove temporary cache
+                    if (imediateCleanMemoryCacheModuleFiles) this.cleanMemoryCacheModuleFiles(name, version);
+
+                    resolve(null);
+                }
+            }).catch((errImport) => {
+                //remove temporary cache
+                if (imediateCleanMemoryCacheModuleFiles) this.cleanMemoryCacheModuleFiles(name, version);
+
+                reject(errImport);
+            });
+        })
+    }
+
+    cleanMemoryCacheModuleFiles(name: string, version: string) {
+        var rootPackageStoreKey: string = PackageStore.parseKey(name, version);
+        this.cacheByRootPackageStore.delete(rootPackageStoreKey);
     }
 }

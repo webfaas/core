@@ -21,7 +21,7 @@ packageRegistryManager.addRegistry("npm", packageRegistryNPM);
     
             var fileBuffer = packageStore.getItemBuffer("semver.js");
             if (fileBuffer){
-                console.log(fileBuffer.toString());
+                console.log(fileBuffer.buffer.toString());
             }
         }
     }
