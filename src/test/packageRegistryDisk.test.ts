@@ -1,6 +1,7 @@
 import * as chai from "chai";
 import * as mocha from "mocha";
 
+import * as os from "os";
 import * as fs from "fs";
 import * as path from "path";
 import { PackageStore } from "../lib/PackageStore/PackageStore";
@@ -12,9 +13,11 @@ describe("Package Registry Disk", () => {
     var packageRegistryManager_1: PackageRegistryManager = new PackageRegistryManager();
     var packageRegistryManager_2: PackageRegistryManager = new PackageRegistryManager();
     var packageRegistryManager_3: PackageRegistryManager = new PackageRegistryManager();
+    var packageRegistryManager_denied: PackageRegistryManager = new PackageRegistryManager();
     var packageRegistryDiskTarball_1: PackageRegistryDiskTarball;
     var packageRegistryDiskTarball_2: PackageRegistryDiskTarball;
     var packageRegistryDiskTarball_3: PackageRegistryDiskTarball;
+    var packageRegistryDiskTarball_denied: PackageRegistryDiskTarball;
 
     packageRegistryDiskTarball_1 = new PackageRegistryDiskTarball();
     chai.expect(packageRegistryDiskTarball_1.getTypeName()).to.eq("DiskTarball");
@@ -29,6 +32,13 @@ describe("Package Registry Disk", () => {
     var config_3 = new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package"));
     packageRegistryDiskTarball_3 = new PackageRegistryDiskTarball(config_3);
     packageRegistryManager_3.addRegistry("diskTarball", packageRegistryDiskTarball_3);
+
+    var tempFolderRegistryDenied = path.join(os.tmpdir(), "webfaas-core-registry-denied-000-" + new Date().getTime());
+    fs.mkdirSync(tempFolderRegistryDenied);
+    fs.chmodSync(tempFolderRegistryDenied, "000");
+    var config_4 = new PackageRegistryDiskTarballConfig(tempFolderRegistryDenied);
+    packageRegistryDiskTarball_denied = new PackageRegistryDiskTarball(config_4);
+    packageRegistryManager_denied.addRegistry("diskTarball", packageRegistryDiskTarball_denied);
 
     it("should return manifest on call - config1", function(done){
         packageRegistryManager_1.getPackageStore("semver").then(function(packageStore){
@@ -118,6 +128,21 @@ describe("Package Registry Disk", () => {
             done();
         }).catch(function(error){
             done(error);
+        })
+    })
+
+    it("should return null manifest on call - permission denied", function(done){
+        let tempFolder = path.join(os.tmpdir(), "webfaas-core-registry-denied-000-" + new Date().getTime());
+        fs.mkdirSync(tempFolder);
+        fs.chmodSync(tempFolder, "000");
+        packageRegistryManager_denied.getPackageStore("semver").then(function(packageStore){
+            chai.expect(packageStore).to.be.null;
+
+            done();
+        }).catch(function(error){
+            chai.expect(error.code).to.eq("EACCES");
+
+            done();
         })
     })
 

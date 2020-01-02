@@ -40,6 +40,7 @@ export class ClientHTTP  {
     destroy(){
         Array.from(this.listHttpAgent.keys()).forEach((key) => {
             let agent = this.listHttpAgent.get(key);
+            /* istanbul ignore else  */
             if (agent){
                 agent.destroy();
                 this.listHttpAgent.delete(key);
@@ -48,6 +49,7 @@ export class ClientHTTP  {
 
         Array.from(this.listHttpsAgent.keys()).forEach((key) => {
             let agent = this.listHttpsAgent.get(key);
+            /* istanbul ignore else  */
             if (agent){
                 agent.destroy();
                 this.listHttpsAgent.delete(key);

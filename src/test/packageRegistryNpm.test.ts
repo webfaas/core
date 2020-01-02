@@ -22,6 +22,7 @@ describe("Package Registry NPM", () => {
     var packageRegistryNPM_1: PackageRegistryNPM;
     var packageRegistryNPM_2: PackageRegistryNPM;
     var packageRegistryNPM_3: PackageRegistryNPM;
+    var packageRegistryNPM_4: PackageRegistryNPM;
 
     packageRegistryNPM_1 = new PackageRegistryNPM(undefined, log);
     chai.expect(packageRegistryNPM_1.getTypeName()).to.eq("NPM");
@@ -40,6 +41,9 @@ describe("Package Registry NPM", () => {
     var config_3 = new PackageRegistryNPMConfig("https://registry.npmjs.org");
     packageRegistryNPM_3 = new PackageRegistryNPM(config_3, log);
     packageRegistryManager_3.addRegistry("npm", packageRegistryNPM_3);
+
+    packageRegistryNPM_4 = new PackageRegistryNPM();
+    chai.expect(packageRegistryNPM_4.getTypeName()).to.eq("NPM");
 
     it("should return manifest on call - config1", function(done){
         chai.expect(packageRegistryNPM_1.getConfig()).to.be.an.instanceof(Object);

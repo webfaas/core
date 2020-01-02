@@ -23,13 +23,15 @@ describe("PackageStore Cache Disk", () => {
     it("should return object on call", function(){
         var packageStoreCacheDisk1 = new PackageStoreCacheDisk(undefined, log);
         var packageStoreCacheDisk2 = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(), log);
+        var packageStoreCacheDisk3 = new PackageStoreCacheDisk();
         chai.expect(packageStoreCacheDisk1.config).to.be.an.instanceof(Object);
         chai.expect(packageStoreCacheDisk2.config).to.be.an.instanceof(Object);
+        chai.expect(packageStoreCacheDisk3.config).to.be.an.instanceof(Object);
     })
 
-    it("should return error in putPackageStore", function(done){
+    it("should return error in putPackageStore - not exist folder", function(done){
         (async function(){
-            let tempFolder = path.join(os.tmpdir(), "notexist-" + new Date().getTime(), "-webfaas-core-manifest-" + new Date().getTime()); //force nonexistent folder
+            let tempFolder = path.join(os.tmpdir(), "notexist-" + new Date().getTime(), "-webfaas-core-manifest-" + new Date().getTime()); //force not exist folder
             try {
                 var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
                 var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
@@ -55,6 +57,70 @@ describe("PackageStore Cache Disk", () => {
             }
         })();
     })
+})
+
+it("should return error in putPackageStore - permission denied - 000", function(done){
+    (async function(){
+        try {
+            let tempFolder = path.join(os.tmpdir(), "webfaas-core-denied-000-" + new Date().getTime());
+            fs.mkdirSync(tempFolder);
+            fs.chmodSync(tempFolder, "000");
+
+            var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
+            var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
+            packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+
+            var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
+            var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
+            
+            if (packageStore1){
+                await packageStoreCacheDisk.putPackageStore(packageStore1);
+            }
+            
+            throw new Error("expected catch");
+        }
+        catch (errTry) {
+            try {
+                chai.expect(errTry.message).to.not.eq("expected catch");
+                done();
+            }
+            catch (errTry2) {
+                done(errTry2);
+            }
+        }
+    })();
+})
+
+it("should return error in putPackageStore - permission denied - 444", function(done){
+    (async function(){
+        try {
+            let tempFolder = path.join(os.tmpdir(), "webfaas-core-denied-444-" + new Date().getTime());
+            fs.mkdirSync(tempFolder);
+            fs.chmodSync(tempFolder, "444");
+
+            var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
+            var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
+            packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+
+            var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
+            var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
+            
+            if (packageStore1){
+                await packageStoreCacheDisk.putPackageStore(packageStore1);
+            }
+            
+            throw new Error("expected catch");
+        }
+        catch (errTry) {
+            try {
+                chai.expect(errTry.message).to.not.eq("expected catch");
+                done();
+            }
+            catch (errTry2) {
+                done(errTry2);
+            }
+        }
+    })();
 })
 
 describe("PackageStore Cache Disk Config", () => {

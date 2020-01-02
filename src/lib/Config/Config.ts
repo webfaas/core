@@ -22,12 +22,15 @@ export class Config {
         this.configByKey = {};
         this.log = log || Log.getInstance();
 
+        this.open(fileOrObject);
+        /*
         try {
             this.open(fileOrObject);
         }
         catch (errTry) {
             this.log.writeError("constructor", errTry, null, __filename);
         }
+        */
     }
 
     static getInstance(): Config{

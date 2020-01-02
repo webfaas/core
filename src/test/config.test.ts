@@ -2,6 +2,8 @@ import * as chai from "chai";
 import * as mocha from "mocha";
 
 import {Config} from "../lib/Config/Config";
+import * as os from "os";
+import * as fs from "fs";
 import * as path from "path";
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
@@ -12,7 +14,7 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 process.env.VAR1 = "1";
 process.env.VAR2 = "2";
 
-describe("Static Config", () => {
+describe("Config - Static Config", () => {
     var config = new Config(path.join(__dirname, "./data/data-config"), log);
     
     it("should return response on call", () => {
@@ -22,7 +24,7 @@ describe("Static Config", () => {
     })
 })
 
-describe("Custom Config", () => {
+describe("Config - Custom Config", () => {
     var configData: any = {};
     configData.attribute1 = "value1";
     configData.attribute2 = "value2";
@@ -38,13 +40,17 @@ describe("Custom Config", () => {
     })
 })
 
-describe("NotFound Config", () => {
+describe("Config - Denied", () => {
+    let tempFolder = path.join(os.tmpdir(), "webfaas-core-config-denied-000-" + new Date().getTime());
+    fs.mkdirSync(tempFolder);
+    fs.chmodSync(tempFolder, "000");
+
     it("should return response on call", () => {
-        chai.expect(new Config("filenotfound", log)).to.not.throw;
+        chai.expect(new Config(path.join(tempFolder, "file1"), log)).to.not.throw;
     })
 })
 
-describe("Default Config", () => {
+describe("Config - Default Config", () => {
     var config = new Config(path.join(__dirname, "./data/data-config"), log);
     
     it("should return response on call", () => {
@@ -59,7 +65,7 @@ describe("Default Config", () => {
     })
 })
 
-describe("Declared Config", () => {
+describe("Config - Declared Config", () => {
     var config2 = new Config(path.join(__dirname, "./data/data-config", "config2.json"), log);
     
     it("should return response on call", () => {
