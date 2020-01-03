@@ -18,9 +18,10 @@ Minimalist FaaS framework for [node](http://nodejs.org).
 $ npm install @webfaas/core
 ```
 
-## Build
+## Shell
 ```bash
-$ npm run build
+$ node dist/lib/index.js invoke @webfaaslabs/mathsumasync:0.0.2#sum '{"x":2,"y":5}'
+$ node dist/lib/index.js invoke @webfaaslabs/mathsum:0.0.1 '[2,5]'
 ```
 
 ## Usage

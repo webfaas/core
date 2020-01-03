@@ -413,7 +413,7 @@ export class ModuleManager {
         })
     }
 
-    dynamicInvokeAsync(moduleObj: any, method?: string, parameter?: any[]): Promise<any>{
+    private dynamicInvokeAsync(moduleObj: any, method?: string, parameter?: any[]): Promise<any>{
         return new Promise((resolve, reject) => {
             if (moduleObj){
                 let targetInvoke: any;
