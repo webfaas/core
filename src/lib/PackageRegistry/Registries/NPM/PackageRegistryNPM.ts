@@ -158,4 +158,19 @@ export class PackageRegistryNPM implements IPackageRegistry {
             }
         });
     }
+
+    start(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            resolve();
+        })
+    }
+
+    stop(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (this.clientHTTP){
+                this.clientHTTP.destroy();
+            }
+            resolve();
+        })
+    }
 }

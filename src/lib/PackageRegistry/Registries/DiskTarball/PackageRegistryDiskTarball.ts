@@ -139,4 +139,16 @@ export class PackageRegistryDiskTarball implements IPackageRegistry {
             }
         });
     }
+
+    start(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            resolve();
+        })
+    }
+
+    stop(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            resolve();
+        })
+    }
 }

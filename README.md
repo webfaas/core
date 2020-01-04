@@ -20,8 +20,8 @@ $ npm install @webfaas/core
 
 ## Shell
 ```bash
-$ node dist/lib/index.js invoke @webfaaslabs/mathsumasync:0.0.2#sum '{"x":2,"y":5}'
-$ node dist/lib/index.js invoke @webfaaslabs/mathsum:0.0.1 '[2,5]'
+$ node dist/lib/server.js invoke @webfaaslabs/mathsumasync:0.0.2#sum '{"x":2,"y":5}'
+$ node dist/lib/server.js invoke @webfaaslabs/mathsum:0.0.1 '[2,5]'
 ```
 
 ## Usage

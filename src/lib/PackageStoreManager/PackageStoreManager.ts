@@ -21,7 +21,6 @@ export class PackageStoreManager {
         }
         else{
             this.packageRegistryManager = new PackageRegistryManager(this.log);
-            this.packageRegistryManager.loadDefaultRegistries();
         }
     }
 

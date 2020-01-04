@@ -188,4 +188,19 @@ export class PackageRegistryGitHubTarballV3 implements IPackageRegistry {
             }
         });
     }
+
+    start(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            resolve();
+        })
+    }
+
+    stop(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (this.clientHTTP){
+                this.clientHTTP.destroy();
+            }
+            resolve();
+        })
+    }
 }

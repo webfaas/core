@@ -7,6 +7,14 @@ import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
 import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreManager";
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
+import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
+import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
+
+function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
+    packageRegistryManager.addRegistry("NPM", new PackageRegistryNPM(undefined, log));
+    //packageRegistryManager.addRegistry("DISK", new PackageRegistryDiskTarball(undefined, log));
+    //packageRegistryManager.addRegistry("GITHUB", new PackageRegistryGitHubTarballV3(undefined, log));
+}
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
@@ -25,6 +33,7 @@ describe("Module Manager", () => {
 
     it("import uuid/v1 version - 3", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
+        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
             
         let responseObj1: any = await moduleManager1.import("uuid/v1", "3");
         chai.expect(typeof(responseObj1())).to.eq("string");
@@ -40,6 +49,7 @@ describe("Module Manager", () => {
 
     it("import uuid/v1 version - 3.3.3", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
+        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
             
         let responseObj1: any = await moduleManager1.import("uuid/v1", "3.3.3");
         chai.expect(typeof(responseObj1())).to.eq("string");
@@ -55,6 +65,7 @@ describe("Module Manager", () => {
 
     it("import chalk version - 3", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
+        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
             
         let responseObj1: any = await moduleManager1.import("chalk", "3");
         chai.expect(typeof(responseObj1.Level)).to.eq("object");
@@ -70,6 +81,7 @@ describe("Module Manager", () => {
 
     it("import chalk version - 3.0.0", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
+        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
             
         let responseObj1: any = await moduleManager1.import("chalk", "3.0.0");
         chai.expect(typeof(responseObj1.Level)).to.eq("object");
@@ -85,6 +97,7 @@ describe("Module Manager", () => {
 
     it("import package not exist", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
+        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
 
         try {
             let responseObj1: any = await moduleManager1.import("packagenotexist_packagenotexist/v1", "3");

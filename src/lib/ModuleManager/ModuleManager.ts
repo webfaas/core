@@ -48,7 +48,6 @@ export class ModuleManager {
             //TODO: CHECK CONFIG FILE
 
             let packageRegistryManager = new PackageRegistryManager(this.log);
-            packageRegistryManager.loadDefaultRegistries();
 
             this.packageStoreManager = new PackageStoreManager(packageRegistryManager, undefined, this.log);
 

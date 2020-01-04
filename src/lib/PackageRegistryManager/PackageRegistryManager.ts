@@ -1,17 +1,8 @@
 import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../PackageRegistry/IPackageRegistryResponse";
 import { PackageRegistryManagerItem, PackageRegistryManagerItemStatusEnum } from "./PackageRegistryManagerItem";
-import { PackageRegistryNPM } from "../PackageRegistry/Registries/NPM/PackageRegistryNPM";
-import { PackageRegistryGitHubTarballV3 } from "../PackageRegistry/Registries/GitHubTarballV3/PackageRegistryGitHubTarballV3";
-import { PackageRegistryDiskTarball } from "../PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
 import { PackageStore } from "../PackageStore/PackageStore";
 import { Log } from "../Log/Log";
-
-export enum PackageRegistryManagerRegistryTypeEnum {
-    NPM = "NPM",
-    DISK = "DISK",
-    GITHUB = "GITHUB"
-}
 
 /**
  * manager PackageRegistry pool
@@ -33,9 +24,7 @@ export class PackageRegistryManager {
      * @param name registry name
      */
     setDefaultRegistryName(name: string): void{
-        if (this.listRegistry.has(name)){
-            this.defaultRegistryName = name;
-        }
+        this.defaultRegistryName = name;
     }
 
     /**
@@ -75,32 +64,6 @@ export class PackageRegistryManager {
     
     constructor(log?: Log){
         this.log = log || Log.getInstance();
-    }
-
-    /**
-     * load default registries
-     */
-    loadDefaultRegistries(): void{
-        this.loadRegistry(PackageRegistryManagerRegistryTypeEnum.NPM);
-        this.loadRegistry(PackageRegistryManagerRegistryTypeEnum.DISK);
-        this.loadRegistry(PackageRegistryManagerRegistryTypeEnum.GITHUB);
-    }
-
-    /**
-     * load registry
-     */
-    loadRegistry(type: PackageRegistryManagerRegistryTypeEnum): void{
-        switch (type){
-            case PackageRegistryManagerRegistryTypeEnum.NPM:
-                this.addRegistry(PackageRegistryManagerRegistryTypeEnum.NPM.toString(), new PackageRegistryNPM(undefined, this.log));
-                break;
-            case PackageRegistryManagerRegistryTypeEnum.DISK:
-                this.addRegistry(PackageRegistryManagerRegistryTypeEnum.DISK.toString(), new PackageRegistryDiskTarball(undefined, this.log));
-                break;
-            case PackageRegistryManagerRegistryTypeEnum.GITHUB:
-                this.addRegistry(PackageRegistryManagerRegistryTypeEnum.GITHUB.toString(), new PackageRegistryGitHubTarballV3(undefined, this.log));
-                break;
-        }
     }
 
     /**

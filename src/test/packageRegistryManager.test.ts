@@ -4,12 +4,21 @@ import * as mocha from "mocha";
 import * as fs from "fs";
 import * as path from "path";
 import { PackageStore } from "../lib/PackageStore/PackageStore";
-import { PackageRegistryManager, PackageRegistryManagerRegistryTypeEnum } from "../lib/PackageRegistryManager/PackageRegistryManager";
+import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
 import { PackageRegistryManagerItemStatusEnum, PackageRegistryManagerItem } from "../lib/PackageRegistryManager/PackageRegistryManagerItem";
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
+import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
+import { PackageRegistryDiskTarball } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
+import { PackageRegistryGitHubTarballV3 } from "../lib/PackageRegistry/Registries/GitHubTarballV3/PackageRegistryGitHubTarballV3";
+
+function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
+    packageRegistryManager.addRegistry("NPM", new PackageRegistryNPM(undefined, log));
+    packageRegistryManager.addRegistry("DISK", new PackageRegistryDiskTarball(undefined, log));
+    packageRegistryManager.addRegistry("GITHUB", new PackageRegistryGitHubTarballV3(undefined, log));
+}
 
 export class PackageRegistryError implements IPackageRegistry {
     getTypeName(): string{
@@ -23,6 +32,14 @@ export class PackageRegistryError implements IPackageRegistry {
     getPackage(name: string, version: string, etag?: string): Promise<import("../lib/PackageRegistry/IPackageRegistryResponse").IPackageRegistryResponse> {
         throw new Error("getPackage not implemented.");
     }
+
+    start(): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
+    
+    stop(): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 var log = new Log();
@@ -34,9 +51,9 @@ describe("Package Registry Manager", () => {
     var packageRegistryManager_disabled: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryManager_error: PackageRegistryManager = new PackageRegistryManager(log);
     
-    packageRegistryManager_default.loadDefaultRegistries();
+    loadDefaultRegistries(packageRegistryManager_default, log);
     packageRegistryManager_default.addRouteByScope("webfaaslabs", "GITHUB");
-    packageRegistryManager_disabled.loadDefaultRegistries();
+    loadDefaultRegistries(packageRegistryManager_disabled, log);
     packageRegistryManager_error.addRegistry("registry_disabled", new PackageRegistryError(), PackageRegistryManagerItemStatusEnum.DISABLED); //not default registry when disabled
     packageRegistryManager_error.addRegistry("registry1", new PackageRegistryError());
 
@@ -47,9 +64,9 @@ describe("Package Registry Manager", () => {
     chai.expect(packageRegistryManager_default.getRouteByScope("scope1")).to.eq("route1");
     packageRegistryManager_default.removeRouteByScope("scope1");
     chai.expect(packageRegistryManager_default.getRouteByScope("scope1")).to.eq("");
-    chai.expect(packageRegistryManager_default.getRegistry(PackageRegistryManagerRegistryTypeEnum.NPM.toString())).to.be.not.null;
-    chai.expect(packageRegistryManager_default.getRegistry(PackageRegistryManagerRegistryTypeEnum.DISK.toString())).to.be.not.null;
-    chai.expect(packageRegistryManager_default.getRegistry(PackageRegistryManagerRegistryTypeEnum.GITHUB.toString())).to.be.not.null;
+    chai.expect(packageRegistryManager_default.getRegistry("NPM")).to.be.not.null;
+    chai.expect(packageRegistryManager_default.getRegistry("DISK")).to.be.not.null;
+    chai.expect(packageRegistryManager_default.getRegistry("GITHUB")).to.be.not.null;
 
     chai.expect(packageRegistryManager_disabled.getDefaultRegistryName()).to.eq("NPM");
     chai.expect(packageRegistryManager_disabled.getRegistry("notfound")).to.be.null;
@@ -57,9 +74,9 @@ describe("Package Registry Manager", () => {
     chai.expect(packageRegistryManager_disabled.getRouteByScope("scope1")).to.eq("route1");
     packageRegistryManager_disabled.removeRouteByScope("scope1");
     chai.expect(packageRegistryManager_disabled.getRouteByScope("scope1")).to.eq("");
-    chai.expect(packageRegistryManager_disabled.getRegistry(PackageRegistryManagerRegistryTypeEnum.NPM.toString())).to.be.not.null;
-    chai.expect(packageRegistryManager_disabled.getRegistry(PackageRegistryManagerRegistryTypeEnum.DISK.toString())).to.be.not.null;
-    chai.expect(packageRegistryManager_disabled.getRegistry(PackageRegistryManagerRegistryTypeEnum.GITHUB.toString())).to.be.not.null;
+    chai.expect(packageRegistryManager_disabled.getRegistry("NPM")).to.be.not.null;
+    chai.expect(packageRegistryManager_disabled.getRegistry("DISK")).to.be.not.null;
+    chai.expect(packageRegistryManager_disabled.getRegistry("GITHUB")).to.be.not.null;
 
     chai.expect(packageRegistryManager_error.getDefaultRegistryName()).to.eq("registry1");
     chai.expect(packageRegistryManager_error.getRegistry("notfound")).to.be.null;
@@ -69,16 +86,16 @@ describe("Package Registry Manager", () => {
     packageRegistryManager_error.removeRouteByScope("scope1");
     chai.expect(packageRegistryManager_error.getRouteByScope("scope1")).to.eq("");
     packageRegistryManager_error.setDefaultRegistryName("notfound");
-    chai.expect(packageRegistryManager_error.getDefaultRegistryName()).to.eq("registry1");
+    chai.expect(packageRegistryManager_error.getDefaultRegistryName()).to.eq("notfound");
     
 
     //disable all registry
     let tmpItem: PackageRegistryManagerItem | null;
-    tmpItem = packageRegistryManager_disabled.getRegistryItem(PackageRegistryManagerRegistryTypeEnum.NPM.toString());
+    tmpItem = packageRegistryManager_disabled.getRegistryItem("NPM");
     if (tmpItem) tmpItem.status = PackageRegistryManagerItemStatusEnum.DISABLED;
-    tmpItem = packageRegistryManager_disabled.getRegistryItem(PackageRegistryManagerRegistryTypeEnum.DISK.toString());
+    tmpItem = packageRegistryManager_disabled.getRegistryItem("DISK");
     if (tmpItem) tmpItem.status = PackageRegistryManagerItemStatusEnum.DISABLED;
-    tmpItem = packageRegistryManager_disabled.getRegistryItem(PackageRegistryManagerRegistryTypeEnum.GITHUB.toString());
+    tmpItem = packageRegistryManager_disabled.getRegistryItem("GITHUB");
     if (tmpItem) tmpItem.status = PackageRegistryManagerItemStatusEnum.DISABLED;
 
     it("should return package item on call - loadDefaultRegistries", function(done){
@@ -180,7 +197,7 @@ describe("Package Registry Manager", () => {
             done();
         }).catch(function(error){
             try {
-                chai.expect(error.message).to.eq("getPackage not implemented.");
+                chai.expect(error.message).to.eq("PackageRegistryManagerItem not available");
                 done();
             }
             catch (error2) {

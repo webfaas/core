@@ -6,12 +6,21 @@ import { ModuleManager } from "../lib/ModuleManager/ModuleManager";
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
+import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
+import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
+
+function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
+    packageRegistryManager.addRegistry("NPM", new PackageRegistryNPM(undefined, log));
+    //packageRegistryManager.addRegistry("DISK", new PackageRegistryDiskTarball(undefined, log));
+    //packageRegistryManager.addRegistry("GITHUB", new PackageRegistryGitHubTarballV3(undefined, log));
+}
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("Module Manager", () => {
     let moduleManager = new ModuleManager(undefined, log);
+    loadDefaultRegistries(moduleManager.getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @webfaaslabs/mathsum version - 0.0.1", async function(){
         var response: any = await moduleManager.invokeAsync("@webfaaslabs/mathsum", "0.0.1", "", [2,3]);
@@ -87,6 +96,7 @@ describe("Module Manager", () => {
 
 describe("Module Manager - internal require", () => {
     let moduleManager = new ModuleManager(undefined, log);
+    loadDefaultRegistries(moduleManager.getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @webfaaslabs/simulateerror version - 0.0.3 - lib1", async function(){
         try {
@@ -127,6 +137,7 @@ describe("Module Manager - internal require", () => {
 
 describe("Module Manager - disable imediateCleanMemoryCacheModuleFiles and clean cache", () => {
     let moduleManager = new ModuleManager(undefined, log);
+    loadDefaultRegistries(moduleManager.getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @webfaaslabs/simulateerror version - 0.0.3 - lib1", async function(){
         try {

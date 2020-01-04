@@ -23,26 +23,6 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Run Mocha All",
-            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-            "args": [
-                "--inspect-brk",
-                "--timeout",
-                "999999",
-                "--colors",
-                "${workspaceFolder}/dist/test/**/*.js"
-            ],
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/dist/test/**/*.js"
-            ],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
-        }
-        ,
-        {
-            "type": "node",
-            "request": "launch",
             "name": "Run Mocha",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
