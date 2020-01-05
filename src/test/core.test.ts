@@ -9,6 +9,7 @@ describe("Core", () => {
     it("constructor - default", function(){
         var core = new Core();
         chai.expect(typeof core.getModuleManager()).to.eq("object");
+        chai.expect(typeof core.getPluginManager()).to.eq("object");
     })
 
     it("start", async function(){

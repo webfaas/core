@@ -2,8 +2,9 @@ import { Core } from "../Core";
 import { IPlugin } from "./IPlugin";
 import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
 import { PackageRegistryManagerItem } from "../PackageRegistryManager/PackageRegistryManagerItem";
+import { AbstractPlugin } from "./AbstractPlugin";
 
-export abstract class AbstractPackageRegistryPlugin implements IPlugin {
+export abstract class AbstractPackageRegistryPlugin extends AbstractPlugin {
     registry: IPackageRegistry;
     data: PackageRegistryManagerItem;
     
@@ -16,6 +17,8 @@ export abstract class AbstractPackageRegistryPlugin implements IPlugin {
     }
 
     constructor(core: Core, registry: IPackageRegistry, name: string, slaveName: string){
+        super();
+        
         this.registry = registry;
         this.data = new PackageRegistryManagerItem(name, slaveName, registry);
         

@@ -5,7 +5,11 @@ import { PackageRegistryNPMConfig } from "../PackageRegistry/Registries/NPM/Pack
 import { PackageRegistryManagerItem } from "../PackageRegistryManager/PackageRegistryManagerItem";
 import { AbstractPackageRegistryPlugin } from "../PluginManager/AbstractPackageRegistryPlugin";
 
-class PackageRegistryNpmPlugin extends AbstractPackageRegistryPlugin {
+export default class PackageRegistryNpmPlugin extends AbstractPackageRegistryPlugin {
+    static instanceBuilder(core:Core):IPlugin{
+        return new PackageRegistryNpmPlugin(core);
+    }
+    
     constructor(core: Core){
         let config = new PackageRegistryNPMConfig();
         let registry = new PackageRegistryNPM(config, core.getLog());
@@ -14,9 +18,3 @@ class PackageRegistryNpmPlugin extends AbstractPackageRegistryPlugin {
         core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().setDefaultRegistryName("NPM");
     }
 }
-
-const factory: IPluginFactory = function (core:Core):IPlugin {
-    return new PackageRegistryNpmPlugin(core);
-}
-
-export default factory;

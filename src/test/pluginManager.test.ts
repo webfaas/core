@@ -2,40 +2,28 @@ import * as chai from "chai";
 import * as mocha from "mocha";
 
 import { Core } from "../lib/Core";
-import { DefaultPackageRegistryRoutingPlugin } from "../lib/Plugins/DefaultPackageRegistryRoutingPlugin";
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../lib/PackageRegistry/IPackageRegistryResponse";
 import { PluginManager } from "../lib/PluginManager/PluginManager";
+import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/DefaultPackageRegistryRoutingPlugin";
+import { AbstractPlugin } from "../lib/PluginManager/AbstractPlugin";
 
-/*
-loadPluginFromFactoryPlugin(newPluginFactory) {
-    let newPlugin;
-    if (newPluginFactory.__esModule) {
-        newPlugin = newPluginFactory.default(this.core);
-    }
-    else {
-        newPlugin = newPluginFactory(this.core);
-    }
-    this.addPlugin(newPlugin);
+
+class CustomPlugin1 extends AbstractPlugin {
+    
 }
-*/
 
 function factoryPluginMock(){
-    /*
-    const factory: IPluginFactory = function (core:Core):IPlugin {
-        return new DefaultPackageRegistryRoutingPlugin(core);
-    }
-    */
+    // to-do: implement interface IPlugin
     return function(){
-
+        //:IPlugin
     }
 }
-
 
 describe("Package Registry Routing Plugin", () => {
     it("should return properties on call", function(){
         const core = new Core();
-        const defaultPackageRegistryRoutingPlugin = new DefaultPackageRegistryRoutingPlugin(core);
+        const defaultPackageRegistryRoutingPlugin: DefaultPackageRegistryRoutingPlugin = <DefaultPackageRegistryRoutingPlugin> DefaultPackageRegistryRoutingPlugin.instanceBuilder(core);
         const pluginManager = new PluginManager(core);
 
         defaultPackageRegistryRoutingPlugin.addRegistryNameByScopeName("webfaaslabs", "GITHUB");
@@ -47,6 +35,8 @@ describe("Package Registry Routing Plugin", () => {
         defaultPackageRegistryRoutingPlugin.removeRegistryNameByScopeName("scope1");
         chai.expect(defaultPackageRegistryRoutingPlugin.getRegistryNameByScopeName("scope1")).to.eq("");
 
-        pluginManager.loadPluginFromFactoryPlugin(factoryPluginMock);
+        pluginManager.instanceBuild(factoryPluginMock);
+
+        chai.expect(() => {CustomPlugin1.instanceBuilder(core)}).to.throw("Override static method");
     })
 })

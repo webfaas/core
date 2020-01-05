@@ -1,10 +1,10 @@
 "use strict";
 
 import { Core } from "../lib/Core";
-import { DefaultPackageRegistryRoutingPlugin } from "../lib/Plugins/DefaultPackageRegistryRoutingPlugin";
+import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/DefaultPackageRegistryRoutingPlugin";
 
 const core = new Core();
-const defaultPackageRegistryRoutingPlugin = new DefaultPackageRegistryRoutingPlugin(core);
+const defaultPackageRegistryRoutingPlugin: DefaultPackageRegistryRoutingPlugin = <DefaultPackageRegistryRoutingPlugin> DefaultPackageRegistryRoutingPlugin.instanceBuilder(core);
 
 defaultPackageRegistryRoutingPlugin.addRegistryNameByScopeName("webfaaslabs", "GITHUB");
 

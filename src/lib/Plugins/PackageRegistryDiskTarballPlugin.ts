@@ -5,16 +5,14 @@ import { PackageRegistryDiskTarballConfig } from "../PackageRegistry/Registries/
 import { PackageRegistryManagerItem } from "../PackageRegistryManager/PackageRegistryManagerItem";
 import { AbstractPackageRegistryPlugin } from "../PluginManager/AbstractPackageRegistryPlugin";
 
-class PackageRegistryDiskTarballPlugin extends AbstractPackageRegistryPlugin {
+export default class PackageRegistryDiskTarballPlugin extends AbstractPackageRegistryPlugin {
+    static instanceBuilder(core:Core):IPlugin{
+        return new PackageRegistryDiskTarballPlugin(core);
+    }
+    
     constructor(core: Core){
         let config = new PackageRegistryDiskTarballConfig();
         let registry = new PackageRegistryDiskTarball(config, core.getLog());
         super(core, registry, "DISK", "");
     }
 }
-
-const factory: IPluginFactory = function (core:Core):IPlugin {
-    return new PackageRegistryDiskTarballPlugin(core);
-}
-
-export default factory;

@@ -2,7 +2,11 @@ import { Core } from "../Core";
 import { IPlugin, IPluginFactory } from "../PluginManager/IPlugin";
 import { AbstractPackageRegistryRoutingPlugin } from "../PluginManager/AbstractPackageRegistryRoutingPlugin";
 
-export class DefaultPackageRegistryRoutingPlugin extends AbstractPackageRegistryRoutingPlugin {
+export default class DefaultPackageRegistryRoutingPlugin extends AbstractPackageRegistryRoutingPlugin {
+    static instanceBuilder(core:Core):IPlugin{
+        return new DefaultPackageRegistryRoutingPlugin(core);
+    }
+    
     private listRegistryNameByScope: Map<string, string> = new Map<string, string>();
     
     /**
@@ -52,9 +56,3 @@ export class DefaultPackageRegistryRoutingPlugin extends AbstractPackageRegistry
         super(core);
     }
 }
-
-const factory: IPluginFactory = function (core:Core):IPlugin {
-    return new DefaultPackageRegistryRoutingPlugin(core);
-}
-
-export default factory;

@@ -13,10 +13,9 @@ export class PluginManager {
         this.loadInternalPlugins();
     }
 
-    addPlugin(plugin: IPlugin): void{
-        this.listPlugin.push(plugin);
-    }
-
+    /**
+     * start plugins
+     */
     async start(): Promise<any>{
         for (let i = 0; i < this.listPlugin.length; i++){
             let plugin: IPlugin = this.listPlugin[i];
@@ -24,6 +23,9 @@ export class PluginManager {
         }
     }
 
+    /**
+     * stop plugins
+     */
     async stop(): Promise<any>{
         for (let i = 0; i < this.listPlugin.length; i++){
             let plugin: IPlugin = this.listPlugin[i];
@@ -31,24 +33,44 @@ export class PluginManager {
         }
     }
 
-    loadPluginFromFactoryPlugin(newPluginFactory: any){
+    /**
+     * add plugin
+     * @param plugin plugin
+     */
+    addPlugin(plugin: IPlugin): void{
+        this.listPlugin.push(plugin);
+    }
+
+    /**
+     * build instance
+     * @param pluginClassOrFunction class or function
+     */
+    instanceBuild(pluginClassOrFunction: any): IPlugin{
         let newPlugin: IPlugin;
-        if (newPluginFactory.__esModule){
-            newPlugin = newPluginFactory.default(this.core);
+        if (pluginClassOrFunction.default && pluginClassOrFunction.default.instanceBuilder){
+            newPlugin = pluginClassOrFunction.default.instanceBuilder(this.core);
         }
         else{
-            newPlugin = newPluginFactory(this.core);
+            newPlugin = pluginClassOrFunction(this.core);
         }
-        this.addPlugin(newPlugin);
+        return newPlugin;
     }
 
+    /**d
+     * load plugin from file
+     * @param fullFileName full file name
+     */
     private loadPluginFromFile(fullFileName: string){
         if (path.extname(fullFileName).toLowerCase() === ".js" ){
-            let newPluginFactory: any = require(fullFileName);
-            this.loadPluginFromFactoryPlugin(newPluginFactory);
+            let pluginClassOrFunction: any = require(fullFileName);
+            let newPlugin = this.instanceBuild(pluginClassOrFunction);
+            this.addPlugin(newPlugin);
         }
     }
 
+    /**
+     * load internal plugins
+     */
     private loadInternalPlugins(){
         let scanFolderName = path.join(__dirname, "../Plugins");
         let files = fs.readdirSync(scanFolderName);
