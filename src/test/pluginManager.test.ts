@@ -10,7 +10,13 @@ import { AbstractPlugin } from "../lib/PluginManager/AbstractPlugin";
 
 
 class CustomPlugin1 extends AbstractPlugin {
+    startPlugin(core: Core): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
     
+    stopPlugin(core: Core): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 function factoryPluginMock(){
