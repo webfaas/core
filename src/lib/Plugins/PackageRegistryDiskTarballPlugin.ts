@@ -1,29 +1,15 @@
-import { IPluginPackageRegistry } from "../PluginManager/IPluginPackageRegistryRegistry";
-import { PackageRegistryManagerItemStatusEnum } from "../PackageRegistryManager/PackageRegistryManagerItem";
-import { TypePluginEnum, IPluginFactory, IPlugin } from "../PluginManager/IPlugin";
-import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
+import { Core } from "../Core";
+import { IPluginFactory, IPlugin } from "../PluginManager/IPlugin";
 import { PackageRegistryDiskTarball } from "../PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
 import { PackageRegistryDiskTarballConfig } from "../PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarballConfig";
-import { Core } from "../Core";
+import { PackageRegistryManagerItem } from "../PackageRegistryManager/PackageRegistryManagerItem";
+import { AbstractPackageRegistryPlugin } from "../PluginManager/AbstractPackageRegistryPlugin";
 
-class PackageRegistryDiskTarballPlugin implements IPluginPackageRegistry{
-    name = "DISK"
-    typePlugin = TypePluginEnum.PACKAGEREGISTRY;
-    status = PackageRegistryManagerItemStatusEnum.ENABLED;
-    registry: IPackageRegistry;
-    config: PackageRegistryDiskTarballConfig;
-
+class PackageRegistryDiskTarballPlugin extends AbstractPackageRegistryPlugin {
     constructor(core: Core){
-        this.config = new PackageRegistryDiskTarballConfig();
-        this.registry = new PackageRegistryDiskTarball(this.config, core.getLog());
-    }
-    
-    async startPlugin(core: Core) {
-        await this.registry.start();
-    }
-
-    async stopPlugin(core: Core) {
-        await this.registry.stop();
+        let config = new PackageRegistryDiskTarballConfig();
+        let registry = new PackageRegistryDiskTarball(config, core.getLog());
+        super(core, registry, "DISK", "");
     }
 }
 

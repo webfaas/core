@@ -1,8 +1,10 @@
 "use strict";
 
 import { ModuleManager } from "../lib/ModuleManager/ModuleManager";
+import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
 
 var moduleManager = new ModuleManager();
+moduleManager.getPackageStoreManager().getPackageRegistryManager().addRegistry("NPM", "", new PackageRegistryNPM());
 
 process.on('unhandledRejection', (reason, p) => {
     console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);

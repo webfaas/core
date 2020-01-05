@@ -22,23 +22,23 @@ describe("Package Registry Disk", () => {
     packageRegistryDiskTarball_1 = new PackageRegistryDiskTarball();
     chai.expect(packageRegistryDiskTarball_1.getTypeName()).to.eq("DiskTarball");
     packageRegistryDiskTarball_1.getConfig().base = path.join(__dirname, "./data/data-package");
-    packageRegistryManager_1.addRegistry("diskTarball", packageRegistryDiskTarball_1);
+    packageRegistryManager_1.addRegistry("diskTarball", "", packageRegistryDiskTarball_1);
 
     var config_2 = new PackageRegistryDiskTarballConfig();
     config_2.base = path.join(__dirname, "./data/data-package");
     packageRegistryDiskTarball_2 = new PackageRegistryDiskTarball(config_2);
-    packageRegistryManager_2.addRegistry("diskTarball", packageRegistryDiskTarball_2);
+    packageRegistryManager_2.addRegistry("diskTarball", "", packageRegistryDiskTarball_2);
 
     var config_3 = new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package"));
     packageRegistryDiskTarball_3 = new PackageRegistryDiskTarball(config_3);
-    packageRegistryManager_3.addRegistry("diskTarball", packageRegistryDiskTarball_3);
+    packageRegistryManager_3.addRegistry("diskTarball", "", packageRegistryDiskTarball_3);
 
     var tempFolderRegistryDenied = path.join(os.tmpdir(), "webfaas-core-registry-denied-000-" + new Date().getTime());
     fs.mkdirSync(tempFolderRegistryDenied);
     fs.chmodSync(tempFolderRegistryDenied, "000");
     var config_4 = new PackageRegistryDiskTarballConfig(tempFolderRegistryDenied);
     packageRegistryDiskTarball_denied = new PackageRegistryDiskTarball(config_4);
-    packageRegistryManager_denied.addRegistry("diskTarball", packageRegistryDiskTarball_denied);
+    packageRegistryManager_denied.addRegistry("diskTarball", "", packageRegistryDiskTarball_denied);
 
     it("should return manifest on call - config1", function(done){
         packageRegistryManager_1.getPackageStore("semver").then(function(packageStore){

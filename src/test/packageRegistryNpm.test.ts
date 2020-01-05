@@ -26,7 +26,7 @@ describe("Package Registry NPM", () => {
 
     packageRegistryNPM_1 = new PackageRegistryNPM(undefined, log);
     chai.expect(packageRegistryNPM_1.getTypeName()).to.eq("NPM");
-    packageRegistryManager_1.addRegistry("npm", packageRegistryNPM_1);
+    packageRegistryManager_1.addRegistry("npm", "", packageRegistryNPM_1);
     
     var config_1 = new PackageRegistryNPMConfig("url1", new ClientHTTPConfig(), "token1");
     chai.expect(config_1.url).to.eq("url1");
@@ -36,11 +36,11 @@ describe("Package Registry NPM", () => {
     var config_2 = new PackageRegistryNPMConfig();
     config_2.url = "https://registry.npmjs.org";
     packageRegistryNPM_2 = new PackageRegistryNPM(config_2, log);
-    packageRegistryManager_2.addRegistry("npm", packageRegistryNPM_2);
+    packageRegistryManager_2.addRegistry("npm", "", packageRegistryNPM_2);
 
     var config_3 = new PackageRegistryNPMConfig("https://registry.npmjs.org");
     packageRegistryNPM_3 = new PackageRegistryNPM(config_3, log);
-    packageRegistryManager_3.addRegistry("npm", packageRegistryNPM_3);
+    packageRegistryManager_3.addRegistry("npm", "", packageRegistryNPM_3);
 
     packageRegistryNPM_4 = new PackageRegistryNPM();
     chai.expect(packageRegistryNPM_4.getTypeName()).to.eq("NPM");

@@ -25,7 +25,7 @@ describe("Package Registry GitHubTarballV3", () => {
 
     packageRegistryGitHubTarballV3_1 = new PackageRegistryGitHubTarballV3(undefined, log);
     chai.expect(packageRegistryGitHubTarballV3_1.getTypeName()).to.eq("GitHubTarballV3");
-    packageRegistryManager_1.addRegistry("GitHubTarballV3", packageRegistryGitHubTarballV3_1);
+    packageRegistryManager_1.addRegistry("GitHubTarballV3", "", packageRegistryGitHubTarballV3_1);
     
     var config_1 = new PackageRegistryGitHubTarballV3Config("url1", new ClientHTTPConfig(), "token1");
     chai.expect(config_1.url).to.eq("url1");
@@ -35,11 +35,11 @@ describe("Package Registry GitHubTarballV3", () => {
     var config_2 = new PackageRegistryGitHubTarballV3Config();
     config_2.url = "https://api.github.com";
     packageRegistryGitHubTarballV3_2 = new PackageRegistryGitHubTarballV3(config_2, log);
-    packageRegistryManager_2.addRegistry("GitHubTarballV3", packageRegistryGitHubTarballV3_2);
+    packageRegistryManager_2.addRegistry("GitHubTarballV3", "", packageRegistryGitHubTarballV3_2);
 
     var config_3 = new PackageRegistryGitHubTarballV3Config("https://api.github.com");
     packageRegistryGitHubTarballV3_3 = new PackageRegistryGitHubTarballV3(config_3, log);
-    packageRegistryManager_3.addRegistry("GitHubTarballV3", packageRegistryGitHubTarballV3_3);
+    packageRegistryManager_3.addRegistry("GitHubTarballV3", "", packageRegistryGitHubTarballV3_3);
 
     it("should return manifest on call - config1", function(done){
         chai.expect(packageRegistryGitHubTarballV3_1.getConfig()).to.be.an.instanceof(Object);

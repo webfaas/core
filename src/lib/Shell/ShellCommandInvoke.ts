@@ -5,7 +5,7 @@ import { IShellCommand } from "./IShellCommand";
 export class ShellCommandInvoke implements IShellCommand {
     core: Core | null = null;
     commandTrigger: string = "INVOKE";
-    info: string = "INVOKE [MODULE] [PARAMETERS] [registryName]";
+    info: string = "INVOKE [MODULE] [PARAMETERS] [REGISTRYNAME]";
     example: string = "INVOKE @webfaaslabs/mathsum:0.0.1 '[2,5]'";
     
     executeCommand(shellArgv: string[]){

@@ -1,30 +1,17 @@
-import { IPluginPackageRegistry } from "../PluginManager/IPluginPackageRegistryRegistry";
-import { PackageRegistryManagerItemStatusEnum } from "../PackageRegistryManager/PackageRegistryManagerItem";
-import { TypePluginEnum, IPluginFactory, IPlugin } from "../PluginManager/IPlugin";
-import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
+import { Core } from "../Core";
+import { IPluginFactory, IPlugin } from "../PluginManager/IPlugin";
 import { PackageRegistryNPM } from "../PackageRegistry/Registries/NPM/PackageRegistryNPM";
 import { PackageRegistryNPMConfig } from "../PackageRegistry/Registries/NPM/PackageRegistryNPMConfig";
-import { Core } from "../Core";
+import { PackageRegistryManagerItem } from "../PackageRegistryManager/PackageRegistryManagerItem";
+import { AbstractPackageRegistryPlugin } from "../PluginManager/AbstractPackageRegistryPlugin";
 
-class PackageRegistryNpmPlugin implements IPluginPackageRegistry{
-    name = "NPM"
-    typePlugin = TypePluginEnum.PACKAGEREGISTRY;
-    status = PackageRegistryManagerItemStatusEnum.ENABLED;
-    registry: IPackageRegistry;
-    config: PackageRegistryNPMConfig;
-
+class PackageRegistryNpmPlugin extends AbstractPackageRegistryPlugin {
     constructor(core: Core){
-        this.config = new PackageRegistryNPMConfig();
-        this.registry = new PackageRegistryNPM(this.config, core.getLog());
-        core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().setDefaultRegistryName(this.name);
-    }
-    
-    async startPlugin(core: Core) {
-        await this.registry.start();
-    }
+        let config = new PackageRegistryNPMConfig();
+        let registry = new PackageRegistryNPM(config, core.getLog());
+        super(core, registry, "NPM", "");
 
-    async stopPlugin(core: Core) {
-        await this.registry.stop();
+        core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().setDefaultRegistryName("NPM");
     }
 }
 

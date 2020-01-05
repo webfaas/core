@@ -1,6 +1,6 @@
 import { IPackageRegistry } from "../PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../PackageRegistry/IPackageRegistryResponse";
-import { PackageRegistryManagerItem, PackageRegistryManagerItemStatusEnum } from "./PackageRegistryManagerItem";
+import { PackageRegistryManagerItem } from "./PackageRegistryManagerItem";
 import { PackageStore } from "../PackageStore/PackageStore";
 import { Log } from "../Log/Log";
 
@@ -11,7 +11,6 @@ export class PackageRegistryManager {
     private log: Log;
     private defaultRegistryName: string = "";
     private listRegistry: Map<string, PackageRegistryManagerItem> = new Map<string, PackageRegistryManagerItem>();
-    private listRouteByScope: Map<string, string> = new Map<string, string>();
 
     /**
      * return default registry name
@@ -50,60 +49,49 @@ export class PackageRegistryManager {
     }
 
     /**
-     * return scope name by module name
+     * 
+     * @param moduleName return registry name by extenal routing
+     */
+    getRegistryNameByExternalRouting(moduleName: string){
+        return "";
+    }
+
+    /**
+     * return RegistryManagerItem by module name
      * @param name module name
      */
-    private getScopeByModuleName(name: string): string{
-        if (name.substring(0,1) === "@"){
-            return name.substring(1, name.indexOf("/"));
+    getRegistryManagerItemByModuleName(moduleName: string): PackageRegistryManagerItem | null{
+        let targetName: string;
+        let item: PackageRegistryManagerItem | null = null;
+        
+        targetName = this.getRegistryNameByExternalRouting(moduleName);
+        
+        if (targetName){
+            item = this.getRegistryItem(targetName);
         }
         else{
-            return "default";
+            item = this.getRegistryItem(this.defaultRegistryName);
         }
+
+        return item;
     }
-    
+
     constructor(log?: Log){
         this.log = log || Log.getInstance();
     }
 
     /**
-     * add registrie
-     * @param name registry
-     * @param registry registry object
-     * @param status [ENABLED | DISABLED]
+     * add registry
+     * @param name  name of registry
+     * @param slaveName slave name of registry
+     * @param registry registry
      */
-    addRegistry(name: string, registry: IPackageRegistry, status: PackageRegistryManagerItemStatusEnum = PackageRegistryManagerItemStatusEnum.ENABLED): void{
-        var item: PackageRegistryManagerItem = new PackageRegistryManagerItem(name, registry);
-        item.status = status;
+    addRegistry(name: string, slaveName: string, registry: IPackageRegistry): void{
+        var item: PackageRegistryManagerItem = new PackageRegistryManagerItem(name, slaveName, registry);
         this.listRegistry.set(name, item);
         if (!this.defaultRegistryName){
-            if (item.status !== PackageRegistryManagerItemStatusEnum.DISABLED){
-                this.setDefaultRegistryName(name);
-            }
+            this.setDefaultRegistryName(name);
         }
-    }
-
-    /**
-     * return registry name by scope name
-     * @param scopeName scope name
-     */
-    getRouteByScope(scopeName: string): string{
-        return this.listRouteByScope.get(scopeName) || "";
-    }
-    /**
-     * add route by scope name
-     * @param scopeName scope name
-     * @param registryName registry name
-     */
-    addRouteByScope(scopeName: string, registryName: string): void{
-        this.listRouteByScope.set(scopeName, registryName);
-    }
-    /**
-     * remove route by scope name
-     * @param scopeName scope name
-     */
-    removeRouteByScope(scopeName: string): void{
-        this.listRouteByScope.delete(scopeName);
     }
 
     /**
@@ -117,27 +105,23 @@ export class PackageRegistryManager {
             var packageRegistryResponseObj: IPackageRegistryResponse;
 
             if (this.listRegistry.size){
-                let registryNameTarget: string;
-                
+                let item: PackageRegistryManagerItem | null;
                 if (registryName){
-                    registryNameTarget = registryName;
+                    item = this.getRegistryItem(registryName);
                 }
                 else{
-                    let scopeName = this.getScopeByModuleName(name);
-                    registryNameTarget = this.getRouteByScope(scopeName);
-                    if (!registryNameTarget){
-                        registryNameTarget = this.defaultRegistryName;
-                    }
+                    item = this.getRegistryManagerItemByModuleName(name);
                 }
-
-                let item: PackageRegistryManagerItem | undefined = this.listRegistry.get(registryNameTarget);
-                if (item && item.status === PackageRegistryManagerItemStatusEnum.ENABLED){
+                
+                if (item){
                     try {
                         if (version){
                             packageRegistryResponseObj = await item.registry.getPackage(name, version, etag);
+                            //TO-DO: RETRY WITH SLAVE
                         }
                         else{
                             packageRegistryResponseObj = await item.registry.getManifest(name, etag);
+                            //TO-DO: RETRY WITH SLAVE
                         }
 
                         if (packageRegistryResponseObj.packageStore) {
@@ -147,8 +131,8 @@ export class PackageRegistryManager {
                             resolve(null);
                         }
                     }
-                    catch (errTryGetManifest) {
-                        reject(errTryGetManifest);
+                    catch (errTryGetPackageOrManifest) {
+                        reject(errTryGetPackageOrManifest);
                     }
                 }
                 else{

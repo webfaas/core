@@ -10,7 +10,7 @@ import { PackageRegistryNPM } from "../../../lib/PackageRegistry/Registries/NPM/
 var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager();
 var packageRegistryNPM: PackageRegistryNPM = new PackageRegistryNPM();
 
-packageRegistryManager.addRegistry("npm", packageRegistryNPM);
+packageRegistryManager.addRegistry("npm", "", packageRegistryNPM);
 
 (async function(){
     try {

@@ -1,8 +1,12 @@
 "use strict";
 
 import { ModuleManager } from "../lib/ModuleManager/ModuleManager";
+import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
+import { PackageRegistryGitHubTarballV3 } from "../lib/PackageRegistry/Registries/GitHubTarballV3/PackageRegistryGitHubTarballV3";
 
 var moduleManager = new ModuleManager();
+moduleManager.getPackageStoreManager().getPackageRegistryManager().addRegistry("NPM", "", new PackageRegistryNPM());
+moduleManager.getPackageStoreManager().getPackageRegistryManager().addRegistry("GITHUB", "", new PackageRegistryGitHubTarballV3());
 
 (async function(){
     try {

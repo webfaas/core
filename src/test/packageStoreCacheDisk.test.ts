@@ -35,7 +35,7 @@ describe("PackageStore Cache Disk", () => {
             try {
                 var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
                 var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-                packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+                packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
                 var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
                 var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
@@ -68,7 +68,7 @@ it("should return error in putPackageStore - permission denied - 000", function(
 
             var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
             var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-            packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+            packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
             var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
             var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
@@ -100,7 +100,7 @@ it("should return error in putPackageStore - permission denied - 444", function(
 
             var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
             var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-            packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+            packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
             var packageStoreCacheDisk: PackageStoreCacheDisk = new PackageStoreCacheDisk(new PackageStoreCacheDiskConfig(tempFolder), log);
             var packageStore1: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
@@ -136,7 +136,7 @@ describe("PackageStore Cache Disk Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
     var tempFolder = path.join(os.tmpdir(), "webfaas-core-manifest-" + new Date().getTime()); //force nonexistent folder
-    packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+    packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
     it("should return object on call", function(done){
         (async function(){
@@ -220,7 +220,7 @@ describe("PackageStore Cache Disk Package", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
     var tempFolder = path.join(os.tmpdir(), "webfaas-core-package-" + new Date().getTime()); //force nonexistent folder
-    packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+    packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
     it("should return object on call", function(done){
         (async function(){

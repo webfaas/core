@@ -10,9 +10,9 @@ import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageReg
 import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
-    packageRegistryManager.addRegistry("NPM", new PackageRegistryNPM(undefined, log));
-    //packageRegistryManager.addRegistry("DISK", new PackageRegistryDiskTarball(undefined, log));
-    //packageRegistryManager.addRegistry("GITHUB", new PackageRegistryGitHubTarballV3(undefined, log));
+    packageRegistryManager.addRegistry("NPM", "", new PackageRegistryNPM(undefined, log));
+    //packageRegistryManager.addRegistry("DISK", "", new PackageRegistryDiskTarball(undefined, log));
+    //packageRegistryManager.addRegistry("GITHUB", "", new PackageRegistryGitHubTarballV3(undefined, log));
 }
 
 var log = new Log();

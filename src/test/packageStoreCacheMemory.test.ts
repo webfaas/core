@@ -40,7 +40,7 @@ describe("PackageStore Cache Memory Config", () => {
 describe("PackageStore Cache Memory Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-    packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+    packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
     it("should return object on call", function(done){
         (async function(){
@@ -128,7 +128,7 @@ describe("PackageStore Cache Memory Manifest", () => {
 describe("PackageStore Cache Memory Package", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
     var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-    packageRegistryManager.addRegistry("diskTarball", packageRegistryDiskTarball);
+    packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
 
     it("should return object on call", function(done){
         (async function(){
