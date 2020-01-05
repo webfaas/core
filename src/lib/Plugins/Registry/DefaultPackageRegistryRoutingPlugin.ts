@@ -1,6 +1,6 @@
-import { Core } from "../Core";
-import { IPlugin, IPluginFactory } from "../PluginManager/IPlugin";
-import { AbstractPackageRegistryRoutingPlugin } from "../PluginManager/AbstractPackageRegistryRoutingPlugin";
+import { Core } from "../../Core";
+import { IPlugin, IPluginFactory } from "../../PluginManager/IPlugin";
+import { AbstractPackageRegistryRoutingPlugin } from "../../PluginManager/AbstractPackageRegistryRoutingPlugin";
 
 export default class DefaultPackageRegistryRoutingPlugin extends AbstractPackageRegistryRoutingPlugin {
     static instanceBuilder(core:Core):IPlugin{

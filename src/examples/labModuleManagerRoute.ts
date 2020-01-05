@@ -1,7 +1,7 @@
 "use strict";
 
 import { Core } from "../lib/Core";
-import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/DefaultPackageRegistryRoutingPlugin";
+import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/Registry/DefaultPackageRegistryRoutingPlugin";
 
 const core = new Core();
 const defaultPackageRegistryRoutingPlugin: DefaultPackageRegistryRoutingPlugin = <DefaultPackageRegistryRoutingPlugin> DefaultPackageRegistryRoutingPlugin.instanceBuilder(core);

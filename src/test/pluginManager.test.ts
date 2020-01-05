@@ -5,7 +5,7 @@ import { Core } from "../lib/Core";
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../lib/PackageRegistry/IPackageRegistryResponse";
 import { PluginManager } from "../lib/PluginManager/PluginManager";
-import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/DefaultPackageRegistryRoutingPlugin";
+import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/Registry/DefaultPackageRegistryRoutingPlugin";
 import { AbstractPlugin } from "../lib/PluginManager/AbstractPlugin";
 
 

@@ -11,10 +11,10 @@ process.on('unhandledRejection', (reason, p) => {
 (async function(){
     try {
         await core.start();
-        var response: any = await core.getModuleManager().invokeAsync("@webfaaslabs/mathsum", "0.0.1", "", [2,3]);
-        //var response: any = await core.getModuleManager().invokeAsync("uuid/v1", "3.3.3");
-        //var response: any = await core.getModuleManager().invokeAsync("@webfaaslabs/mathsumasync", "0.0.2", "sum", [{x:2,y:3}]);
-        //var response: any = await core.getModuleManager().invokeAsync("@webfaaslabs/mathsumasync/package.json", "0.0.2", "");
+        var response: any = await core.invokeAsync("@webfaaslabs/mathsum", "0.0.1", "", [2,3]);
+        //var response: any = await core.invokeAsync("uuid/v1", "3.3.3");
+        //var response: any = await core.invokeAsync("@webfaaslabs/mathsumasync", "0.0.2", "sum", [{x:2,y:3}]);
+        //var response: any = await core.invokeAsync("@webfaaslabs/mathsumasync/package.json", "0.0.2", "");
 
         if (response){
             console.log("response", response);

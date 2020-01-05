@@ -72,7 +72,24 @@ export class PluginManager {
      * load internal plugins
      */
     private loadInternalPlugins(){
-        let scanFolderName = path.join(__dirname, "../Plugins");
+        this.loadInternalPluginsByFolder(path.join(__dirname, "../Plugins/Registry"));
+    }
+
+    /**
+     * load internal plugins by folder
+     */
+    private loadInternalPluginsByFolder(scanFolderName: string){
+        try {
+            /* istanbul ignore else  */
+            if (fs.statSync(scanFolderName).isDirectory() === false){
+                return;
+            }
+        }
+        catch (error) {
+            /* istanbul ignore next */
+            return;
+        }
+
         let files = fs.readdirSync(scanFolderName);
         for (let i = 0; i < files.length; i++){
             this.loadPluginFromFile(path.join(scanFolderName, files[i]));

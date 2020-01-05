@@ -36,7 +36,7 @@ export class ModuleManager {
     private packageStoreManager: PackageStoreManager;
     private sandBoxContext: Context = SandBox.SandBoxBuilderContext();
     private cacheByRootPackageStore: Map<string, IPackageStoreCache> = new Map<string, IPackageStoreCache>();
-    private cacheObject: Map<string, ModuleManagerCacheObjectItem> = new Map<string, ModuleManagerCacheObjectItem>();
+    public cacheObject: Map<string, ModuleManagerCacheObjectItem> = new Map<string, ModuleManagerCacheObjectItem>();
     
     constructor(packageStoreManager?: PackageStoreManager, log?: Log){
         this.log = log || Log.getInstance();
@@ -45,14 +45,9 @@ export class ModuleManager {
             this.packageStoreManager = packageStoreManager;
         }
         else{
-            //TODO: CHECK CONFIG FILE
-
             let packageRegistryManager = new PackageRegistryManager(this.log);
 
             this.packageStoreManager = new PackageStoreManager(packageRegistryManager, undefined, this.log);
-
-            //let diskPackageStore = new PackageStoreCacheDisk();
-            //this.packageStoreManager = new PackageStoreManager(packageRegistryManager, diskPackageStore, this.log);
         }
 
         this.moduleCompile = new ModuleCompile(this.log);
@@ -60,7 +55,7 @@ export class ModuleManager {
         this.sandBoxContext = SandBox.SandBoxBuilderContext();
     }
 
-    private addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object): void{
+    addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object): void{
         var packageKey: string = packageName + ":" + packageVersion;
         var cacheModuleManagerItem = this.cacheObject.get(packageKey);
         if (!cacheModuleManagerItem){
@@ -70,7 +65,7 @@ export class ModuleManager {
         cacheModuleManagerItem.setObjectToCache(itemKey, obj);
     }
 
-    private getObjectFromCache(packageName: string, packageVersion: string, itemKey: string): Object | null{
+    getObjectFromCache(packageName: string, packageVersion: string, itemKey: string): Object | null{
         var packageKey: string = packageName + ":" + packageVersion;
         var cacheModuleManagerItem = this.cacheObject.get(packageKey);
         if (cacheModuleManagerItem){
@@ -81,7 +76,7 @@ export class ModuleManager {
         }
     }
 
-    private getSmallManifest(packageName: string): Promise<SmallManifest | null>{
+    getSmallManifest(packageName: string): Promise<SmallManifest | null>{
         return new Promise(async (resolve, reject) => {
             try {
                 var smallManifestResponse: SmallManifest | null = <SmallManifest | null> this.getObjectFromCache(packageName, "", "smallmanifest");
@@ -113,7 +108,7 @@ export class ModuleManager {
         })
     }
 
-    private resolveVersion(packageName: string, packageVersion: string): Promise<string>{
+    resolveVersion(packageName: string, packageVersion: string): Promise<string>{
         return new Promise(async (resolve, reject) => {
             try {
                 if (semver.valid(packageVersion)){
@@ -141,10 +136,14 @@ export class ModuleManager {
         })
     }
 
-    private requireSync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
+    requireNativeModule(name: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): any{
+        //native module
+        return require(name);
+    }
+
+    requireSync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
         if (nativeModule.builtinModules.indexOf(name) > -1){
-            //native module
-            return require(name);
+            return this.requireNativeModule(name, moduleManagerRequireContextData, parentModuleCompileManifestData);
         }
 
         //find packageStore in cache
@@ -156,7 +155,9 @@ export class ModuleManager {
             var moduleCompileManifestData: ModuleCompileManifestData | null = null;
 
             if (name.substring(0,1) === "."){
+                //
                 //require internal package
+                //
                 if (parentModuleCompileManifestData){
                     let internalFileFullPath: string = path.resolve("/" + parentModuleCompileManifestData.mainFileDirName, name).substring(1);
 
@@ -177,12 +178,7 @@ export class ModuleManager {
                     }
 
                     if (moduleCompileManifestData && codeBufferResponse){
-                        if (codeBufferResponse.extension === ".json"){
-                            responseObj = JSON.parse(codeBufferResponse.buffer.toString());
-                        }
-                        else{
-                            responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, codeBufferResponse.buffer);
-                        }
+                        responseObj = this.compilePackageStoreItemBuffer(codeBufferResponse, moduleManagerRequireContextData, moduleCompileManifestData);
                         if (responseObj){
                             this.addObjectToCache(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion, internalFileFullPath, responseObj);
                             return responseObj;
@@ -191,7 +187,9 @@ export class ModuleManager {
                 }
             }
             else{
+                //
                 //require external package
+                //
 
                 var nameParsedObj: IModuleNameData = moduleName.parse(name, "");
                 
@@ -228,12 +226,7 @@ export class ModuleManager {
                 }
 
                 if (packageStore && moduleCompileManifestData && codeBufferResponse){
-                    if (codeBufferResponse.extension === ".json"){
-                        responseObj = JSON.parse(codeBufferResponse.buffer.toString());
-                    }
-                    else{
-                        responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, codeBufferResponse.buffer);
-                    }
+                    responseObj = this.compilePackageStoreItemBuffer(codeBufferResponse, moduleManagerRequireContextData, moduleCompileManifestData);
                     if (responseObj){
                         this.addObjectToCache(nameParsedObj.fullName, version, "", responseObj);
                         return responseObj;
@@ -248,18 +241,19 @@ export class ModuleManager {
         }
     }
 
-    private compilePackage(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer | null): Object | null{
+    compilePackageStoreItemBuffer(itemBufferResponse: PackageStoreItemBufferResponse, moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData): Object | null{
+        var responseObj: Object | null = null;
+        if (itemBufferResponse.extension === ".json"){
+            responseObj = JSON.parse(itemBufferResponse.buffer.toString());
+        }
+        else{
+            responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, itemBufferResponse.buffer);
+        }
+        return responseObj;
+    }
+
+    compilePackage(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer | null): Object | null{
         try {
-            if (moduleCompileManifestData.mainFileFullPath.substring(moduleCompileManifestData.mainFileFullPath.lastIndexOf(".")).toUpperCase() === ".JSON"){
-                //JSON
-                if (codeBuffer){
-                    return JSON.parse(codeBuffer.toString());
-                }
-                else{
-                    return null;
-                }
-            }
-    
             var moduleManagerRequireContextDataDependency: ModuleManagerRequireContextData = new ModuleManagerRequireContextData(moduleManagerRequireContextData.rootPackageStoreKey);
             moduleManagerRequireContextDataDependency.parentPackageStoreName = moduleCompileManifestData.name;
             moduleManagerRequireContextDataDependency.parentPackageStoreVersion = moduleCompileManifestData.version;
@@ -310,7 +304,7 @@ export class ModuleManager {
      * @param packageStore 
      * @param contextCache 
      */
-    private importDependencies(packageStore: PackageStore, contextCache?: IPackageStoreCache): Promise<null>{
+    importDependencies(packageStore: PackageStore, contextCache?: IPackageStoreCache): Promise<null>{
         return new Promise(async (resolve, reject) => {
             try {
                 var packageManifestObj: IManifest | null = packageStore.getManifest();
@@ -412,7 +406,7 @@ export class ModuleManager {
         })
     }
 
-    private dynamicInvokeAsync(moduleObj: any, method?: string, parameter?: any[]): Promise<any>{
+    invokeAsyncByModuleObject(moduleObj: any, method?: string, parameter?: any[]): Promise<any>{
         return new Promise((resolve, reject) => {
             if (moduleObj){
                 let targetInvoke: any;
@@ -477,7 +471,7 @@ export class ModuleManager {
         return new Promise(async (resolve, reject) => {
             this.import(name, version, undefined, registryName, false).then((moduleObj)=>{ //disable imediateCleanMemoryCacheModuleFiles in import
                 if (moduleObj){
-                    this.dynamicInvokeAsync(moduleObj, method, parameter).then((responseInvokeAsync)=>{
+                    this.invokeAsyncByModuleObject(moduleObj, method, parameter).then((responseInvokeAsync)=>{
                         resolve(responseInvokeAsync);
 
                         //remove temporary cache

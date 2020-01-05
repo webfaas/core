@@ -1,9 +1,9 @@
-import { Core } from "../Core";
-import { IPluginFactory, IPlugin } from "../PluginManager/IPlugin";
-import { PackageRegistryNPM } from "../PackageRegistry/Registries/NPM/PackageRegistryNPM";
-import { PackageRegistryNPMConfig } from "../PackageRegistry/Registries/NPM/PackageRegistryNPMConfig";
-import { PackageRegistryManagerItem } from "../PackageRegistryManager/PackageRegistryManagerItem";
-import { AbstractPackageRegistryPlugin } from "../PluginManager/AbstractPackageRegistryPlugin";
+import { Core } from "../../Core";
+import { IPluginFactory, IPlugin } from "../../PluginManager/IPlugin";
+import { PackageRegistryNPM } from "../../PackageRegistry/Registries/NPM/PackageRegistryNPM";
+import { PackageRegistryNPMConfig } from "../../PackageRegistry/Registries/NPM/PackageRegistryNPMConfig";
+import { PackageRegistryManagerItem } from "../../PackageRegistryManager/PackageRegistryManagerItem";
+import { AbstractPackageRegistryPlugin } from "../../PluginManager/AbstractPackageRegistryPlugin";
 
 export default class PackageRegistryNpmPlugin extends AbstractPackageRegistryPlugin {
     static instanceBuilder(core:Core):IPlugin{

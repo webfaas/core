@@ -46,12 +46,18 @@ export class Core {
         await this.pluginManager.stop();
     }
 
+    async invokeAsync(name: string, version: string, method?: string, parameter?: any[]){
+        return await this.moduleManager.invokeAsync(name, version, method, parameter);
+    }
+
     constructor() {
         this.config = new Config();
         this.log = Log.getInstance();
         
         this.packageRegistryManager = new PackageRegistryManager(this.log);
-        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, undefined, this.log); //cache?
+        //let diskPackageStore = new PackageStoreCacheDisk();
+        //this.packageStoreManager = new PackageStoreManager(packageRegistryManager, diskPackageStore, this.log);
+        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, undefined, this.log);
         this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
         this.pluginManager = new PluginManager(this);
     }

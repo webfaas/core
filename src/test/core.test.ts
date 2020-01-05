@@ -23,4 +23,12 @@ describe("Core", () => {
         await core.stop();
         chai.expect(typeof(core.getModuleManager())).to.eq("object");
     })
+
+    it("invokeAsync @webfaaslabs/mathsum version - 0.0.1", async function(){
+        var core = new Core();
+        await core.start();
+        var response: any = await core.invokeAsync("@webfaaslabs/mathsum", "0.0.1", "", [2,3]);
+
+        chai.expect(response).to.eq(5);
+    })
 })

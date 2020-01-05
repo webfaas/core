@@ -9,6 +9,8 @@ import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreMana
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
+import { resolve } from "dns";
+import { rejects } from "assert";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("NPM", "", new PackageRegistryNPM(undefined, log));
@@ -31,6 +33,96 @@ describe("Module Manager", () => {
         done();
     })
 
+    it("invokeAsyncByModuleObject", async function(){
+        let moduleManager1 = new ModuleManager(undefined, log);
+
+        let moduleObj1 = {};
+        let response1 = await moduleManager1.invokeAsyncByModuleObject(null);
+        chai.expect(response1).to.null;
+
+        try {
+            let moduleObj = {};
+            let responseObj: any = await moduleManager1.invokeAsyncByModuleObject(moduleObj, "methodnotfound", [1,3]);
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
+        }
+
+        try {
+            let moduleObj: any = {};
+            moduleObj.testError = function(){
+                throw new Error("simulate error");
+            }
+            let responseObj: any = await moduleManager1.invokeAsyncByModuleObject(moduleObj, "testError");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.InvokeError);
+        }
+
+        try {
+            let moduleObj: any = {};
+            moduleObj.testErrorAsync = function(){
+                return new Promise((resolve, reject)=>{
+                    throw new Error("simulate error");
+                })
+            }
+            let responseObj: any = await moduleManager1.invokeAsyncByModuleObject(moduleObj, "testErrorAsync");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.InvokeError);
+        }
+    })
+
+    it("resolveVersion", async function(){
+        let moduleManager1 = new ModuleManager(undefined, log);
+
+        moduleManager1.getSmallManifest = function(){
+            throw new Error("simulate error");
+        }
+
+        try {
+            let responseObj: any = await moduleManager1.resolveVersion("package1", "1.*");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+    })
+
+    it("getSmallManifest", async function(){
+        let moduleManager1 = new ModuleManager(undefined, log);
+        let moduleManager2 = new ModuleManager(undefined, log);
+
+        moduleManager1.getPackageStoreManager().getPackageStore = function(){
+            throw new Error("simulate error");
+        }
+
+        moduleManager2.getPackageStoreManager().getPackageStore = function(){
+            let customPackageStore: any = {};
+            customPackageStore.getManifest = function(){
+                return null;
+            }
+            return customPackageStore;
+        }
+
+        try {
+            let responseObj: any = await moduleManager1.getSmallManifest("package1");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+
+        let responseObj1: any = await moduleManager2.getSmallManifest("package1");
+        chai.expect(responseObj1).to.null;
+    })
+
+    /*
+    */
+    
     it("import uuid/v1 version - 3", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
         loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
