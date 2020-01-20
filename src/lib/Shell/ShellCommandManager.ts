@@ -12,7 +12,7 @@ export class ShellCommandManager {
     
     constructor(core: Core) {
         this.core = core;
-        this.addShellCommand(new ShellCommandInvoke());
+        this.addShellCommand(new ShellCommandInvoke(this.core));
     }
 
     /**
@@ -36,21 +36,36 @@ export class ShellCommandManager {
      * execute shell command
      * @param shellArgv process.argv
      */
-    executeShellCommand(shellArgv: string[]){
-        let commandText: string | undefined = shellArgv[2];
-        if (commandText){
-            let shellCommand: IShellCommand | null = this.getShellCommand(commandText);
-            if (shellCommand === null){
-                console.log("UNRECOGNIZED COMMAND!");
-                this.printInfo();
+    executeShellCommand(shellArgv: string[]): Promise<void>{
+        return new Promise((resolve, reject) => {
+            try {
+                let commandText: string | undefined = shellArgv[2];
+                if (commandText){
+                    let shellCommand: IShellCommand | null = this.getShellCommand(commandText);
+                    if (shellCommand === null){
+                        this.printLog("RESPONSE", "UNRECOGNIZED COMMAND!")
+                        this.printInfo();
+                        resolve();
+                    }
+                    else{
+                        shellCommand.executeCommand(shellArgv).then((response) => {
+                            this.printLog("RESPONSE", response);
+                            resolve();
+                        }).catch((errExecuteCommand) => {
+                            reject(errExecuteCommand);
+                        })
+                    }
+                }
+                else{
+                    this.printInfo();
+                    resolve();
+                }
             }
-            else{
-                shellCommand.executeCommand(shellArgv);
+            catch (errTry) {
+                this.printLog("ERROR", errTry);
+                reject(errTry);
             }
-        }
-        else{
-            this.printInfo();
-        }
+        });
     }
 
     /**
@@ -63,8 +78,17 @@ export class ShellCommandManager {
             let shellCommand: IShellCommand | null = this.getShellCommand(keys[i]);
             /* istanbul ignore else  */
             if (shellCommand){
-                console.log(shellCommand.info + "\n");
+                this.printLog("", shellCommand.info + "\n");
             }
         }
+    }
+
+    /**
+     * print log
+     * @param type type log
+     * @param message message log
+     */
+    printLog(type: string, message: any): void{
+        console.log(type, message);
     }
 }

@@ -20,13 +20,13 @@ export class PackageStore {
 
     private mainFileFullPath: string = "";
 
-    constructor(name: string, version: string, etag: string, packageBuffer: Buffer, dataPackageItemDataMap?: Map<string, IPackageStoreItemData>) {
+    constructor(name: string, version: string, etag: string, packageBuffer?: Buffer, dataPackageItemDataMap?: Map<string, IPackageStoreItemData>) {
         this.name = name;
         this.version = version;
         this.key = PackageStore.parseKey(this.name, this.version);
         this.etag = etag;
-        this.packageBuffer = packageBuffer;
-        this.size = packageBuffer.length;
+        this.packageBuffer = packageBuffer || Buffer.alloc(0);
+        this.size = this.packageBuffer.length;
         
         if (dataPackageItemDataMap){
             this.length = dataPackageItemDataMap.size;
@@ -188,19 +188,30 @@ export class PackageStore {
     addItemData(nameItem: string, itemData: IPackageStoreItemData){
         this.removeItemData(nameItem);
         this.dataPackageItemDataMap.set(nameItem, itemData);
-        if (itemData.size){
-            this.size += itemData.size;
-        }
+        this.size += itemData.size;
         this.length ++;
+        
+        this.seekMainFile();
+    }
+
+    addItemBuffer(nameItem: string, itemBuffer: Buffer): IPackageStoreItemData{
+        var itemData = {} as IPackageStoreItemData;
+        itemData.begin = this.packageBuffer.length;
+        itemData.name = nameItem;
+        itemData.size = itemBuffer.length;
+
+        this.packageBuffer = Buffer.concat([this.packageBuffer, itemBuffer]);
+
+        this.addItemData(nameItem, itemData);
+
+        return itemData;
     }
 
     removeItemData(nameItem: string){
         var itemData = this.dataPackageItemDataMap.get(nameItem);
         if (itemData){
             this.dataPackageItemDataMap.delete(nameItem);
-            if (itemData.size){
-                this.size -= itemData.size;
-            }
+            this.size -= itemData.size;
             this.length --;
         }
     }

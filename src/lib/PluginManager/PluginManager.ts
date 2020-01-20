@@ -1,16 +1,29 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Core } from "../Core";
-import { IPlugin, IPluginFactory } from "./IPlugin";
-import { AbstractPackageRegistryPlugin } from "./AbstractPackageRegistryPlugin";
+import { IPlugin } from "./IPlugin";
 
 export class PluginManager {
     core: Core;
     listPlugin: Array<IPlugin> = new Array<IPlugin>();
+    rootDir: string = "";
 
-    constructor(core: Core){
+    constructor(core: Core, rootDir?: string){
         this.core = core;
-        this.loadInternalPlugins();
+
+        if (rootDir){
+            this.rootDir = rootDir;
+        }
+        else{
+            if (process.mainModule){
+                this.rootDir = path.dirname(process.mainModule.filename);
+            }
+            else{
+                this.rootDir = path.resolve(__dirname, "../../../");
+            }
+        }
+
+        this.loadPlugins();
     }
 
     /**
@@ -42,57 +55,46 @@ export class PluginManager {
     }
 
     /**
-     * build instance
+     * build instance plugin
      * @param pluginClassOrFunction class or function
      */
-    instanceBuild(pluginClassOrFunction: any): IPlugin{
+    instancePluginBuild(pluginFunctionFactory: any): IPlugin{
         let newPlugin: IPlugin;
-        if (pluginClassOrFunction.default && pluginClassOrFunction.default.instanceBuilder){
-            newPlugin = pluginClassOrFunction.default.instanceBuilder(this.core);
+        if (pluginFunctionFactory.default){
+            newPlugin = pluginFunctionFactory.default(this.core);
         }
         else{
-            newPlugin = pluginClassOrFunction(this.core);
+            newPlugin = pluginFunctionFactory(this.core);
         }
         return newPlugin;
     }
 
-    /**d
-     * load plugin from file
-     * @param fullFileName full file name
+    /**
+     * load plugins
      */
-    private loadPluginFromFile(fullFileName: string){
-        if (path.extname(fullFileName).toLowerCase() === ".js" ){
-            let pluginClassOrFunction: any = require(fullFileName);
-            let newPlugin = this.instanceBuild(pluginClassOrFunction);
-            this.addPlugin(newPlugin);
-        }
+    loadPlugins(){
+        this.loadPluginsByFolder(path.join(__dirname, "node_modules"));
     }
 
     /**
-     * load internal plugins
+     * load plugins by folder
      */
-    private loadInternalPlugins(){
-        this.loadInternalPluginsByFolder(path.join(__dirname, "../Plugins/Registry"));
-    }
-
-    /**
-     * load internal plugins by folder
-     */
-    private loadInternalPluginsByFolder(scanFolderName: string){
+    loadPluginsByFolder(scanFolderName: string){
         try {
-            /* istanbul ignore else  */
-            if (fs.statSync(scanFolderName).isDirectory() === false){
-                return;
+            let files = fs.readdirSync(scanFolderName);
+            for (let i = 0; i < files.length; i++){
+                let file = path.join(scanFolderName, files[i]);
+                if (file.indexOf("webfaas-plugin-") > -1){
+                    if (fs.statSync(file).isDirectory()){
+                        let pluginFunctionFactory: any = require(file);
+                        let newPlugin = this.instancePluginBuild(pluginFunctionFactory);
+                        this.addPlugin(newPlugin);
+                    }
+                }
             }
         }
         catch (error) {
-            /* istanbul ignore next */
             return;
-        }
-
-        let files = fs.readdirSync(scanFolderName);
-        for (let i = 0; i < files.length; i++){
-            this.loadPluginFromFile(path.join(scanFolderName, files[i]));
         }
     }
 }

@@ -1,48 +1,84 @@
 import * as chai from "chai";
 import * as mocha from "mocha";
+import * as path from "path";
 
 import { Core } from "../lib/Core";
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../lib/PackageRegistry/IPackageRegistryResponse";
 import { PluginManager } from "../lib/PluginManager/PluginManager";
-import DefaultPackageRegistryRoutingPlugin from "../lib/Plugins/Registry/DefaultPackageRegistryRoutingPlugin";
-import { AbstractPlugin } from "../lib/PluginManager/AbstractPlugin";
+import { IPlugin } from "../lib/PluginManager/IPlugin";
 
-
-class CustomPlugin1 extends AbstractPlugin {
+class CustomPlugin1 implements IPlugin {
     startPlugin(core: Core): Promise<any> {
-        throw new Error("Method not implemented.");
+        return new Promise((resolve, reject)=>{
+            resolve();
+        });
     }
     
     stopPlugin(core: Core): Promise<any> {
-        throw new Error("Method not implemented.");
+        return new Promise((resolve, reject)=>{
+            resolve();
+        });
     }
 }
 
-function factoryPluginMock(){
-    // to-do: implement interface IPlugin
+function factoryPluginMock_function(){
     return function(){
-        //:IPlugin
+        return "factoryPluginMock_function";
+    }
+}
+
+function factoryPluginMock_module(){
+}
+factoryPluginMock_module.default = function(){
+    return function(){
+        return "factoryPluginMock_module";
     }
 }
 
 describe("Package Registry Routing Plugin", () => {
-    it("should return properties on call", function(){
+    it("constructor", function(){
         const core = new Core();
-        const defaultPackageRegistryRoutingPlugin: DefaultPackageRegistryRoutingPlugin = <DefaultPackageRegistryRoutingPlugin> DefaultPackageRegistryRoutingPlugin.instanceBuilder(core);
+        const pluginManager1 = new PluginManager(core);
+        const pluginManager2 = new PluginManager(core, "/tmp");
+        const oldMain = process.mainModule;
+        process.mainModule = undefined;
+        const pluginManager3 = new PluginManager(core);
+        process.mainModule = oldMain;
+    })
+
+    it("should return properties on call", async function(){
+        const core = new Core();
+        const pluginManager = new PluginManager(core);
+        const customPlugin1 = new CustomPlugin1();
+
+        chai.expect(pluginManager.listPlugin.length).to.eq(0);
+        pluginManager.addPlugin(customPlugin1);
+        chai.expect(pluginManager.listPlugin.length).to.eq(1);
+        await pluginManager.start();
+        await pluginManager.stop();
+
+        let plugin1: any = pluginManager.instancePluginBuild(factoryPluginMock_function);
+        let plugin2: any = pluginManager.instancePluginBuild(factoryPluginMock_module);
+        chai.expect(plugin1()).to.eq("factoryPluginMock_function");
+        chai.expect(plugin2()).to.eq("factoryPluginMock_module");
+    })
+
+    it("loadplugin", async function(){
+        const core = new Core();
         const pluginManager = new PluginManager(core);
 
-        defaultPackageRegistryRoutingPlugin.addRegistryNameByScopeName("webfaaslabs", "GITHUB");
-        chai.expect(defaultPackageRegistryRoutingPlugin.getRegistryNameByScopeName("webfaaslabs")).to.eq("GITHUB");
-        chai.expect(defaultPackageRegistryRoutingPlugin.getRegistryNameByExternalRouting("@webfaaslabs/mathsum")).to.eq("GITHUB");
-        chai.expect(defaultPackageRegistryRoutingPlugin.getRegistryNameByExternalRouting("mathsum")).to.eq("");
-        defaultPackageRegistryRoutingPlugin.addRegistryNameByScopeName("scope1", "route1");
-        chai.expect(defaultPackageRegistryRoutingPlugin.getRegistryNameByScopeName("scope1")).to.eq("route1");
-        defaultPackageRegistryRoutingPlugin.removeRegistryNameByScopeName("scope1");
-        chai.expect(defaultPackageRegistryRoutingPlugin.getRegistryNameByScopeName("scope1")).to.eq("");
-
-        pluginManager.instanceBuild(factoryPluginMock);
-
-        chai.expect(() => {CustomPlugin1.instanceBuilder(core)}).to.throw("Override static method");
+        chai.expect(pluginManager.listPlugin.length).to.eq(0);
+        pluginManager.loadPluginsByFolder(path.join(__dirname, "mocks", "plugins"));
+        chai.expect(pluginManager.listPlugin.length).to.eq(2);
+        
+        chai.expect((<any> pluginManager.listPlugin[0]).state).to.eq("");
+        chai.expect((<any> pluginManager.listPlugin[1]).state).to.eq("");
+        await pluginManager.start();
+        chai.expect((<any> pluginManager.listPlugin[0]).state).to.eq("started");
+        chai.expect((<any> pluginManager.listPlugin[1]).state).to.eq("started");
+        await pluginManager.stop();
+        chai.expect((<any> pluginManager.listPlugin[0]).state).to.eq("stoped");
+        chai.expect((<any> pluginManager.listPlugin[1]).state).to.eq("stoped");
     })
 })

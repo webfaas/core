@@ -4,5 +4,6 @@
     "sourceMap": false,
     "instrument": true,
     "clean": true,
-    "reporter": ["text","html","lcovonly"]
+    "reporter": ["text","html","lcovonly"],
+    "include": "dist/lib"
 }

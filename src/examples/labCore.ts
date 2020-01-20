@@ -1,23 +1,33 @@
 "use strict";
 
 import { Core } from "../lib/Core";
+import { PackageRegistryMock } from "../test/mocks/PackageRegistryMock";
 
-var core = new Core();
+const core = new Core();
 
-process.on('unhandledRejection', (reason, p) => {
-    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
+
+process.on("unhandledRejection", (reason, p) => {
+    console.log("Unhandled Rejection:", p, "reason:", reason);
 });
 
 (async function(){
     try {
         await core.start();
-        var response: any = await core.invokeAsync("@webfaaslabs/mathsum", "0.0.1", "", [2,3]);
-        //var response: any = await core.invokeAsync("uuid/v1", "3.3.3");
-        //var response: any = await core.invokeAsync("@webfaaslabs/mathsumasync", "0.0.2", "sum", [{x:2,y:3}]);
-        //var response: any = await core.invokeAsync("@webfaaslabs/mathsumasync/package.json", "0.0.2", "");
+        
+        var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
 
         if (response){
             console.log("response", response);
+        }
+        else{
+            console.log("not response");
+        }
+
+        var response2: any = await core.invokeAsync("@registry1/mathsumasync", "1.0.0", "sum", [{x:10, y:5}]);
+
+        if (response2){
+            console.log("response2", response2);
         }
         else{
             console.log("not response");

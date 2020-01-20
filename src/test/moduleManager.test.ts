@@ -1,6 +1,8 @@
 import * as chai from "chai";
 import * as mocha from "mocha";
 
+import * as os from "os";
+
 import { ModuleManager } from "../lib/ModuleManager/ModuleManager";
 
 import { Log } from "../lib/Log/Log";
@@ -8,18 +10,20 @@ import { LogLevelEnum } from "../lib/Log/ILog";
 import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreManager";
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
-import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
-import { resolve } from "dns";
-import { rejects } from "assert";
+import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
-    packageRegistryManager.addRegistry("NPM", "", new PackageRegistryNPM(undefined, log));
-    //packageRegistryManager.addRegistry("DISK", "", new PackageRegistryDiskTarball(undefined, log));
-    //packageRegistryManager.addRegistry("GITHUB", "", new PackageRegistryGitHubTarballV3(undefined, log));
+    packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
+    packageRegistryManager.addRegistry("REGISTRY2", "REGISTRY3", new PackageRegistryMock.PackageRegistry2());
+    packageRegistryManager.addRegistry("REGISTRY3", "", new PackageRegistryMock.PackageRegistry3());
 }
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
+
+var packageRegistryManager_default: PackageRegistryManager = new PackageRegistryManager(log);
+loadDefaultRegistries(packageRegistryManager_default, log);
+var packageStoreManager_default = new PackageStoreManager(packageRegistryManager_default, undefined, log);
 
 describe("Module Manager", () => {
     it("constructor", function(done){
@@ -31,6 +35,87 @@ describe("Module Manager", () => {
         chai.expect(moduleManager2.getPackageStoreManager()).to.eq(packageStoreManager2);
 
         done();
+    })
+
+    it("addObjectToCache", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+
+        moduleManager1.addObjectToCache("package1", "version1", "item1", "AAA");
+        chai.expect(moduleManager1.getObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("AAA");
+        moduleManager1.addObjectToCache("package1", "version1", "item1", "BBB");
+        chai.expect(moduleManager1.getObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("BBB");
+    })
+
+    it("resolveVersion - @registry1/mathsum", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+
+        try {
+            let responseObj: any = await moduleManager1.resolveVersion("@registry1/mathsum", "99.*");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
+        }
+
+        try {
+            let responseObj: any = await moduleManager1.resolveVersion("@registry1/mathsum", "0.*");
+            chai.expect(responseObj).to.eq("0.0.3");
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+    })
+
+    it("resolveVersion - simulate error", async function(){
+        let moduleManager1 = new ModuleManager(undefined, log);
+
+        moduleManager1.getSmallManifest = function(){
+            throw new Error("simulate error");
+        }
+
+        try {
+            let responseObj: any = await moduleManager1.resolveVersion("mathsum", "99.*");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+
+        try {
+            let responseObj: any = await moduleManager1.resolveVersion("mathsum", "0.*");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+    })
+
+    it("getSmallManifest - simulate error", async function(){
+        let moduleManager1 = new ModuleManager(undefined, log);
+        let moduleManager2 = new ModuleManager(undefined, log);
+
+        moduleManager1.getPackageStoreManager().getPackageStore = function(){
+            throw new Error("simulate error");
+        }
+
+        moduleManager2.getPackageStoreManager().getPackageStore = function(){
+            let customPackageStore: any = {};
+            customPackageStore.getManifest = function(){
+                return null;
+            }
+            return customPackageStore;
+        }
+
+        try {
+            let responseObj: any = await moduleManager1.getSmallManifest("package1");
+            chai.expect(responseObj).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+
+        let responseObj1: any = await moduleManager2.getSmallManifest("package1");
+        chai.expect(responseObj1).to.null;
     })
 
     it("invokeAsyncByModuleObject", async function(){
@@ -75,129 +160,116 @@ describe("Module Manager", () => {
             chai.expect(errTry).to.be.an.instanceOf(WebFaasError.InvokeError);
         }
     })
+})
 
-    it("resolveVersion", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
+describe("Module Manager - Import", () => {
+    it("import @registry1/mathsum - 0.*", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+            
+        let responseObj1: any = await moduleManager1.import("@registry1/mathsum", "0.*");
+        chai.expect(responseObj1(2,3)).to.eq(5);
 
-        moduleManager1.getSmallManifest = function(){
-            throw new Error("simulate error");
-        }
+        //force return in cache
+        let responseObj2: any = await moduleManager1.import("@registry1/mathsum", "0.*");
+        chai.expect(responseObj2(2,3)).to.eq(5);
 
+        //notexist
         try {
-            let responseObj: any = await moduleManager1.resolveVersion("package1", "1.*");
-            chai.expect(responseObj).to.eq(Error);
-        }
-        catch (errTry) {
-            chai.expect(errTry).to.be.an.instanceOf(Error);
-        }
-    })
-
-    it("getSmallManifest", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-        let moduleManager2 = new ModuleManager(undefined, log);
-
-        moduleManager1.getPackageStoreManager().getPackageStore = function(){
-            throw new Error("simulate error");
-        }
-
-        moduleManager2.getPackageStoreManager().getPackageStore = function(){
-            let customPackageStore: any = {};
-            customPackageStore.getManifest = function(){
-                return null;
-            }
-            return customPackageStore;
-        }
-
-        try {
-            let responseObj: any = await moduleManager1.getSmallManifest("package1");
-            chai.expect(responseObj).to.eq(Error);
-        }
-        catch (errTry) {
-            chai.expect(errTry).to.be.an.instanceOf(Error);
-        }
-
-        let responseObj1: any = await moduleManager2.getSmallManifest("package1");
-        chai.expect(responseObj1).to.null;
-    })
-
-    /*
-    */
-    
-    it("import uuid/v1 version - 3", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
-            
-        let responseObj1: any = await moduleManager1.import("uuid/v1", "3");
-        chai.expect(typeof(responseObj1())).to.eq("string");
-
-        //force return in cache
-        let responseObj2: any = await moduleManager1.import("uuid/v1", "3");
-        chai.expect(typeof(responseObj2())).to.eq("string");
-
-        //notexist
-        let responseObj3: any = await moduleManager1.import("uuid/notexist", "3");
-        chai.expect(responseObj3).to.null;
-    })
-
-    it("import uuid/v1 version - 3.3.3", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
-            
-        let responseObj1: any = await moduleManager1.import("uuid/v1", "3.3.3");
-        chai.expect(typeof(responseObj1())).to.eq("string");
-
-        //force return in cache
-        let responseObj2: any = await moduleManager1.import("uuid/v1", "3.3.3");
-        chai.expect(typeof(responseObj2())).to.eq("string");
-
-        //notexist
-        let responseObj3: any = await moduleManager1.import("uuid/notexist", "3.3.3");
-        chai.expect(responseObj3).to.null;
-    })
-
-    it("import chalk version - 3", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
-            
-        let responseObj1: any = await moduleManager1.import("chalk", "3");
-        chai.expect(typeof(responseObj1.Level)).to.eq("object");
-
-        //force return in cache
-        let responseObj2: any = await moduleManager1.import("chalk", "3");
-        chai.expect(typeof(responseObj2.Level)).to.eq("object");
-
-        //notexist
-        let responseObj3: any = await moduleManager1.import("chalk/notexist", "3");
-        chai.expect(responseObj3).to.null;
-    })
-
-    it("import chalk version - 3.0.0", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
-            
-        let responseObj1: any = await moduleManager1.import("chalk", "3.0.0");
-        chai.expect(typeof(responseObj1.Level)).to.eq("object");
-
-        //force return in cache
-        let responseObj2: any = await moduleManager1.import("chalk", "3.0.0");
-        chai.expect(typeof(responseObj2.Level)).to.eq("object");
-
-        //notexist
-        let responseObj3: any = await moduleManager1.import("chalk/notexist", "3.0.0");
-        chai.expect(responseObj3).to.null;
-    })
-
-    it("import package not exist", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-        loadDefaultRegistries(moduleManager1.getPackageStoreManager().getPackageRegistryManager(), log);
-
-        try {
-            let responseObj1: any = await moduleManager1.import("packagenotexist_packagenotexist/v1", "3");
-            chai.expect(responseObj1).to.null;
+            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            chai.expect(responseObj3).to.eq(Error);
         }
         catch (errTry) {
             chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
-            chai.expect((<WebFaasError.NotFoundError> errTry).type).to.eq(WebFaasError.NotFoundErrorTypeEnum.MANIFEST);
+        }
+    })
+
+    it("import @registry1/mathsum - 0.0.3", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+            
+        let responseObj1: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        chai.expect(responseObj1(2,3)).to.eq(5);
+
+        //force return in cache
+        let responseObj2: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        chai.expect(responseObj2(2,3)).to.eq(5);
+
+        //notexist
+        try {
+            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            chai.expect(responseObj3).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
+        }
+    })
+
+    it("import @registry1/mathsum - 0.0.3", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+            
+        let responseObj1: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        chai.expect(responseObj1(2,3)).to.eq(5);
+
+        //force return in cache
+        let responseObj2: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        chai.expect(responseObj2(2,3)).to.eq(5);
+
+        //notexist
+        try {
+            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            chai.expect(responseObj3).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
+        }
+    })
+
+    it("import @registry1/hostname - 0.0.1", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+            
+        let responseObj1: any = await moduleManager1.import("@registry1/hostname", "0.0.1");
+        chai.expect(responseObj1()).to.eq(os.hostname());
+
+        //force return in cache
+        let responseObj2: any = await moduleManager1.import("@registry1/hostname", "0.0.1");
+        chai.expect(responseObj2()).to.eq(os.hostname());
+
+        //notexist
+        try {
+            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            chai.expect(responseObj3).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
+        }
+    })
+
+    it("import @registry1/syntaxerror - 0.0.1", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+        
+        try {
+            let responseObj1: any = await moduleManager1.import("@registry1/syntaxerror", "0.0.1");
+            throw new Error("Sucess!");
+        }
+        catch (errTry) {
+            chai.expect(errTry.name).to.eq("CompileError");
+        }
+
+        //force return in cache
+        try {
+            let responseObj2: any = await moduleManager1.import("@registry1/syntaxerror", "0.0.1");
+            throw new Error("Sucess!");
+        }
+        catch (errTry) {
+            chai.expect(errTry.name).to.eq("CompileError");
+        }
+
+        //notexist
+        try {
+            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            chai.expect(responseObj3).to.eq(Error);
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
         }
     })
 })

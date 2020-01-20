@@ -2,7 +2,6 @@ import { PackageStore } from "../PackageStore/PackageStore";
 import { Log } from "../Log/Log";
 import { PackageRegistryManager } from "../PackageRegistryManager/PackageRegistryManager";
 import { IPackageStoreCache } from "../PackageStoreCache/IPackageStoreCache";
-import { PackageStoreCacheMemory } from "../PackageStoreCache/Memory/PackageStoreCacheMemory";
 
 /**
  * manager PackageStore

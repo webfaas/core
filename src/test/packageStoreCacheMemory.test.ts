@@ -5,14 +5,15 @@ import * as fs from "fs";
 import * as path from "path";
 import { PackageStore } from "../lib/PackageStore/PackageStore";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
-import { PackageRegistryDiskTarball } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarball";
-import { PackageRegistryDiskTarballConfig } from "../lib/PackageRegistry/Registries/DiskTarball/PackageRegistryDiskTarballConfig";
 
 import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
 import { PackageStoreCacheMemoryConfig } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemoryConfig";
 
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
+import { IPackageStoreCache } from "../lib/PackageStoreCache/IPackageStoreCache";
+import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
+import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
@@ -39,13 +40,14 @@ describe("PackageStore Cache Memory Config", () => {
 
 describe("PackageStore Cache Memory Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
-    var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-    packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
+    var packageStoreCacheMemory: IPackageStoreCache = new PackageStoreCacheMemory(new PackageStoreCacheMemoryConfig());
+    var packageRegistry = new PackageRegistryMock.PackageRegistry1();
+    packageRegistryManager.addRegistry("registryMock", "", packageRegistry);
 
     it("should return object on call", function(done){
         (async function(){
             try {
-                var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("semver");
+                var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("@registry1/mathsum"); //last version -> 0.0.3
                 var packageStoreCacheMemoryAsync: PackageStore | null;
                 var packageStoreCacheMemorySync: PackageStore | null;
 
@@ -58,6 +60,11 @@ describe("PackageStore Cache Memory Manifest", () => {
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
 
                     await packageStoreCacheMemory.putPackageStore(packageStoreBase);
+
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStoreBase.getSize());
+
+                    await packageStoreCacheMemory.putPackageStore(packageStoreBase); //put again
 
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStoreBase.getSize());
@@ -90,7 +97,11 @@ describe("PackageStore Cache Memory Manifest", () => {
                         }
                     }
 
-                    packageStoreCacheMemory.deletePackageStore("semver");
+                    packageStoreCacheMemory.deletePackageStore("@registry1/mathsum");
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStoreBase.getSize());
+                    
+                    packageStoreCacheMemory.deletePackageStore("@registry1/mathsum", "0.0.3");
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
                 }
@@ -127,13 +138,13 @@ describe("PackageStore Cache Memory Manifest", () => {
 
 describe("PackageStore Cache Memory Package", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
-    var packageRegistryDiskTarball: PackageRegistryDiskTarball = new PackageRegistryDiskTarball(new PackageRegistryDiskTarballConfig(path.join(__dirname, "./data/data-package")));
-    packageRegistryManager.addRegistry("diskTarball", "", packageRegistryDiskTarball);
+    var packageRegistry = new PackageRegistryMock.PackageRegistry1();
+    packageRegistryManager.addRegistry("registryMock", "", packageRegistry);
 
     it("should return object on call", function(done){
         (async function(){
             try {
-                var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("semver", "5.6.0");
+                var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("@registry1/mathsum", "0.0.1");
                 var packageStoreCacheMemoryAsync: PackageStore | null;
                 var packageStoreCacheMemorySync: PackageStore | null;
 
@@ -186,7 +197,7 @@ describe("PackageStore Cache Memory Package", () => {
                         }
                     }
 
-                    packageStoreCacheMemory.deletePackageStore("semver", "5.6.0");
+                    packageStoreCacheMemory.deletePackageStore("@registry1/mathsum", "0.0.1");
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
                 }
@@ -205,11 +216,11 @@ describe("PackageStore Cache Memory Package", () => {
                 var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
 
                 //async
-                var packageStoreAsync: PackageStore | null = await packageStoreCacheMemory.getPackageStore("notfound***", "5.6.0");
+                var packageStoreAsync: PackageStore | null = await packageStoreCacheMemory.getPackageStore("notfound***", "0.0.1");
                 chai.expect(packageStoreAsync).to.be.null;
 
                 //sync
-                var packageStoreSync: PackageStore | null = packageStoreCacheMemory.getPackageStoreSync("notfound***", "5.6.0");
+                var packageStoreSync: PackageStore | null = packageStoreCacheMemory.getPackageStoreSync("notfound***", "0.0.1");
                 chai.expect(packageStoreSync).to.be.null;
 
                 done();

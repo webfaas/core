@@ -10,12 +10,12 @@ import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
-import { PackageRegistryNPM } from "../lib/PackageRegistry/Registries/NPM/PackageRegistryNPM";
+import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
-    packageRegistryManager.addRegistry("NPM", "", new PackageRegistryNPM(undefined, log));
-    //packageRegistryManager.addRegistry("DISK", "", new PackageRegistryDiskTarball(undefined, log));
-    //packageRegistryManager.addRegistry("GITHUB", "", new PackageRegistryGitHubTarballV3(undefined, log));
+    packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
+    packageRegistryManager.addRegistry("REGISTRY2", "REGISTRY3", new PackageRegistryMock.PackageRegistry2());
+    packageRegistryManager.addRegistry("REGISTRY3", "", new PackageRegistryMock.PackageRegistry3());
 }
 
 var log = new Log();
@@ -48,42 +48,42 @@ describe("Package Store Manager", () => {
     chai.expect(packageStoreManager_4.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
     it("should return package item on call - without cache configured", function(done){
-        packageStoreManager_withoutcache.getPackageStore("semver", "5.6.0").then(function(packageStore){
+        packageStoreManager_withoutcache.getPackageStore("@registry1/mathsum", "0.0.1").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
             if (packageStore){
-                var manifest = packageStore.getManifest();
+                let manifest = packageStore.getManifest();
                 chai.expect(manifest).to.be.an.instanceof(Object);
                 if (manifest){
-                    chai.expect(manifest.name).to.eq("semver");
-                    chai.expect(manifest.version).to.eq("5.6.0");
-                    chai.expect(manifest.description).to.eq("The semantic version parser used by npm.");
+                    chai.expect(manifest.name).to.eq("@registry1/mathsum");
+                    chai.expect(manifest.version).to.eq("0.0.1");
+                    chai.expect(manifest.description).to.eq("registry1 mock");
                     chai.expect(manifest.notfound).to.eq(undefined);
                 }
 
-                var fileBuffer = packageStore.getItemBuffer("semver.js");
+                let fileBuffer = packageStore.getItemBuffer("index.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y")).to.gt(-1);
                 }
             }
 
             //force pass in cache
-            packageStoreManager_withoutcache.getPackageStore("semver", "5.6.0").then(function(packageStore2){
+            packageStoreManager_withoutcache.getPackageStore("@registry1/mathsum", "0.0.1").then(function(packageStore2){
                 chai.expect(packageStore2).to.be.an.instanceof(Object);
                 if (packageStore2){
-                    var manifest = packageStore2.getManifest();
+                    let manifest = packageStore2.getManifest();
                     chai.expect(manifest).to.be.an.instanceof(Object);
                     if (manifest){
-                        chai.expect(manifest.name).to.eq("semver");
-                        chai.expect(manifest.version).to.eq("5.6.0");
-                        chai.expect(manifest.description).to.eq("The semantic version parser used by npm.");
+                        chai.expect(manifest.name).to.eq("@registry1/mathsum");
+                        chai.expect(manifest.version).to.eq("0.0.1");
+                        chai.expect(manifest.description).to.eq("registry1 mock");
                         chai.expect(manifest.notfound).to.eq(undefined);
                     }
     
-                    var fileBuffer = packageStore2.getItemBuffer("semver.js");
+                    let fileBuffer = packageStore2.getItemBuffer("index.js");
                     chai.expect(typeof(fileBuffer)).to.eq("object");
                     if (fileBuffer){
-                        chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                        chai.expect(fileBuffer.buffer.toString().indexOf("return x + y")).to.gt(-1);
                     }
                 }
     
@@ -97,42 +97,42 @@ describe("Package Store Manager", () => {
     })
 
     it("should return package item on call - with cache configured", function(done){
-        packageStoreManager_withcache.getPackageStore("semver", "5.6.0").then(function(packageStore){
+        packageStoreManager_withcache.getPackageStore("@registry1/mathsum", "0.0.1").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
             if (packageStore){
-                var manifest = packageStore.getManifest();
+                let manifest = packageStore.getManifest();
                 chai.expect(manifest).to.be.an.instanceof(Object);
                 if (manifest){
-                    chai.expect(manifest.name).to.eq("semver");
-                    chai.expect(manifest.version).to.eq("5.6.0");
-                    chai.expect(manifest.description).to.eq("The semantic version parser used by npm.");
+                    chai.expect(manifest.name).to.eq("@registry1/mathsum");
+                    chai.expect(manifest.version).to.eq("0.0.1");
+                    chai.expect(manifest.description).to.eq("registry1 mock");
                     chai.expect(manifest.notfound).to.eq(undefined);
                 }
 
-                var fileBuffer = packageStore.getItemBuffer("semver.js");
+                let fileBuffer = packageStore.getItemBuffer("index.js");
                 chai.expect(typeof(fileBuffer)).to.eq("object");
                 if (fileBuffer){
-                    chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                    chai.expect(fileBuffer.buffer.toString().indexOf("return x + y")).to.gt(-1);
                 }
             }
 
             //force pass in cache
-            packageStoreManager_withcache.getPackageStore("semver", "5.6.0").then(function(packageStore2){
+            packageStoreManager_withcache.getPackageStore("@registry1/mathsum", "0.0.1").then(function(packageStore2){
                 chai.expect(packageStore2).to.be.an.instanceof(Object);
                 if (packageStore2){
-                    var manifest = packageStore2.getManifest();
+                    let manifest = packageStore2.getManifest();
                     chai.expect(manifest).to.be.an.instanceof(Object);
                     if (manifest){
-                        chai.expect(manifest.name).to.eq("semver");
-                        chai.expect(manifest.version).to.eq("5.6.0");
-                        chai.expect(manifest.description).to.eq("The semantic version parser used by npm.");
+                        chai.expect(manifest.name).to.eq("@registry1/mathsum");
+                        chai.expect(manifest.version).to.eq("0.0.1");
+                        chai.expect(manifest.description).to.eq("registry1 mock");
                         chai.expect(manifest.notfound).to.eq(undefined);
                     }
     
-                    var fileBuffer = packageStore2.getItemBuffer("semver.js");
+                    let fileBuffer = packageStore2.getItemBuffer("index.js");
                     chai.expect(typeof(fileBuffer)).to.eq("object");
                     if (fileBuffer){
-                        chai.expect(fileBuffer.buffer.toString().substring(0,34)).to.eq("exports = module.exports = SemVer;");
+                        chai.expect(fileBuffer.buffer.toString().indexOf("return x + y")).to.gt(-1);
                     }
                 }
     

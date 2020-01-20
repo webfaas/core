@@ -2,7 +2,7 @@
   "name": "@webfaas/webfaas-core",
   "version": "0.0.1-alpha",
   "description": "WEBFaaS Framework - Core",
-  "main": "lib/index.js",
+  "main": "lib/Core.js",
   "readmeFilename": "README.md",
   "keywords": [
     "webfaas",
