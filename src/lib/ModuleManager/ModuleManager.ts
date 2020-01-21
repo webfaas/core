@@ -255,7 +255,7 @@ export class ModuleManager {
         return responseObj;
     }
 
-    compilePackage(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer | null): Object | null{
+    compilePackage(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer): Object | null{
         try {
             var moduleManagerRequireContextDataDependency: ModuleManagerRequireContextData = new ModuleManagerRequireContextData(moduleManagerRequireContextData.rootPackageStoreKey);
             moduleManagerRequireContextDataDependency.parentPackageStoreName = moduleCompileManifestData.name;
@@ -274,24 +274,18 @@ export class ModuleManager {
                 }
             }
     
-            if (codeBuffer){
-                var newModule = this.moduleCompile.compile(codeBuffer.toString(), moduleCompileManifestData, this.sandBoxContext, globalRequire);
-                codeBuffer = null; //clean memory!!!!!!!!! not remove!
-                if (newModule.exports){
-                    return newModule.exports;
-                }
-                else{
-                    if (newModule.__esModule){
-                        return newModule;
-                    }
-                    else{
-                        return null;
-                    }
-                }
+            var newModule = this.moduleCompile.compile(codeBuffer.toString(), moduleCompileManifestData, this.sandBoxContext, globalRequire);
+            if (newModule.exports){
+                return newModule.exports;
             }
             else{
-                return null;
-            }            
+                if (newModule.__esModule){
+                    return newModule;
+                }
+                else{
+                    return null;
+                }
+            }
         }
         catch (errTry) {
             var errDetail: any = {};

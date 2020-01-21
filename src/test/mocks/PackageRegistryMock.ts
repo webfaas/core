@@ -79,6 +79,10 @@ export namespace PackageRegistryMock{
             let nameHostName:string = "@registry1/hostname";
             let nameSyntaxError:string = "@registry1/syntaxerror";
             let nameExecutionError:string = "@registry1/executionerror";
+            let nameModuleWhitoutExport:string = "@registry1/modulewhitoutexport";
+            let nameInternalRelativeDependency = "@registry1/internalrelativedependency";
+            let nameModuleDependencyNotFound = "@registry1/moduledependencynotfound"
+            let nameModuleDependencyNotDeclared = "@registry1/moduledependencynotdeclared";
 
             let description: string = "registry1 mock";
 
@@ -91,6 +95,8 @@ export namespace PackageRegistryMock{
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":1.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "1.0.0", {"@registry1/mathsum": "0.0.1"}, description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":2.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "2.0.0", {"@registry1/mathsum": "0.*"}, description));
 
+            this.listPackageRegistryResponse.set(nameSimpleText + ":0.0.1", new PackageRegistryResponseMock.SimpleText(nameSimpleText, "0.0.1", description, "AA1", "BB1", "CC1"));
+
             this.listPackageRegistryResponse.set(nameHostName, new PackageRegistryResponseMock.Manifest(nameHostName, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameHostName + ":0.0.1", new PackageRegistryResponseMock.HostName(nameHostName, "0.0.1", description));
 
@@ -100,7 +106,17 @@ export namespace PackageRegistryMock{
             this.listPackageRegistryResponse.set(nameExecutionError, new PackageRegistryResponseMock.Manifest(nameExecutionError, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameExecutionError + ":0.0.1", new PackageRegistryResponseMock.ExecutionError(nameExecutionError, "0.0.1", description));
 
-            this.listPackageRegistryResponse.set(nameSimpleText + ":0.0.1", new PackageRegistryResponseMock.SimpleText(nameSimpleText, "0.0.1", description, "AA1", "BB1", "CC1"));
+            this.listPackageRegistryResponse.set(nameModuleWhitoutExport, new PackageRegistryResponseMock.Manifest(nameModuleWhitoutExport, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameModuleWhitoutExport + ":0.0.1", new PackageRegistryResponseMock.ModuleWhitoutExport(nameModuleWhitoutExport, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameInternalRelativeDependency, new PackageRegistryResponseMock.Manifest(nameInternalRelativeDependency, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameInternalRelativeDependency + ":0.0.1", new PackageRegistryResponseMock.InternalRelativeDependency(nameInternalRelativeDependency, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameModuleDependencyNotFound, new PackageRegistryResponseMock.Manifest(nameModuleDependencyNotFound, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameModuleDependencyNotFound + ":0.0.1", new PackageRegistryResponseMock.ModuleDependencyNotFound(nameModuleDependencyNotFound, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameModuleDependencyNotDeclared, new PackageRegistryResponseMock.Manifest(nameModuleDependencyNotDeclared, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameModuleDependencyNotDeclared + ":0.0.1", new PackageRegistryResponseMock.ModuleDependencyNotDeclared(nameModuleDependencyNotDeclared, "0.0.1", description));
         }
     }
     
@@ -114,9 +130,6 @@ export namespace PackageRegistryMock{
             let nameMathSum:string = "@registry2/mathsum";
             let nameMathSumAsync:string = "@registry2/mathsumasync";
             let nameSimpleText:string = "@registry2/simpletext";
-            let nameHostName:string = "@registry2/hostname";
-            let nameSyntaxError:string = "@registry2/syntaxerror";
-            let nameExecutionError:string = "@registry2/executionerror";
 
             let description: string = "registry2 mock";
 
@@ -128,15 +141,6 @@ export namespace PackageRegistryMock{
             this.listPackageRegistryResponse.set(nameMathSumAsync, new PackageRegistryResponseMock.Manifest(nameMathSumAsync, ["1.0.0", "2.0.0"], description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":1.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "1.0.0", {"@registry2/mathsum": "0.0.1"}, description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":2.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "2.0.0", {"@registry2/mathsum": "0.*"}, description));
-
-            this.listPackageRegistryResponse.set(nameHostName, new PackageRegistryResponseMock.Manifest(nameHostName, ["0.0.1"], description));
-            this.listPackageRegistryResponse.set(nameHostName + ":0.0.1", new PackageRegistryResponseMock.HostName(nameHostName, "0.0.1", description));
-
-            this.listPackageRegistryResponse.set(nameSyntaxError, new PackageRegistryResponseMock.Manifest(nameSyntaxError, ["0.0.1"], description));
-            this.listPackageRegistryResponse.set(nameSyntaxError + ":0.0.1", new PackageRegistryResponseMock.SyntaxError(nameSyntaxError, "0.0.1", description));
-
-            this.listPackageRegistryResponse.set(nameExecutionError, new PackageRegistryResponseMock.Manifest(nameExecutionError, ["0.0.1"], description));
-            this.listPackageRegistryResponse.set(nameExecutionError + ":0.0.1", new PackageRegistryResponseMock.ExecutionError(nameExecutionError, "0.0.1", description));
 
             this.listPackageRegistryResponse.set(nameSimpleText + ":0.0.1", new PackageRegistryResponseMock.SimpleText(nameSimpleText, "0.0.1", description, "AA2", "BB2", "CC2"));
         }
@@ -152,10 +156,7 @@ export namespace PackageRegistryMock{
             let nameMathSum:string = "@registry3/mathsum";
             let nameMathSumAsync:string = "@registry3/mathsumasync";
             let nameSimpleText:string = "@registry3/simpletext";
-            let nameHostName:string = "@registry3/hostname";
-            let nameSyntaxError:string = "@registry3/syntaxerror";
-            let nameExecutionError:string = "@registry3/executionerror";
-
+            
             let description: string = "registry3 mock";
 
             this.listPackageRegistryResponse.set(nameMathSum, new PackageRegistryResponseMock.Manifest(nameMathSum, ["0.0.1", "0.0.2", "0.0.3"], description));
@@ -166,15 +167,6 @@ export namespace PackageRegistryMock{
             this.listPackageRegistryResponse.set(nameMathSumAsync, new PackageRegistryResponseMock.Manifest(nameMathSumAsync, ["1.0.0", "2.0.0"], description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":1.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "1.0.0", {"@registry3/mathsum": "0.0.1"}, description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":2.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "2.0.0", {"@registry3/mathsum": "0.*"}, description));
-
-            this.listPackageRegistryResponse.set(nameHostName, new PackageRegistryResponseMock.Manifest(nameHostName, ["0.0.1"], description));
-            this.listPackageRegistryResponse.set(nameHostName + ":0.0.1", new PackageRegistryResponseMock.HostName(nameHostName, "0.0.1", description));
-
-            this.listPackageRegistryResponse.set(nameSyntaxError, new PackageRegistryResponseMock.Manifest(nameSyntaxError, ["0.0.1"], description));
-            this.listPackageRegistryResponse.set(nameSyntaxError + ":0.0.1", new PackageRegistryResponseMock.SyntaxError(nameSyntaxError, "0.0.1", description));
-
-            this.listPackageRegistryResponse.set(nameExecutionError, new PackageRegistryResponseMock.Manifest(nameExecutionError, ["0.0.1"], description));
-            this.listPackageRegistryResponse.set(nameExecutionError + ":0.0.1", new PackageRegistryResponseMock.ExecutionError(nameExecutionError, "0.0.1", description));
 
             this.listPackageRegistryResponse.set(nameSimpleText + ":0.0.1", new PackageRegistryResponseMock.SimpleText(nameSimpleText, "0.0.1", description, "AA3", "BB3", "CC3"));
         }

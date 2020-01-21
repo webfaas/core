@@ -1,6 +1,8 @@
 import * as chai from "chai";
 import * as mocha from "mocha";
 
+import * as os from "os";
+
 import { ModuleManager } from "../lib/ModuleManager/ModuleManager";
 
 import { Log } from "../lib/Log/Log";
@@ -99,6 +101,60 @@ describe("Module Manager - Invoke Async", () => {
             chai.expect(errTry.message).to.eq("execution error");
         }
     })
+
+    it("invokeAsync @registry1/modulewhitoutexport - 0.0.1", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1");
+            chai.expect(responseObj1).to.null;
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.null;
+        }
+    })
+
+    it("invokeAsync @registry1/hostname - 0.0.1", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/hostname", "0.0.1");
+            
+            chai.expect(responseObj1).to.eq(os.hostname());
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.null;
+        }
+    })
+
+    it("invokeAsync @registry1/internalrelativedependency - 0.0.1", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/internalrelativedependency", "0.0.1");
+            
+            chai.expect(responseObj1).to.eq("ABCD");
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.null;
+        }
+    })
+
+    it("invokeAsync @registry1/moduledependencynotfound - 0.0.1", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/moduledependencynotfound", "0.0.1");
+            
+            throw new Error("Sucess!");
+        }
+        catch (errTry) {
+            chai.expect(errTry.message).to.eq("MANIFEST NOT FOUND");
+        }
+    })
+
+    it("invokeAsync @registry1/moduledependencynotdeclared - 0.0.1", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/moduledependencynotdeclared", "0.0.1");
+            
+            throw new Error("Sucess!");
+        }
+        catch (errTry) {
+            chai.expect(errTry.message).to.eq("Cannot find module '@registry/notdeclared'");
+        }
+    })
 })
 
 describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleFiles and clean cache", () => {
@@ -130,6 +186,16 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
         }
         catch (errTry) {
             chai.expect(errTry.message).to.eq("execution error");
+        }
+    })
+
+    it("invokeAsync @registry1/modulewhitoutexport - 0.0.1", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1", "", undefined, "", false);
+            chai.expect(responseObj1).to.null;
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.null;
         }
     })
 })

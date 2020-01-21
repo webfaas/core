@@ -112,6 +112,33 @@ export namespace PackageRegistryResponseMock{
         }
     }
 
+    export class ModuleWhitoutExport extends AbstractBase{
+    
+        constructor(name: string = "modulewhitoutexport", version: string = "0.0.1", description: string = "test"){
+            let moduleText = `
+                var privatefunc1 = function(){
+                    return "test";
+                }
+            `
+
+            super(name, version, description, moduleText);
+        }
+    }
+
+    export class ModuleDependencyNotDeclared extends AbstractBase{
+    
+        constructor(name: string = "moduledependencynotdeclared", version: string = "0.0.1", description: string = "test"){
+            let moduleText = `
+                const dependency = require("@registry/notdeclared");
+                module.exports = function(){
+                    return "A";
+                }
+            `
+
+            super(name, version, description, moduleText);
+        }
+    }
+
     export class MathSumAsync implements IPackageRegistryResponse{
         etag: string;
         packageStore: PackageStore | null = null;
@@ -143,6 +170,94 @@ export namespace PackageRegistryResponseMock{
             nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
     
             var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
+    
+            this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
+        }
+    }
+
+    export class ModuleDependencyNotFound implements IPackageRegistryResponse{
+        etag: string;
+        packageStore: PackageStore | null = null;
+    
+        constructor(name: string = "moduledependencynotfound", version: string = "0.0.1", dependencies: any = {"@registry1/notfound": "0.0.1"}, description: string = "test"){
+            this.etag = "etag" + version;
+            
+            var itemData: IPackageStoreItemData;
+            var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+            var nextPos: number = 0;
+
+            let packageObj = {name:name, version:version, main:"index.js", description: description, dependencies: dependencies};
+            let packageBuffer = Buffer.from(JSON.stringify(packageObj));
+            nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
+
+            let moduleText = `
+                module.exports = function(){
+                    return "A";
+                }
+            `
+
+            let file1Buffer = Buffer.from(moduleText);
+            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+    
+            var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
+    
+            this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
+        }
+    }
+
+    export class InternalRelativeDependency implements IPackageRegistryResponse{
+        etag: string;
+        packageStore: PackageStore | null = null;
+    
+        constructor(name: string = "internalrelativedependency", version: string = "0.0.1", description: string = "test"){
+            this.etag = "etag" + version;
+            
+            var itemData: IPackageStoreItemData;
+            var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+            var nextPos: number = 0;
+
+            let packageObj = {name:name, version:version, main:"index.js", description: description};
+            let packageBuffer = Buffer.from(JSON.stringify(packageObj));
+            nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
+
+            let moduleText1 = `
+                const dependency1 = require("./dependency1.js");
+                const dependency2 = require("./dependency2.json");
+                const dependency3 = require("./folder1");
+                module.exports = function(){
+                    return dependency1() + dependency2.name + dependency3() + "D"; //return => ABCD
+                }
+            `
+
+            let moduleText2 = `
+                module.exports = function(){
+                    return "A";
+                }
+            `
+
+            let moduleText3 = `
+                {"name":"B"}
+            `
+
+            let moduleText4 = `
+                module.exports = function(){
+                    return "C";
+                }
+            `
+
+            let file1Buffer = Buffer.from(moduleText1);
+            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+
+            let file2Buffer = Buffer.from(moduleText2);
+            nextPos = addItemData("dependency1.js", nextPos, file2Buffer, dataPackageItemDataMap);
+
+            let file3Buffer = Buffer.from(moduleText3);
+            nextPos = addItemData("dependency2.json", nextPos, file3Buffer, dataPackageItemDataMap);
+
+            let file4Buffer = Buffer.from(moduleText4);
+            nextPos = addItemData("folder1/index.js", nextPos, file4Buffer, dataPackageItemDataMap);
+    
+            var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer, file2Buffer, file3Buffer, file4Buffer]);
     
             this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
         }
