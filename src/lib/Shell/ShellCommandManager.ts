@@ -73,14 +73,10 @@ export class ShellCommandManager {
      */
     printInfo(): void{
         console.log("COMMANDS:\n");
-        let keys: string[] = Array.from(this.listShellCommand.keys());
-        for (let i = 0; i < keys.length; i ++){
-            let shellCommand: IShellCommand | null = this.getShellCommand(keys[i]);
-            /* istanbul ignore else  */
-            if (shellCommand){
-                this.printLog("", shellCommand.info + "\n");
-            }
-        }
+
+        this.listShellCommand.forEach((shellCommand)=>{
+            this.printLog("", shellCommand.info + "\n");
+        })
     }
 
     /**

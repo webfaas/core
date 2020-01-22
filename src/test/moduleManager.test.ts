@@ -11,6 +11,7 @@ import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreMana
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
+import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -158,6 +159,34 @@ describe("Module Manager", () => {
         }
         catch (errTry) {
             chai.expect(errTry).to.be.an.instanceOf(WebFaasError.InvokeError);
+        }
+    })
+
+    it("importDependencies - simulate dependency - getPackageStore return null ", async function(){
+        try {
+            let packageStoreManager_simulate = new PackageStoreManager(packageRegistryManager_default, undefined, log);
+            let moduleManager_simulate = new ModuleManager(packageStoreManager_simulate, log);
+            let packageStore = await moduleManager_simulate.getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
+            moduleManager_simulate.getPackageStoreManager().getPackageStore = async function(){
+                return null;
+            }
+            chai.expect(packageStore).to.not.null;
+            if (packageStore){
+                await moduleManager_simulate.importDependencies(packageStore);
+            }
+        }
+        catch (errTry) {
+            chai.expect(errTry.name).to.eq("NotFoundError");
+        }
+    })
+
+    it("importDependencies - whitout temporaryContextPackageStoreCache ", async function(){
+        let packageStoreManager1 = new PackageStoreManager(packageRegistryManager_default, undefined, log);
+        let moduleManager1 = new ModuleManager(packageStoreManager1, log);
+        let packageStore = await moduleManager1.getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
+        chai.expect(packageStore).to.not.null;
+        if (packageStore){
+            await moduleManager1.importDependencies(packageStore, undefined);
         }
     })
 })

@@ -38,23 +38,15 @@ export class ClientHTTP  {
      * destroy all agents
      */
     destroy(){
-        Array.from(this.listHttpAgent.keys()).forEach((key) => {
-            let agent = this.listHttpAgent.get(key);
-            /* istanbul ignore else  */
-            if (agent){
-                agent.destroy();
-                this.listHttpAgent.delete(key);
-            }
+        Array.from(this.listHttpAgent.values()).forEach((agent) => {
+            agent.destroy();
         });
-
-        Array.from(this.listHttpsAgent.keys()).forEach((key) => {
-            let agent = this.listHttpsAgent.get(key);
-            /* istanbul ignore else  */
-            if (agent){
-                agent.destroy();
-                this.listHttpsAgent.delete(key);
-            }
+        this.listHttpAgent.clear();
+        
+        Array.from(this.listHttpsAgent.values()).forEach((agent) => {
+            agent.destroy();
         });
+        this.listHttpsAgent.clear();
     }
 
     /**

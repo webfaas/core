@@ -32,6 +32,9 @@ var handleResponse = function(request: http.IncomingMessage, response: http.Serv
             response.end();
         }, 60);
     }
+    else if (request.url === "/destroy"){
+        response.destroy();
+    }
     else{
         response.writeHead(200, {"Content-Type": "text/html"});
         response.write(method + "_OK");
@@ -46,6 +49,7 @@ describe("HTTP", () => {
     var config2 = new ClientHTTPConfig();
     config2.timeout = 10;
     var clientHTTP2 = new ClientHTTP(config2, log);
+    var clientHTTP_destroy = new ClientHTTP(new ClientHTTPConfig(), log);
 
     it("should return response on call", function(done){
         chai.expect(typeof(ClientHTTP.getInstance())).to.eq("object");
@@ -70,6 +74,27 @@ describe("HTTP", () => {
                 chai.expect(resp3.data.toString()).to.eq("GET_OK");
                 chai.expect(resp3.headers["content-type"]).to.eq("text/html");
                 chai.expect(resp3.headers["x-test"]).to.eq("value-test");
+
+                try {
+                    var resp: IClientHTTPResponse = await clientHTTP_destroy.request("http://localhost:" + serverPort + "/destroy");
+                    throw new Error("Sucess!");
+                }
+                catch (errTryDestroy) {
+                    chai.expect(errTryDestroy.code).to.eq("ECONNRESET");
+                }
+
+                try {
+                    let logCrash = new Log();
+                    let clientHTTP_simulate_crash1 = new ClientHTTP(new ClientHTTPConfig(), logCrash);
+                    logCrash.write = function(){
+                        throw new Error("Crash");
+                    }
+                    var resp: IClientHTTPResponse = await clientHTTP_simulate_crash1.request("http://localhost:" + serverPort);
+                    throw new Error("Sucess!");
+                }
+                catch (errTryCrash) {
+                    chai.expect(errTryCrash.message).to.eq("Crash");
+                }
     
                 try {
                     var resp4: IClientHTTPResponse = await clientHTTP2.request("http://localhost:" + serverPort + "/timeout");
@@ -86,6 +111,9 @@ describe("HTTP", () => {
                 chai.expect(resp5.data.toString()).to.eq("GET_OK");
                 chai.expect(resp5.headers["content-type"]).to.eq("text/html");
 
+                clientHTTP1.destroy();
+                clientHTTP2.destroy();
+                //force destroy again
                 clientHTTP1.destroy();
                 clientHTTP2.destroy();
             }
