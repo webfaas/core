@@ -2,7 +2,7 @@ import { IPackageRegistry } from "../../lib/PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../../lib/PackageRegistry/IPackageRegistryResponse";
 import { PackageStore } from "../../lib/PackageStore/PackageStore";
 import { IPackageStoreItemData } from "../../lib/PackageStore/IPackageStoreItemData";
-import { PackageStoreUtil } from "../../lib/PackageStore/PackageStoreUtil";
+import { PackageStoreUtil } from "../../lib/Util/PackageStoreUtil";
 
 export namespace PackageRegistryResponseMock{
     function addItemData(name: string, begin: number, fileBuffer: Buffer, dataPackageItemDataMap: Map<string, IPackageStoreItemData>){

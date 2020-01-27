@@ -12,7 +12,7 @@ import { PackageRegistryManagerItem } from "../lib/PackageRegistryManager/Packag
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../lib/PackageRegistry/IPackageRegistryResponse";
 import { IPackageStoreItemData } from "../lib/PackageStore/IPackageStoreItemData";
-import { PackageStoreUtil } from "../lib/PackageStore/PackageStoreUtil";
+import { PackageStoreUtil } from "../lib/Util/PackageStoreUtil";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){

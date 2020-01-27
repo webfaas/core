@@ -1,5 +1,5 @@
 import { PackageStore } from "../../lib/PackageStore/PackageStore";
-import { PackageStoreUtil } from "../../lib/PackageStore/PackageStoreUtil";
+import { PackageStoreUtil } from "../../lib/Util/PackageStoreUtil";
 
 export namespace PackageStoreMock{
     export class MathSum {

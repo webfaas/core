@@ -12,6 +12,7 @@ import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
+import { SmallSemver } from "../lib/Semver/SmallSemver";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -36,6 +37,13 @@ describe("Module Manager", () => {
         chai.expect(moduleManager2.getPackageStoreManager()).to.eq(packageStoreManager2);
 
         done();
+    })
+
+    it("semver", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+        let semver = new SmallSemver();
+        moduleManager1.setSemver(semver);
+        chai.expect(moduleManager1.getSemver()).to.eq(semver);
     })
 
     it("addObjectToCache", async function(){

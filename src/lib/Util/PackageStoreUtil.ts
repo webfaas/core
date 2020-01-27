@@ -1,6 +1,6 @@
 import * as zlib from "zlib";
-import { IPackageStoreItemData } from "./IPackageStoreItemData";
-import { PackageStore } from "./PackageStore";
+import { IPackageStoreItemData } from "../PackageStore/IPackageStoreItemData";
+import { PackageStore } from "../PackageStore/PackageStore";
 
 export class PackageStoreUtil  {
     public static unzipSync(bufferGZ: Buffer): Buffer {

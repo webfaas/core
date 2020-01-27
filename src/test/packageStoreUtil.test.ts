@@ -3,7 +3,7 @@ import * as mocha from "mocha";
 
 import * as fs from "fs";
 import * as path from "path";
-import { PackageStoreUtil } from "../lib/PackageStore/PackageStoreUtil";
+import { PackageStoreUtil } from "../lib/Util/PackageStoreUtil";
 import { IPackageStoreItemData } from "../lib/PackageStore/IPackageStoreItemData";
 import { IManifest } from "../lib/Manifest/IManifest";
 import { PackageStore } from "../lib/PackageStore/PackageStore";

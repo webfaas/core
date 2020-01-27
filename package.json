@@ -1,6 +1,6 @@
 {
   "name": "@webfaas/webfaas-core",
-  "version": "0.1.0",
+  "version": "0.1.0-ALPHA1",
   "description": "WEBFaaS Framework - Core",
   "main": "lib/Core.js",
   "readmeFilename": "README.md",
@@ -29,10 +29,8 @@
     "url": "https://github.com/webfaas/core.git"
   },
   "dependencies": {
-    "semver": "^6.2"
   },
   "devDependencies": {
-    "@types/semver": "^6.2",
     "@types/chai": "^4.2",
     "@types/mocha": "^5.2",
     "@types/node": "^13.1",

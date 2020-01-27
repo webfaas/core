@@ -1,5 +1,4 @@
 import * as path from "path";
-import * as semver from "semver";
 import { Log } from "../Log/Log";
 import { PackageStore } from "../PackageStore/PackageStore";
 import { PackageStoreManager } from "../PackageStoreManager/PackageStoreManager";
@@ -22,6 +21,8 @@ import { types } from "util"
 import { type } from "os";
 import { PackageStoreItemBufferResponse } from "../PackageStore/PackageStoreItemBufferResponse";
 import { PackageStoreCacheMemory } from "../PackageStoreCache/Memory/PackageStoreCacheMemory";
+import { ISemver } from "../Semver/ISemver";
+import { SmallSemver } from "../Semver/SmallSemver";
 
 const nativeModule = require("module");
 const moduleName = ModuleName.getInstance();
@@ -36,6 +37,7 @@ export class ModuleManager {
     private sandBoxContext: Context = SandBox.SandBoxBuilderContext();
     private cacheByRootPackageStore: Map<string, IPackageStoreCache> = new Map<string, IPackageStoreCache>();
     private cacheCompiledObject: Map<string, ModuleManagerCacheObjectItem> = new Map<string, ModuleManagerCacheObjectItem>();
+    private semver: ISemver = new SmallSemver();
     
     constructor(packageStoreManager?: PackageStoreManager, log?: Log){
         this.log = log || Log.getInstance();
@@ -52,6 +54,13 @@ export class ModuleManager {
         this.moduleCompile = new ModuleCompile(this.log);
 
         this.sandBoxContext = SandBox.SandBoxBuilderContext();
+    }
+
+    getSemver(): ISemver{
+        return this.semver;
+    }
+    setSemver(semver: ISemver){
+        this.semver = semver;
     }
 
     temporaryContextPackageStoreCacheBuild(): IPackageStoreCache{
@@ -114,13 +123,13 @@ export class ModuleManager {
     resolveVersion(packageName: string, packageVersion: string): Promise<string>{
         return new Promise(async (resolve, reject) => {
             try {
-                if (semver.valid(packageVersion)){
+                if (this.getSemver().valid(packageVersion)){
                     resolve(packageVersion);
                 }
                 else{
                     var smallManifestResponse: SmallManifest | null = await this.getSmallManifest(packageName);
                     if (smallManifestResponse){
-                        var versionTO: string = semver.maxSatisfying(smallManifestResponse.versionsArray, packageVersion) || "";
+                        var versionTO: string = this.getSemver().maxSatisfying(smallManifestResponse.versionsArray, packageVersion) || "";
                         if (versionTO){
                             resolve(versionTO);
                         }
