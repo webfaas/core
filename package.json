@@ -28,8 +28,7 @@
     "type": "git",
     "url": "https://github.com/webfaas/core.git"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.2",
     "@types/mocha": "^5.2",

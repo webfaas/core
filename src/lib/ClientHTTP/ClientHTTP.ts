@@ -28,13 +28,6 @@ export class ClientHTTP  {
     }
 
     /**
-     * return singleton instance
-     */
-    static getInstance(): ClientHTTP{
-        return clientHTTPInstance;
-    }
-
-    /**
      * destroy all agents
      */
     destroy(){
@@ -171,5 +164,3 @@ export class ClientHTTP  {
         })
     }
 }
-
-const clientHTTPInstance: ClientHTTP = new ClientHTTP();

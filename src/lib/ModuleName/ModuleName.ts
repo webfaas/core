@@ -8,20 +8,13 @@ export class ModuleName {
     }
 
     /**
-     * return singleton instance
-     */
-    static getInstance(): ModuleName{
-        return moduleNameInstance;
-    }
-
-    /**
      * return parse name of module
      * @param moduleName name of module
      * @param fileName name of file
      */
     parse(moduleName: string, fileName: string): IModuleNameData{
         var responseObj = {} as IModuleNameData;
-        var listToken: Array<String> = moduleName.split("/");
+        var listToken: Array<string> = moduleName.split("/");
     
         if (fileName){
             responseObj.fullName = moduleName + "/" + fileName;
@@ -46,6 +39,7 @@ export class ModuleName {
                 responseObj.moduleName = moduleName;
                 responseObj.fileName = fileName;
             }
+            responseObj.moduleNameWhitOutScopeName = listToken[1];
         }
         else{
             responseObj.scopeName = "default";
@@ -62,10 +56,9 @@ export class ModuleName {
                 responseObj.moduleName = moduleName;
                 responseObj.fileName = fileName;
             }
+            responseObj.moduleNameWhitOutScopeName = responseObj.moduleName;
         }
     
         return responseObj;
     }
 }
-
-const moduleNameInstance:ModuleName = new ModuleName();

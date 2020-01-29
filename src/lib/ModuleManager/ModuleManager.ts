@@ -25,7 +25,7 @@ import { ISemver } from "../Semver/ISemver";
 import { SmallSemver } from "../Semver/SmallSemver";
 
 const nativeModule = require("module");
-const moduleName = ModuleName.getInstance();
+const moduleName = new ModuleName();
 
 /**
  * manager Module

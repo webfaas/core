@@ -62,3 +62,9 @@ export class Core {
         this.pluginManager = new PluginManager(this);
     }
 }
+
+export { PackageStoreUtil } from "./Util/PackageStoreUtil";
+export { ClientHTTP } from "./ClientHTTP/ClientHTTP";
+export { IClientHTTPResponse } from "./ClientHTTP/IClientHTTPResponse";
+export { ClientHTTPConfig } from "./ClientHTTP/ClientHTTPConfig";
+export { ModuleName } from "./ModuleName/ModuleName";

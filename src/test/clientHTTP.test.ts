@@ -50,10 +50,9 @@ describe("HTTP", () => {
     config2.timeout = 10;
     var clientHTTP2 = new ClientHTTP(config2, log);
     var clientHTTP_destroy = new ClientHTTP(new ClientHTTPConfig(), log);
+    var clientHTTP_default = new ClientHTTP();
 
     it("should return response on call", function(done){
-        chai.expect(typeof(ClientHTTP.getInstance())).to.eq("object");
-
         var server1: http.Server | null = null;
 
         server1 = http.createServer(handleResponse);

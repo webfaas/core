@@ -7,6 +7,7 @@ import { exec } from "child_process";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { Log } from "../lib/Log/Log";
+import { ClientHTTPConfig } from "../lib/ClientHTTP/ClientHTTPConfig";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
