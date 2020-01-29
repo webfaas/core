@@ -63,8 +63,25 @@ export class Core {
     }
 }
 
+//Util
 export { PackageStoreUtil } from "./Util/PackageStoreUtil";
+export { ModuleNameUtil } from "./Util/ModuleNameUtil";
+
+//ClientHTTP
 export { ClientHTTP } from "./ClientHTTP/ClientHTTP";
 export { IClientHTTPResponse } from "./ClientHTTP/IClientHTTPResponse";
 export { ClientHTTPConfig } from "./ClientHTTP/ClientHTTPConfig";
-export { ModuleName } from "./ModuleName/ModuleName";
+
+//Log
+export { Log } from "./Log/Log";
+
+//PackageRegistry
+export { IPackageRegistry } from "./PackageRegistry/IPackageRegistry";
+export { IPackageRegistryResponse } from "./PackageRegistry/IPackageRegistryResponse";
+
+//Manifest
+export { IManifest } from "./Manifest/IManifest";
+
+//PackageStore
+export { IPackageStoreItemData } from "./PackageStore/IPackageStoreItemData";
+export { PackageStore } from "./PackageStore/PackageStore";

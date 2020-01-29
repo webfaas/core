@@ -1,18 +1,18 @@
-import { IModuleNameData } from "./IModuleName";
+export interface IModuleNameData {
+    fullName: string;
+    scopeName: string,
+    moduleName: string,
+    moduleNameWhitOutScopeName: string,
+    fileName: string
+}
 
-/**
- * ModuleName
- */
-export class ModuleName {
-    constructor() {
-    }
-
+export class ModuleNameUtil {
     /**
      * return parse name of module
      * @param moduleName name of module
      * @param fileName name of file
      */
-    parse(moduleName: string, fileName: string): IModuleNameData{
+    static parse(moduleName: string, fileName: string): IModuleNameData{
         var responseObj = {} as IModuleNameData;
         var listToken: Array<string> = moduleName.split("/");
     

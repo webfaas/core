@@ -1,5 +1,6 @@
 import * as path from "path";
 import { Log } from "../Log/Log";
+import { types } from "util"
 import { PackageStore } from "../PackageStore/PackageStore";
 import { PackageStoreManager } from "../PackageStoreManager/PackageStoreManager";
 import { PackageRegistryManager } from "../PackageRegistryManager/PackageRegistryManager";
@@ -13,19 +14,15 @@ import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { ModuleCompileManifestData } from "../ModuleCompile/ModuleCompileManifestData";
 import { ModuleManagerRequireContextData } from "./ModuleManagerRequireContextData";
 import { ModuleManagerCacheObjectItem } from "./ModuleManagerCacheObjectItem";
-import { ModuleName } from "../ModuleName/ModuleName";
 import { SmallManifest } from "../Manifest/SmallManifest";
-import { IModuleNameData } from "../ModuleName/IModuleName";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
-import { types } from "util"
-import { type } from "os";
 import { PackageStoreItemBufferResponse } from "../PackageStore/PackageStoreItemBufferResponse";
 import { PackageStoreCacheMemory } from "../PackageStoreCache/Memory/PackageStoreCacheMemory";
 import { ISemver } from "../Semver/ISemver";
 import { SmallSemver } from "../Semver/SmallSemver";
+import { ModuleNameUtil, IModuleNameData } from "../Util/ModuleNameUtil";
 
 const nativeModule = require("module");
-const moduleName = new ModuleName();
 
 /**
  * manager Module
@@ -203,7 +200,7 @@ export class ModuleManager {
                 //require external package
                 //
 
-                var nameParsedObj: IModuleNameData = moduleName.parse(name, "");
+                var nameParsedObj: IModuleNameData = ModuleNameUtil.parse(name, "");
                 
                 //if not version exist, seek version in parent package.json
                 if (version === "" && moduleManagerRequireContextData.parentPackageStoreName){
@@ -367,7 +364,7 @@ export class ModuleManager {
     import(name: string, version: string, etag?: string, registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<Object | null>{
         return new Promise(async (resolve, reject) => {
             try {
-                var nameParsedObj: IModuleNameData = moduleName.parse(name, "");
+                var nameParsedObj: IModuleNameData = ModuleNameUtil.parse(name, "");
                 var responseModuleObj : Object | null;
                 var versionResolved: string = await this.resolveVersion(nameParsedObj.moduleName, version);
 
