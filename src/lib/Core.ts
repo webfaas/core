@@ -69,11 +69,12 @@ export { ModuleNameUtil } from "./Util/ModuleNameUtil";
 
 //ClientHTTP
 export { ClientHTTP } from "./ClientHTTP/ClientHTTP";
-export { IClientHTTPResponse } from "./ClientHTTP/IClientHTTPResponse";
 export { ClientHTTPConfig } from "./ClientHTTP/ClientHTTPConfig";
+export { IClientHTTPResponse } from "./ClientHTTP/IClientHTTPResponse";
 
 //Log
 export { Log } from "./Log/Log";
+export { LogLevelEnum } from "./Log/ILog";
 
 //PackageRegistry
 export { IPackageRegistry } from "./PackageRegistry/IPackageRegistry";
@@ -83,5 +84,11 @@ export { IPackageRegistryResponse } from "./PackageRegistry/IPackageRegistryResp
 export { IManifest } from "./Manifest/IManifest";
 
 //PackageStore
-export { IPackageStoreItemData } from "./PackageStore/IPackageStoreItemData";
 export { PackageStore } from "./PackageStore/PackageStore";
+export { IPackageStoreItemData } from "./PackageStore/IPackageStoreItemData";
+
+//Plugin
+export { IPlugin } from "./PluginManager/IPlugin";
+
+//ModuleManager
+export { ModuleManager } from "./ModuleManager/ModuleManager";
