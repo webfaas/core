@@ -70,17 +70,28 @@ export class PackageStoreUtil  {
         //116	8	Group's numeric user ID
         //124	12	File size in bytes (octal base)
 
+        /*
+        if (bufferTar.subarray(0, 17).toString() === "pax_global_header"){
+            offset = 512 * 3; //ignore pax header - https://marc.info/?l=linux-kernel&m=111909182607985&w=2
+        }
+        */
+
         do{
             var item = {} as IPackageStoreItemData;
             var nameBuffer = bufferTar.subarray(offset, offset + 100);
             item.name = nameBuffer.subarray(0, nameBuffer.indexOf(0)).toString();
             item.name = item.name.substring(item.name.indexOf("/") + 1); //remove prefix. ex: package/
             item.size = parseInt(bufferTar.subarray(offset + 124, offset + 136).toString(), 8);
-            item.begin = offset + 512; //header -> block 512 Bytes
             
-            dataPackageItemDataMap.set(item.name, item);
+            if (item.size){
+                item.begin = offset + 512; //header -> block 512 Bytes
+                dataPackageItemDataMap.set(item.name, item);
+                offset = offset + 512 + item.size + (512 - (item.size % 512)); //512Bytes(header block) + XBytes(data item block - multiple of 512 Bytes)
+            }
+            else{
+                offset = offset + 512; //size(0) => header only
+            }
 
-            offset = offset + 512 + item.size + (512 - (item.size % 512)); //512Bytes(header block) + XBytes(data item block - multiple of 512 Bytes)
         } while (offset < size);
         
         return dataPackageItemDataMap;

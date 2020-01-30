@@ -164,3 +164,125 @@ describe("PackageStoreUtil", () => {
         chai.expect(targetPackageStoreBase.getMainBuffer()?.buffer.toString()).to.eq(PackageStoreMock.MathSumIndexInFolder.moduleIndexBuffer.toString());
     })
 })
+
+describe("PackageStoreUtil - Tarball", () => {
+    it("buildPackageStoreFromTarGzBuffer - mathsum - github", function(){
+        let bufferFile: Buffer = fs.readFileSync(path.join(__dirname, "data/tarball/mathsum.github.tar.gz"));
+
+        let packageStore = PackageStoreUtil.buildPackageStoreFromTarGzBuffer("mathsum", "0.0.1", "etag1", bufferFile);
+
+        let listKeys = Array.from(packageStore.getDataPackageItemDataMap().keys());
+        
+        chai.expect(listKeys).to.eql(["pax_global_header", ".gitignore", "README.md", "package.json", "src/lib/index.js", "src/schema/index.js", "src/test/schema.js", "src/test/sum.js"]);
+
+        chai.expect(packageStore.getName()).to.eq("mathsum");
+        chai.expect(packageStore.getVersion()).to.eq("0.0.1");
+        chai.expect(packageStore.getEtag()).to.eq("etag1");
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("package.json");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("package.json");
+            chai.expect(itemResponse.extension).to.eq(".json");
+            chai.expect(itemResponse.buffer.toString().indexOf("@webfaaslabs/mathsum")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("src/lib/index.js");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("src/lib/index.js");
+            chai.expect(itemResponse.extension).to.eq(".js");
+            chai.expect(itemResponse.buffer.toString().indexOf("return x + y;")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("src/test/sum.js");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("src/test/sum.js");
+            chai.expect(itemResponse.extension).to.eq(".js");
+            chai.expect(itemResponse.buffer.toString().indexOf("assert.strictEqual(moduleTest(2,3), 5);")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("src/test/schema.js");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("src/test/schema.js");
+            chai.expect(itemResponse.extension).to.eq(".js");
+            chai.expect(itemResponse.buffer.toString().indexOf('assert.strictEqual(schema.input.type, "array");')).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("src/schema/index.js");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("src/schema/index.js");
+            chai.expect(itemResponse.extension).to.eq(".js");
+            chai.expect(itemResponse.buffer.toString().indexOf("module.exports.output = {")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer(".gitignore");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq(".gitignore");
+            chai.expect(itemResponse.extension).to.eq(".gitignore");
+            chai.expect(itemResponse.buffer.toString().indexOf("node_modules")).to.gt(-1);
+        }
+        
+        chai.expect(packageStore.getMainBuffer()?.buffer.toString().indexOf("return x + y;")).to.gt(-1);
+    })
+
+    it("buildPackageStoreFromTarGzBuffer - mathsumasync - npm", function(){
+        let bufferFile: Buffer = fs.readFileSync(path.join(__dirname, "data/tarball/mathsumasync.npm.tgz"));
+
+        let packageStore = PackageStoreUtil.buildPackageStoreFromTarGzBuffer("mathsum", "0.0.1", "etag1", bufferFile);
+
+        let listKeys = Array.from(packageStore.getDataPackageItemDataMap().keys());
+        
+        chai.expect(listKeys).to.eql(["index.js", "schema/schema.js", "package.json", "index.d.ts", "schema/schema.d.ts"]);
+
+        chai.expect(packageStore.getName()).to.eq("mathsum");
+        chai.expect(packageStore.getVersion()).to.eq("0.0.1");
+        chai.expect(packageStore.getEtag()).to.eq("etag1");
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("package.json");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("package.json");
+            chai.expect(itemResponse.extension).to.eq(".json");
+            chai.expect(itemResponse.buffer.toString().indexOf("@webfaaslabs/mathsumasync")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("index.js");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("index.js");
+            chai.expect(itemResponse.extension).to.eq(".js");
+            chai.expect(itemResponse.buffer.toString().indexOf("mathSum(event.x, event.y)")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("schema/schema.js");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("schema/schema.js");
+            chai.expect(itemResponse.extension).to.eq(".js");
+            chai.expect(itemResponse.buffer.toString().indexOf("use strict")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("index.d.ts");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("index.d.ts");
+            chai.expect(itemResponse.extension).to.eq(".ts");
+            chai.expect(itemResponse.buffer.toString().indexOf("export declare function sum(event: schema.sum.input): Promise<schema.sum.output>")).to.gt(-1);
+        }
+
+        var itemResponse: PackageStoreItemBufferResponse | null = packageStore.getItemBuffer("schema/schema.d.ts");
+        chai.expect(itemResponse).to.be.an.instanceof(Object);
+        if (itemResponse){
+            chai.expect(itemResponse.name).to.eq("schema/schema.d.ts");
+            chai.expect(itemResponse.extension).to.eq(".ts");
+            chai.expect(itemResponse.buffer.toString().indexOf("declare namespace schema.sum")).to.gt(-1);
+        }
+
+        chai.expect(packageStore.getMainBuffer()?.buffer.toString().indexOf("mathSum(event.x, event.y)")).to.gt(-1);
+    })
+})
