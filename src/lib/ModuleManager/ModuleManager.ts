@@ -4,7 +4,7 @@ import { types } from "util"
 import { PackageStore } from "../PackageStore/PackageStore";
 import { PackageStoreManager } from "../PackageStoreManager/PackageStoreManager";
 import { PackageRegistryManager } from "../PackageRegistryManager/PackageRegistryManager";
-import { IPackageStoreCache } from "../PackageStoreCache/IPackageStoreCache";
+import { IPackageStoreCacheSync } from "../PackageStoreCache/IPackageStoreCacheSync";
 import { IManifest } from "../Manifest/IManifest";
 import { ModuleCompile } from "../ModuleCompile/ModuleCompile";
 import { SandBox } from "../ModuleCompile/SandBox";
@@ -17,7 +17,7 @@ import { ModuleManagerCacheObjectItem } from "./ModuleManagerCacheObjectItem";
 import { SmallManifest } from "../Manifest/SmallManifest";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
 import { PackageStoreItemBufferResponse } from "../PackageStore/PackageStoreItemBufferResponse";
-import { PackageStoreCacheMemory } from "../PackageStoreCache/Memory/PackageStoreCacheMemory";
+import { PackageStoreCacheMemorySync } from "../PackageStoreCache/Memory/PackageStoreCacheMemorySync";
 import { ISemver } from "../Semver/ISemver";
 import { SmallSemver } from "../Semver/SmallSemver";
 import { ModuleNameUtil, IModuleNameData } from "../Util/ModuleNameUtil";
@@ -32,7 +32,7 @@ export class ModuleManager {
     private moduleCompile: ModuleCompile;
     private packageStoreManager: PackageStoreManager;
     private sandBoxContext: Context = SandBox.SandBoxBuilderContext();
-    private cacheByRootPackageStore: Map<string, IPackageStoreCache> = new Map<string, IPackageStoreCache>();
+    private cacheByRootPackageStore: Map<string, IPackageStoreCacheSync> = new Map<string, IPackageStoreCacheSync>();
     private cacheCompiledObject: Map<string, ModuleManagerCacheObjectItem> = new Map<string, ModuleManagerCacheObjectItem>();
     private semver: ISemver = new SmallSemver();
     
@@ -60,8 +60,8 @@ export class ModuleManager {
         this.semver = semver;
     }
 
-    temporaryContextPackageStoreCacheBuild(): IPackageStoreCache{
-        return new PackageStoreCacheMemory();
+    temporaryContextPackageStoreCacheBuild(): IPackageStoreCacheSync{
+        return new PackageStoreCacheMemorySync();
     }
 
     addObjectToCache(packageName: string, packageVersion: string, itemKey: string, obj: Object): void{
@@ -156,7 +156,7 @@ export class ModuleManager {
         }
 
         //find packageStore in cache
-        var cacheRootPackageStore: IPackageStoreCache | undefined = this.cacheByRootPackageStore.get(moduleManagerRequireContextData.rootPackageStoreKey);
+        var cacheRootPackageStore: IPackageStoreCacheSync | undefined = this.cacheByRootPackageStore.get(moduleManagerRequireContextData.rootPackageStoreKey);
         if (cacheRootPackageStore){
             let codeBufferResponse: PackageStoreItemBufferResponse | null = null;
             //var codeBuffer: Buffer | null = null;
@@ -176,7 +176,7 @@ export class ModuleManager {
                         return responseObj;
                     }
 
-                    let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
+                    let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
                     if (parentPackageStore){
                         codeBufferResponse = parentPackageStore.getItemBuffer(internalFileFullPath);
                         moduleCompileManifestData = new ModuleCompileManifestData(
@@ -204,7 +204,7 @@ export class ModuleManager {
                 
                 //if not version exist, seek version in parent package.json
                 if (version === "" && moduleManagerRequireContextData.parentPackageStoreName){
-                    let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
+                    let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
                     if (parentPackageStore){
                         let parentPackageManifest: IManifest | null = parentPackageStore.getManifest();
                         if (parentPackageManifest && parentPackageManifest.dependencies){
@@ -219,7 +219,7 @@ export class ModuleManager {
                     return responseObj;
                 }
 
-                let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStoreSync(nameParsedObj.moduleName, version);
+                let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(nameParsedObj.moduleName, version);
                 if (packageStore){
                     if (nameParsedObj.fileName){
                         codeBufferResponse = packageStore.getItemBuffer(nameParsedObj.fileName);
@@ -307,7 +307,7 @@ export class ModuleManager {
      * @param packageStore 
      * @param contextCache 
      */
-    importDependencies(packageStore: PackageStore, temporaryContextPackageStoreCache?: IPackageStoreCache): Promise<null>{
+    importDependencies(packageStore: PackageStore, temporaryContextPackageStoreCache?: IPackageStoreCacheSync): Promise<null>{
         return new Promise(async (resolve, reject) => {
             try {
                 var packageManifestObj: IManifest | null = packageStore.getManifest();

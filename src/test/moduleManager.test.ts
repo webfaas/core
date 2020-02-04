@@ -11,8 +11,9 @@ import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreMana
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
-import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
 import { SmallSemver } from "../lib/Semver/SmallSemver";
+import { ModuleManagerRequireContextData } from "../lib/ModuleManager/ModuleManagerRequireContextData";
+import { ModuleCompileManifestData } from "../lib/ModuleCompile/ModuleCompileManifestData";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -308,5 +309,51 @@ describe("Module Manager - Import", () => {
         catch (errTry) {
             chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
         }
+    })
+})
+
+
+
+describe("Module Manager - requireSync", () => {
+    it("requireSync @registry1/mathsum - 0.*", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+
+        //name, version, moduleManagerRequireContextData, parentModuleCompileManifestData
+        let parentModuleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsum", "0.0.1", "mainfile");
+
+        let moduleManagerRequireContextData = new ModuleManagerRequireContextData("@registry1/mathsum:0.0.1");
+        moduleManagerRequireContextData.parentPackageStoreName = "@registry1/mathsum";
+        moduleManagerRequireContextData.parentPackageStoreVersion = "0.0.1";
+
+        let moduleManagerRequireContextData_parentnotexist = new ModuleManagerRequireContextData("@registry1/mathsum:0.0.1");
+        moduleManagerRequireContextData_parentnotexist.parentPackageStoreName = "notexist";
+        moduleManagerRequireContextData_parentnotexist.parentPackageStoreVersion = "0.0.1";
+            
+        let responseObj1: any = moduleManager1.requireSync("@registry1/mathsum", "0.0.1", moduleManagerRequireContextData, parentModuleCompileManifestData);
+        chai.expect(responseObj1).to.null;
+
+        let responseObj2: any = moduleManager1.requireSync("@registry1/mathsum", "0.0.1", moduleManagerRequireContextData);
+        chai.expect(responseObj2).to.null;
+        
+        let responseObj3: any = await moduleManager1.import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
+        chai.expect(responseObj3(2,3)).to.eq(5);
+
+        
+        let responseObj4_a: any = moduleManager1.requireSync("@registry1/mathsum", "", moduleManagerRequireContextData_parentnotexist, parentModuleCompileManifestData);
+        chai.expect(responseObj4_a).to.null;
+        let responseObj4_b: any = moduleManager1.requireSync("@registry1/mathsum", "0.0.1", moduleManagerRequireContextData_parentnotexist, parentModuleCompileManifestData);
+        chai.expect(responseObj4_b(2,3)).to.eq(5);
+
+        let responseObj5_a: any = moduleManager1.requireSync("./index.js", "", moduleManagerRequireContextData, parentModuleCompileManifestData);
+        chai.expect(responseObj5_a(2,3)).to.eq(5);
+        let responseObj5_b: any = moduleManager1.requireSync("./index.js", "0.0.1", moduleManagerRequireContextData, parentModuleCompileManifestData);
+        chai.expect(responseObj5_b(2,3)).to.eq(5);
+
+        let responseObj6_a: any = moduleManager1.requireSync("./index.js", "", moduleManagerRequireContextData_parentnotexist, parentModuleCompileManifestData);
+        chai.expect(responseObj6_a).to.null;
+        let responseObj6_b: any = moduleManager1.requireSync("./index.js", "0.0.1", moduleManagerRequireContextData_parentnotexist, parentModuleCompileManifestData);
+        chai.expect(responseObj6_b).to.null;
+
+        //chai.expect(responseObj1(2,3)).to.eq(5);
     })
 })

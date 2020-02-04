@@ -92,3 +92,6 @@ export { IPlugin } from "./PluginManager/IPlugin";
 
 //ModuleManager
 export { ModuleManager } from "./ModuleManager/ModuleManager";
+
+//WebFaasError
+export { WebFaasError } from "./WebFaasError/WebFaasError";

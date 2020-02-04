@@ -6,12 +6,12 @@ import * as path from "path";
 import { PackageStore } from "../lib/PackageStore/PackageStore";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 
-import { PackageStoreCacheMemory } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemory";
+import { PackageStoreCacheMemorySync } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemorySync";
 import { PackageStoreCacheMemoryConfig } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemoryConfig";
 
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
-import { IPackageStoreCache } from "../lib/PackageStoreCache/IPackageStoreCache";
+import { IPackageStoreCacheSync } from "../lib/PackageStoreCache/IPackageStoreCacheSync";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
 
@@ -20,8 +20,8 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("PackageStore Cache Memory", () => {
     it("should return object on call", function(){
-        var packageStoreCacheMemory1 = new PackageStoreCacheMemory();
-        var packageStoreCacheMemory2 = new PackageStoreCacheMemory(new PackageStoreCacheMemoryConfig());
+        var packageStoreCacheMemory1 = new PackageStoreCacheMemorySync();
+        var packageStoreCacheMemory2 = new PackageStoreCacheMemorySync(new PackageStoreCacheMemoryConfig());
         chai.expect(packageStoreCacheMemory1.config).to.be.an.instanceof(Object);
         chai.expect(packageStoreCacheMemory2.config).to.be.an.instanceof(Object);
     })
@@ -40,21 +40,21 @@ describe("PackageStore Cache Memory Config", () => {
 
 describe("PackageStore Cache Memory Manifest", () => {
     var packageRegistryManager: PackageRegistryManager = new PackageRegistryManager(log);
-    var packageStoreCacheMemory: IPackageStoreCache = new PackageStoreCacheMemory(new PackageStoreCacheMemoryConfig());
+    var packageStoreCacheMemory: IPackageStoreCacheSync = new PackageStoreCacheMemorySync(new PackageStoreCacheMemoryConfig());
     var packageRegistry = new PackageRegistryMock.PackageRegistry1();
+    
     packageRegistryManager.addRegistry("registryMock", "", packageRegistry);
 
     it("should return object on call", function(done){
         (async function(){
             try {
                 var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("@registry1/mathsum"); //last version -> 0.0.3
-                var packageStoreCacheMemoryAsync: PackageStore | null;
                 var packageStoreCacheMemorySync: PackageStore | null;
 
                 chai.expect(packageStoreBase).to.be.an.instanceof(Object);
             
                 if (packageStoreBase){
-                    var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
+                    var packageStoreCacheMemory = new PackageStoreCacheMemorySync();
     
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
@@ -69,25 +69,14 @@ describe("PackageStore Cache Memory Manifest", () => {
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStoreBase.getSize());
             
-                    //async
-                    packageStoreCacheMemoryAsync = await packageStoreCacheMemory.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
-                    chai.expect(packageStoreCacheMemoryAsync).to.be.an.instanceof(Object);
-
                     //sync
-                    packageStoreCacheMemorySync = packageStoreCacheMemory.getPackageStoreSync(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    packageStoreCacheMemorySync = packageStoreCacheMemory.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
                     chai.expect(packageStoreCacheMemorySync).to.be.an.instanceof(Object);
             
-                    if (packageStoreCacheMemoryAsync && packageStoreCacheMemorySync){
+                    if (packageStoreCacheMemorySync){
                         var bufferBase = packageStoreBase.getItemBuffer("package.json");
                         chai.expect(bufferBase?.buffer).to.be.an.instanceof(Buffer);
                         if (bufferBase){
-                            //async
-                            var bufferMemoryAsync = packageStoreCacheMemoryAsync.getItemBuffer("package.json");
-                            chai.expect(bufferMemoryAsync?.buffer).to.be.an.instanceof(Buffer);
-                            if (bufferMemoryAsync){
-                                chai.expect(bufferBase.buffer.equals(bufferMemoryAsync.buffer)).to.eq(true);
-                            }
-
                             //sync
                             var bufferMemorySync = packageStoreCacheMemorySync.getItemBuffer("package.json");
                             chai.expect(bufferMemorySync?.buffer).to.be.an.instanceof(Buffer);
@@ -117,14 +106,9 @@ describe("PackageStore Cache Memory Manifest", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
+                var packageStoreCacheMemory = new PackageStoreCacheMemorySync();
                 
-                //async
-                var packageStoreAsync: PackageStore | null = await packageStoreCacheMemory.getPackageStore("notfound***");
-                chai.expect(packageStoreAsync).to.be.null;
-
-                //sync
-                var packageStoreSync: PackageStore | null = packageStoreCacheMemory.getPackageStoreSync("notfound***");
+                var packageStoreSync: PackageStore | null = packageStoreCacheMemory.getPackageStore("notfound***");
                 chai.expect(packageStoreSync).to.be.null;
 
                 done();
@@ -145,13 +129,12 @@ describe("PackageStore Cache Memory Package", () => {
         (async function(){
             try {
                 var packageStoreBase: PackageStore | null = await packageRegistryManager.getPackageStore("@registry1/mathsum", "0.0.1");
-                var packageStoreCacheMemoryAsync: PackageStore | null;
                 var packageStoreCacheMemorySync: PackageStore | null;
 
                 chai.expect(packageStoreBase).to.be.an.instanceof(Object);
             
                 if (packageStoreBase){
-                    var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
+                    var packageStoreCacheMemory = new PackageStoreCacheMemorySync();
     
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
@@ -161,15 +144,11 @@ describe("PackageStore Cache Memory Package", () => {
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStoreBase.getSize());
             
-                    //async
-                    packageStoreCacheMemoryAsync = await packageStoreCacheMemory.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
-                    chai.expect(packageStoreCacheMemoryAsync).to.be.an.instanceof(Object);
-
                     //sync
-                    packageStoreCacheMemorySync = packageStoreCacheMemory.getPackageStoreSync(packageStoreBase.getName(), packageStoreBase.getVersion());
+                    packageStoreCacheMemorySync = packageStoreCacheMemory.getPackageStore(packageStoreBase.getName(), packageStoreBase.getVersion());
                     chai.expect(packageStoreCacheMemorySync).to.be.an.instanceof(Object);
 
-                    if (packageStoreCacheMemoryAsync && packageStoreCacheMemorySync){
+                    if (packageStoreCacheMemorySync){
                         var keys: Array<string> = [];
                         packageStoreBase.getDataPackageItemDataMap().forEach(function(item){
                             keys.push(item.name);
@@ -180,13 +159,6 @@ describe("PackageStore Cache Memory Package", () => {
                             var bufferBase = packageStoreBase.getItemBuffer(key);
                             chai.expect(bufferBase?.buffer).to.be.an.instanceof(Buffer);
                             if (bufferBase){
-                                //async
-                                var bufferMemoryAsync = packageStoreCacheMemoryAsync.getItemBuffer(key);
-                                chai.expect(bufferMemoryAsync?.buffer).to.be.an.instanceof(Buffer);
-                                if (bufferMemoryAsync){
-                                    chai.expect(bufferBase.buffer.equals(bufferMemoryAsync.buffer)).to.eq(true);
-                                }
-
                                 //sync
                                 var bufferMemorySync = packageStoreCacheMemorySync.getItemBuffer(key);
                                 chai.expect(bufferMemorySync?.buffer).to.be.an.instanceof(Buffer);
@@ -213,14 +185,9 @@ describe("PackageStore Cache Memory Package", () => {
     it("should return null on call", function(done){
         (async function(){
             try {
-                var packageStoreCacheMemory: PackageStoreCacheMemory = new PackageStoreCacheMemory();
+                var packageStoreCacheMemory = new PackageStoreCacheMemorySync();
 
-                //async
-                var packageStoreAsync: PackageStore | null = await packageStoreCacheMemory.getPackageStore("notfound***", "0.0.1");
-                chai.expect(packageStoreAsync).to.be.null;
-
-                //sync
-                var packageStoreSync: PackageStore | null = packageStoreCacheMemory.getPackageStoreSync("notfound***", "0.0.1");
+                var packageStoreSync: PackageStore | null = packageStoreCacheMemory.getPackageStore("notfound***", "0.0.1");
                 chai.expect(packageStoreSync).to.be.null;
 
                 done();
