@@ -55,9 +55,7 @@ export class Core {
         this.log = Log.getInstance();
         
         this.packageRegistryManager = new PackageRegistryManager(this.log);
-        //let diskPackageStore = new PackageStoreCacheDisk();
-        //this.packageStoreManager = new PackageStoreManager(packageRegistryManager, diskPackageStore, this.log);
-        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, undefined, this.log);
+        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
         this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
         this.pluginManager = new PluginManager(this);
     }

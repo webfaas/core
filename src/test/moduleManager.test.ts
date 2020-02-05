@@ -26,7 +26,7 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 
 var packageRegistryManager_default: PackageRegistryManager = new PackageRegistryManager(log);
 loadDefaultRegistries(packageRegistryManager_default, log);
-var packageStoreManager_default = new PackageStoreManager(packageRegistryManager_default, undefined, log);
+var packageStoreManager_default = new PackageStoreManager(packageRegistryManager_default, log);
 
 describe("Module Manager", () => {
     it("constructor", function(done){
@@ -173,7 +173,7 @@ describe("Module Manager", () => {
 
     it("importDependencies - simulate dependency - getPackageStore return null ", async function(){
         try {
-            let packageStoreManager_simulate = new PackageStoreManager(packageRegistryManager_default, undefined, log);
+            let packageStoreManager_simulate = new PackageStoreManager(packageRegistryManager_default, log);
             let moduleManager_simulate = new ModuleManager(packageStoreManager_simulate, log);
             let packageStore = await moduleManager_simulate.getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
             moduleManager_simulate.getPackageStoreManager().getPackageStore = async function(){
@@ -190,7 +190,7 @@ describe("Module Manager", () => {
     })
 
     it("importDependencies - whitout temporaryContextPackageStoreCache ", async function(){
-        let packageStoreManager1 = new PackageStoreManager(packageRegistryManager_default, undefined, log);
+        let packageStoreManager1 = new PackageStoreManager(packageRegistryManager_default, log);
         let moduleManager1 = new ModuleManager(packageStoreManager1, log);
         let packageStore = await moduleManager1.getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
         chai.expect(packageStore).to.not.null;

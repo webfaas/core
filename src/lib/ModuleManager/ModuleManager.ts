@@ -45,7 +45,7 @@ export class ModuleManager {
         else{
             let packageRegistryManager = new PackageRegistryManager(this.log);
 
-            this.packageStoreManager = new PackageStoreManager(packageRegistryManager, undefined, this.log);
+            this.packageStoreManager = new PackageStoreManager(packageRegistryManager, this.log);
         }
 
         this.moduleCompile = new ModuleCompile(this.log);

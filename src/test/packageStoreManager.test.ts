@@ -22,22 +22,24 @@ var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("Package Store Manager", () => {
-    var packageStoreManager_withoutcache: PackageStoreManager = new PackageStoreManager(undefined, undefined, log);
+    var packageStoreManager_withoutcache: PackageStoreManager = new PackageStoreManager(undefined, log);
     loadDefaultRegistries(packageStoreManager_withoutcache.getPackageRegistryManager(), log);
     chai.expect(packageStoreManager_withoutcache.getCache()).to.null;
     chai.expect(packageStoreManager_withoutcache.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
-    var packageStoreManager_withcache: PackageStoreManager = new PackageStoreManager(undefined, new PackageStoreCacheMemoryAsyncMock(), log);
+    var packageStoreManager_withcache: PackageStoreManager = new PackageStoreManager(undefined, log);
+    packageStoreManager_withcache.setCache(new PackageStoreCacheMemoryAsyncMock());
     loadDefaultRegistries(packageStoreManager_withcache.getPackageRegistryManager(), log);
     chai.expect(packageStoreManager_withcache.getCache()).to.be.an.instanceof(Object);
     chai.expect(packageStoreManager_withcache.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
-    var packageStoreManager_2: PackageStoreManager = new PackageStoreManager(new PackageRegistryManager(), undefined, log);
+    var packageStoreManager_2: PackageStoreManager = new PackageStoreManager(new PackageRegistryManager(), log);
     loadDefaultRegistries(packageStoreManager_2.getPackageRegistryManager(), log);
     chai.expect(packageStoreManager_2.getCache()).to.null;
     chai.expect(packageStoreManager_2.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
-    var packageStoreManager_3: PackageStoreManager = new PackageStoreManager(new PackageRegistryManager(), new PackageStoreCacheMemoryAsyncMock(), log);
+    var packageStoreManager_3: PackageStoreManager = new PackageStoreManager(new PackageRegistryManager(), log);
+    packageStoreManager_3.setCache(new PackageStoreCacheMemoryAsyncMock());
     loadDefaultRegistries(packageStoreManager_3.getPackageRegistryManager(), log);
     chai.expect(packageStoreManager_3.getCache()).to.be.an.instanceof(Object);
     chai.expect(packageStoreManager_3.getPackageRegistryManager()).to.be.an.instanceof(Object);

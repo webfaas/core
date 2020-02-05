@@ -8,13 +8,12 @@ import { IPackageStoreCacheAsync } from "../PackageStoreCache/IPackageStoreCache
  */
 export class PackageStoreManager {
     private log: Log;
-    private cache: IPackageStoreCacheAsync | null;
     private packageRegistryManager: PackageRegistryManager;
+    private cache: IPackageStoreCacheAsync | null = null;
     
-    constructor(packageRegistryManager?: PackageRegistryManager, cache?: IPackageStoreCacheAsync, log?: Log){
+    constructor(packageRegistryManager?: PackageRegistryManager, log?: Log){
         this.log = log || Log.getInstance();
-        this.cache = cache || null;
-
+        
         if (packageRegistryManager){
             this.packageRegistryManager = packageRegistryManager;
         }
@@ -31,10 +30,17 @@ export class PackageStoreManager {
     }
 
     /**
-     * return default cache
+     * return async package cache
      */
     getCache(): IPackageStoreCacheAsync | null{
         return this.cache;
+    }
+
+    /**
+     * set async package cache
+     */
+    setCache(cache: IPackageStoreCacheAsync): void{
+        this.cache = cache;
     }
 
     /**

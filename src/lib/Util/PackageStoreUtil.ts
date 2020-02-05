@@ -70,12 +70,6 @@ export class PackageStoreUtil  {
         //116	8	Group's numeric user ID
         //124	12	File size in bytes (octal base)
 
-        /*
-        if (bufferTar.subarray(0, 17).toString() === "pax_global_header"){
-            offset = 512 * 3; //ignore pax header - https://marc.info/?l=linux-kernel&m=111909182607985&w=2
-        }
-        */
-
         do{
             var item = {} as IPackageStoreItemData;
             var nameBuffer = bufferTar.subarray(offset, offset + 100);
