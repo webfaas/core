@@ -98,6 +98,21 @@ export class PackageStoreUtil  {
         var dataPackageItemDataMap = packageStore.getDataPackageItemDataMap();
         var listDataBuffer: Array<Buffer> = new Array<Buffer>();
 
+        //https://www.gnu.org/software/tar/manual/html_node/Standard.html
+        //0	100	File name
+        //100	8	File mode
+        //108	8	Owner's numeric user ID
+        //116	8	Group's numeric user ID
+        //124	12	File size in bytes (octal base)
+        //136   12  mtime
+        //148   8   chksum
+        //156   1   typeflag
+        //157   100 linkname
+        //257   6   magic
+        //263   2   version
+        //329   8   devmajor
+        //337   8   devminor
+        
         dataPackageItemDataMap.forEach(function(itemData: IPackageStoreItemData){
             let dataBuffer: Buffer;
             let dataBufferPad: Buffer;
@@ -109,7 +124,32 @@ export class PackageStoreUtil  {
 
             let dataHeader: Buffer = Buffer.alloc(512, 0);
             dataHeader.write("package/" + itemData.name, 0, 100);
-            dataHeader.write((itemData.size).toString(8).padStart(12,"0"), 124, 12);
+
+            dataHeader.write("000664 ", 100, 8); //File mode
+            
+            dataHeader.write((itemData.size).toString(8).padStart(10,"0") + " ", 124, 11); //File size in bytes (octal base)
+
+            dataHeader.write("3560116604 ", 136, 12); //mtime
+
+            dataHeader.write("0", 156, 1); //typeflag
+
+            dataHeader.write("ustar", 257, 5); //magic
+
+            dataHeader.write("00", 263, 2); //version
+
+            dataHeader.write("000000 ", 329, 8); //devmajor
+
+            dataHeader.write("000000 ", 337, 8); //devminor
+
+            //chksum
+            let sum: number = 8 * 0x20
+            for (let i = 0; i < 148; i++) {
+                sum += dataHeader[i]
+            }
+            for (let i = 156; i < 346; i++) {
+                sum += dataHeader[i]
+            }
+            dataHeader.write(sum.toString(8).padStart(7,"0") + " ", 148, 8); //chksum
 
             listDataBuffer.push(dataHeader);
             listDataBuffer.push(dataBuffer);
