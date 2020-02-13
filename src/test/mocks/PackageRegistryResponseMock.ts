@@ -24,19 +24,18 @@ export namespace PackageRegistryResponseMock{
             var itemData: IPackageStoreItemData;
             var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
             var nextPos: number = 0;
-            var lastVersion = versions[versions.length - 1];
-
+            
             var manifestVersionsObj: any = {};
             for (var i = 0; i < versions.length; i++){
                 let version = versions[i];
                 manifestVersionsObj[version] = {name:name, version:version, main:"index.js", description: description};
             }
             
-            var packageObj = {name:name, version:lastVersion, main:"index.js", versions: manifestVersionsObj, description: description};
+            var packageObj = {name:name, main:"index.js", versions: manifestVersionsObj, description: description};
             var packageBuffer = Buffer.from(JSON.stringify(packageObj));
             nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
 
-            this.packageStore = new PackageStore(name, packageObj.version, this.etag, packageBuffer, dataPackageItemDataMap);
+            this.packageStore = new PackageStore(name, "", this.etag, packageBuffer, dataPackageItemDataMap);
         }
     }
 

@@ -87,10 +87,11 @@ describe("PackageStore Cache Memory Manifest", () => {
                     }
 
                     packageStoreCacheMemory.deletePackageStore("@registry1/mathsum");
-                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(1);
-                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(packageStoreBase.getSize());
-                    
-                    packageStoreCacheMemory.deletePackageStore("@registry1/mathsum", "0.0.3");
+                    chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
+                    chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
+
+                    //delete again
+                    packageStoreCacheMemory.deletePackageStore("@registry1/mathsum");
                     chai.expect(packageStoreCacheMemory.getTotalEntry()).to.eq(0);
                     chai.expect(packageStoreCacheMemory.getTotalSize()).to.eq(0);
                 }

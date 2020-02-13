@@ -50,10 +50,13 @@ describe("Module Manager", () => {
     it("addObjectToCache", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
 
-        moduleManager1.addObjectToCache("package1", "version1", "item1", "AAA");
-        chai.expect(moduleManager1.getObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("AAA");
-        moduleManager1.addObjectToCache("package1", "version1", "item1", "BBB");
-        chai.expect(moduleManager1.getObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("BBB");
+        moduleManager1.addCompiledObjectToCache("package1", "version1", "item1", "AAA");
+        chai.expect(moduleManager1.getCompiledObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("AAA");
+        moduleManager1.addCompiledObjectToCache("package1", "version1", "item1", "BBB");
+        chai.expect(moduleManager1.getCompiledObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("BBB");
+        chai.expect(moduleManager1.getCacheCompiledObject().size).to.eq(1);
+        moduleManager1.cleanCacheObjectCompiled();
+        chai.expect(moduleManager1.getCacheCompiledObject().size).to.eq(0);
     })
 
     it("resolveVersion - @registry1/mathsum", async function(){

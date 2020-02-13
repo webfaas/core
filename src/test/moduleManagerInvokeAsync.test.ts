@@ -166,7 +166,7 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
 
         chai.expect(response).to.eq(5);
 
-        moduleManager.cleanMemoryCacheModuleFiles("@registry1/simulateerror", "0.0.3");
+        moduleManager.cleanCachePackageStoreDependencies("@registry1/simulateerror", "0.0.3");
     })
 
     it("invokeAsync @registry1/syntaxerror - 0.0.1", async function(){
