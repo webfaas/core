@@ -35,7 +35,7 @@ export interface IWriteLog {
 
 export function parseLogLevel(level: LogLevelEnum | string): LogLevelEnum{
     if (typeof(level) === "string"){
-        level.toUpperCase();
+        level = level.toUpperCase();
         if (level === "OFF"){
             return LogLevelEnum.OFF;
         }
@@ -61,4 +61,4 @@ export function parseLogLevel(level: LogLevelEnum | string): LogLevelEnum{
     else{
         return level;
     }
-};
+}

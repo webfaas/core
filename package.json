@@ -22,7 +22,8 @@
     "publisher:pack": "cd dist && npm pack",
     "pack": "cd dist && npm pack",
     "buildAndPublish": "npm run build && npm run publish",
-    "buildAndTest": "npm run build && npm run test:coverage"
+    "buildAndTest": "npm run build && npm run test:coverage",
+    "sonar": "node scripts/sonar-project.js"
   },
   "repository": {
     "type": "git",
@@ -33,10 +34,11 @@
     "@types/chai": "^4.2",
     "@types/mocha": "^5.2",
     "@types/node": "^13.1",
-    "typescript": "^3.7",
     "chai": "^4.2",
     "mocha": "^6.2",
     "nyc": "^15.0",
+    "sonarqube-scanner": "^2.5.0",
+    "typescript": "^3.7",
     "typescript-tslint-plugin": "^0.5"
   },
   "engines": {

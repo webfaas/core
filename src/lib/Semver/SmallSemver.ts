@@ -7,7 +7,6 @@ export class SmallSemver implements ISemver {
     parseVersion(version: string): ISemverData{
         //<major> "." <minor> "." <patch>
         version = version.toUpperCase();
-        let versionList = version.split(".");
         let versionDataParsed = {major: "", minor: "", patch: "", pre_release: ""} as ISemverData;
         
         const pos_minor = version.indexOf(".");
@@ -71,7 +70,7 @@ export class SmallSemver implements ISemver {
         maxVersion.patch = "-1";
         
         let prefix_1 = version.substring(0,1);
-        let prefix_2 = version.substring(1,2);
+        //let prefix_2 = version.substring(1,2);
         if (prefix_1 === "^"){
             //include everything greater than a particular version in the same major range
             let versionTargetObj = this.parseVersion(version.substring(1));
@@ -119,7 +118,7 @@ export class SmallSemver implements ISemver {
             })
         }
         else if (prefix_1 === "*"){
-            let versionTargetObj = this.parseVersion(version.substring(1));
+            //let versionTargetObj = this.parseVersion(version.substring(1));
             versionsArray.forEach((itemVersion)=>{
                 let itemVersionObj = this.parseVersion(itemVersion);
                 if (itemVersionObj.major > maxVersion.major){
@@ -141,7 +140,7 @@ export class SmallSemver implements ISemver {
         else{
             let versionTargetObj = this.parseVersion(version);
             let flagNotMinor = ((versionTargetObj.minor === "") || (versionTargetObj.minor === "*") || (versionTargetObj.minor === "X"));
-            let flagNotPatch = ((versionTargetObj.patch === "") || (versionTargetObj.patch === "*") || (versionTargetObj.patch === "X"));
+            //let flagNotPatch = ((versionTargetObj.patch === "") || (versionTargetObj.patch === "*") || (versionTargetObj.patch === "X"));
             maxVersion.major = versionTargetObj.major;
             versionsArray.forEach((itemVersion)=>{
                 let itemVersionObj = this.parseVersion(itemVersion);

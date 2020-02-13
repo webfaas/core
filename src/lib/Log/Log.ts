@@ -5,6 +5,7 @@ import { DefaultWriteLog } from './DefaultWriteLog';
 import { IInvokeContext } from '../InvokeContext/IInvokeContext';
 
 const rootPath = process.cwd();
+var logInstance:Log;
 
 /**
  * Log
@@ -120,4 +121,4 @@ export class Log {
     }
 }
 
-const logInstance:Log = new Log();
+logInstance = new Log();

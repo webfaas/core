@@ -48,9 +48,9 @@ export class ModuleCompile {
      */
     compile(code: string, moduleCompileManifestData: ModuleCompileManifestData, sandboxContext?: vm.Context, globalRequire?: Function): any{
         try {
-            var timeInit: number = new Date().getTime();
+            let timeInit: number = new Date().getTime();
 
-            var codeWrapper: string = wrapper[0] + code + wrapper[1];
+            let codeWrapper: string = wrapper[0] + code + wrapper[1];
     
             if (!sandboxContext){
                 sandboxContext = this.defaultSandBoxContext;
@@ -62,12 +62,12 @@ export class ModuleCompile {
                 displayErrors: true
             });
     
-            var newModule = {} as Object;
+            let newModule = {} as Object;
             
             compiledWrapper(newModule, globalRequire || this.defaultGlobalRequire, newModule, moduleCompileManifestData.mainFileFullPath, moduleCompileManifestData.mainFileDirName);
     
             //logDetail
-            var logDetail = {} as any;
+            let logDetail = {} as any;
             logDetail.manifest = moduleCompileManifestData;
             logDetail.delay = new Date().getTime() - timeInit;
     
@@ -76,8 +76,7 @@ export class ModuleCompile {
             return newModule;
         }
         catch (errTry) {
-            //logDetail
-            var logDetail = {} as any;
+            let logDetail = {} as any;
             logDetail.moduleCompileManifestData = moduleCompileManifestData;
             
             this.log.writeError("compile", errTry, logDetail, __filename);

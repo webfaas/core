@@ -122,8 +122,6 @@ export class PackageStore {
         var item: IPackageStoreItemData | undefined = this.dataPackageItemDataMap.get(key);
         var extension = key.substring(key.lastIndexOf("."));
 
-        item = this.dataPackageItemDataMap.get(key);
-
         if (item === undefined){
             if (key.indexOf(".") === -1){
                 extension = ".js";

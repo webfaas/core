@@ -4,6 +4,7 @@ import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 
 const valueEnvironmentRegex = /\${[a-zA-Z0-9_:]*}/g
+var configInstance: Config | null = null;
 
 /**
  * Configuration. Automatic search file config and load
@@ -23,14 +24,6 @@ export class Config {
         this.log = log || Log.getInstance();
 
         this.open(fileOrObject);
-        /*
-        try {
-            this.open(fileOrObject);
-        }
-        catch (errTry) {
-            this.log.writeError("constructor", errTry, null, __filename);
-        }
-        */
     }
 
     static getInstance(): Config{
@@ -106,11 +99,10 @@ export class Config {
                 if (typeof(item) === "object"){
                     this.processConfig(item, fullKey);
                 }
-                else if (typeof(item) === "string"){
-                    
-                }
                 else{
-                    this.configByKey[fullKey] = item;
+                    if (typeof(item) !== "string"){
+                        this.configByKey[fullKey] = item;
+                    }
                 }                
             }
             catch (errTry) {
@@ -178,5 +170,3 @@ export class Config {
         }
     }
 }
-
-var configInstance: Config | null = null;

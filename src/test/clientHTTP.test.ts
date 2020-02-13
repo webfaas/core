@@ -43,7 +43,7 @@ var handleResponse = function(request: http.IncomingMessage, response: http.Serv
 }
 
 describe("HTTP", () => {
-    var serverPort = 9090;
+    var serverPort = 50090;
 
     var clientHTTP1 = new ClientHTTP(new ClientHTTPConfig(), log);
     var config2 = new ClientHTTPConfig();
@@ -136,7 +136,7 @@ describe("HTTP", () => {
 })
 
 describe("HTTPS IGNORE", () => {
-    var serverPort = 9092;
+    var serverPort = 50092;
 
     var serverOptionsHTTPS = {
         key: fs.readFileSync(path.join(__dirname, "./data/crt/key.pem")),
@@ -212,7 +212,7 @@ describe("HTTPS IGNORE", () => {
 })
 
 describe("HTTPS CERTIFICATE", () => {
-    var serverPort = 9094;
+    var serverPort = 50094;
 
     var serverOptionsHTTPS = {
         key: fs.readFileSync(path.join(__dirname, "./data/crt/key.pem")),

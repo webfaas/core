@@ -2,10 +2,10 @@
  * Config
  */
 export class PackageStoreCacheMemoryConfig  {
-    maxMemory: Number = -1;
-    maxEntry: Number = -1;
+    maxMemory: number = -1;
+    maxEntry: number = -1;
 
-    constructor(maxMemory?: Number, maxEntry?: Number){
+    constructor(maxMemory?: number, maxEntry?: number){
         if (maxMemory !== undefined){
             this.maxMemory = maxMemory;
         }

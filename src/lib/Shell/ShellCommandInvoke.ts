@@ -17,7 +17,7 @@ export class ShellCommandInvoke implements IShellCommand {
     executeCommand(shellArgv: string[]): Promise<any>{
         return new Promise((resolve, reject) => {
             if (shellArgv.length > 3){
-                let subCommandText: string = shellArgv[3];
+                //let subCommandText: string = shellArgv[3];
                 let invokeData1 = InvokeData.parseInvokeCommandTexto(shellArgv[3]);
                 let parameters: any[] = [];
                 let registryName = "";
