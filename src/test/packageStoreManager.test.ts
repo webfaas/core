@@ -49,6 +49,11 @@ describe("Package Store Manager", () => {
     chai.expect(packageStoreManager_4.getCache()).to.null;
     chai.expect(packageStoreManager_4.getPackageRegistryManager()).to.be.an.instanceof(Object);
 
+    var packageStoreManager_simulateerror: PackageStoreManager = new PackageStoreManager();
+    packageStoreManager_simulateerror.getPackageRegistryManager().getPackageStore = function(name, version, etag, registryName){
+        throw new Error("getPackageStore error");
+    }
+
     it("should return package item on call - without cache configured", function(done){
         packageStoreManager_withoutcache.getPackageStore("@registry1/mathsum", "0.0.1").then(function(packageStore){
             chai.expect(packageStore).to.be.an.instanceof(Object);
@@ -144,6 +149,16 @@ describe("Package Store Manager", () => {
             })
         }).catch(function(error){
             done(error);
+        })
+    })
+
+    it("should return error", function(done){
+        packageStoreManager_simulateerror.getPackageStore("@registry1/mathsum", "0.0.1").then(function(packageStore){
+            chai.expect(packageStore).to.null;
+            done();
+        }).catch(function(error){
+            chai.expect(error.message).to.eq("getPackageStore error");
+            done();
         })
     })
 })

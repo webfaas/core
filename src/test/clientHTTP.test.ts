@@ -307,3 +307,99 @@ describe("HTTPS CERTIFICATE", () => {
         });
     });
 })
+
+describe("HTTP - Force Error In Response", () => {
+    var serverPort = 50096;
+    var log = new Log();
+    var clientHTTP1 = new ClientHTTP(new ClientHTTPConfig(), log);
+    log.write = function(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:any){
+        console.log("mock => ", method, code, message);
+        if (method === "request" && code === "PROCESS" && message === "reponse"){
+            throw new Error("Error in response");
+        }
+    }
+
+    it("should return error in response on call", function(done){
+        var server1: http.Server | null = null;
+
+        server1 = http.createServer(handleResponse);
+        server1.listen(serverPort, async function(){
+            try {
+                var resp: IClientHTTPResponse = await clientHTTP1.request("http://localhost:" + serverPort);
+                chai.expect(resp).to.eq(null);
+                
+                clientHTTP1.destroy();
+            }
+            catch (errTry) {
+                chai.expect(errTry.message).to.eq("Error in response");
+                clientHTTP1.destroy();
+            }
+            finally{
+                if (server1){
+                    server1.close(function(errClose){
+                        done();
+                    });
+                }
+                else{
+                    done();
+                }
+            }
+        });
+    });
+
+    it("should return error in request HTTP", function(done){
+        var server1: http.Server | null = null;
+
+        server1 = http.createServer(handleResponse);
+        server1.listen(serverPort, async function(){
+            try {
+                var resp: IClientHTTPResponse = await clientHTTP1.request("http://:" + serverPort);
+                chai.expect(resp).to.eq(null);
+                
+                clientHTTP1.destroy();
+            }
+            catch (errTry) {
+                chai.expect(errTry.code).to.eq("ENOTFOUND");
+                clientHTTP1.destroy();
+            }
+            finally{
+                if (server1){
+                    server1.close(function(errClose){
+                        done();
+                    });
+                }
+                else{
+                    done();
+                }
+            }
+        });
+    });
+
+    it("should return error in request HTTPS", function(done){
+        var server1: http.Server | null = null;
+
+        server1 = http.createServer(handleResponse);
+        server1.listen(serverPort, async function(){
+            try {
+                var resp: IClientHTTPResponse = await clientHTTP1.request("https://:" + serverPort);
+                chai.expect(resp).to.eq(null);
+                
+                clientHTTP1.destroy();
+            }
+            catch (errTry) {
+                chai.expect(errTry.code).to.eq("ENOTFOUND");
+                clientHTTP1.destroy();
+            }
+            finally{
+                if (server1){
+                    server1.close(function(errClose){
+                        done();
+                    });
+                }
+                else{
+                    done();
+                }
+            }
+        });
+    });
+})
