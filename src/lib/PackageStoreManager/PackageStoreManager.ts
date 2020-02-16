@@ -12,7 +12,7 @@ export class PackageStoreManager {
     private cache: IPackageStoreCacheAsync | null = null;
     
     constructor(packageRegistryManager?: PackageRegistryManager, log?: Log){
-        this.log = log || Log.getInstance();
+        this.log = log || new Log();
         
         if (packageRegistryManager){
             this.packageRegistryManager = packageRegistryManager;

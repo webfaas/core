@@ -2,7 +2,6 @@ import * as vm from "vm";
 import { SandBox } from "./SandBox";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
-import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { ModuleCompileManifestData } from "./ModuleCompileManifestData";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
 
@@ -19,15 +18,8 @@ export class ModuleCompile {
     private defaultSandBoxContext: vm.Context;
 
     constructor(log?: Log) {
-        this.log = log || Log.getInstance();
+        this.log = log || new Log();
         this.defaultSandBoxContext = SandBox.SandBoxBuilderContext();
-    }
-
-    /**
-     * return singleton instance
-     */
-    static getInstance(): ModuleCompile{
-        return moduleCompileInstance;
     }
 
     private defaultGlobalRequire = (path: string): any => {
@@ -85,5 +77,3 @@ export class ModuleCompile {
         }
     }
 }
-
-const moduleCompileInstance:ModuleCompile = new ModuleCompile();

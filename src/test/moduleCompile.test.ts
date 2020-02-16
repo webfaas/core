@@ -12,6 +12,7 @@ var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
 var moduleCompile = new ModuleCompile(log);
+var moduleCompile_default = new ModuleCompile();
 
 describe("ModuleCompile", () => {
     it("should return response on call", () => {
@@ -39,8 +40,6 @@ describe("ModuleCompile", () => {
         catch (errorTry) {
             chai.expect(errorTry.message).to.eq("Unexpected identifier");
         }
-
-        chai.expect(typeof ModuleCompile.getInstance()).to.eq("object");
 
         var module4 = moduleCompile.compile("module.exports = function(){var url = require('url'); return url.parse('value4')}", manifest);
         chai.expect(module4.exports().path).to.eq("value4");

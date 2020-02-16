@@ -2,25 +2,25 @@ import { IPackageStoreCacheSync } from "../IPackageStoreCacheSync";
 import { PackageStore } from "../../PackageStore/PackageStore";
 import { PackageStoreCacheMemoryConfig } from "./PackageStoreCacheMemoryConfig";
 import { Log } from "../../Log/Log";
-import { LogLevelEnum, LogCodeEnum } from "../../Log/ILog";
-
-const log = Log.getInstance();
 
 /**
  * Cache PackageStore in memory
  */
 export class PackageStoreCacheMemorySync implements IPackageStoreCacheSync {
-    config: PackageStoreCacheMemoryConfig;
+    private config: PackageStoreCacheMemoryConfig;
+    private log: Log;
     private listCacheItem: Map<string, PackageStore> = new Map<string, PackageStore>();
     private totalSize: number = 0;
     
-    constructor(config?: PackageStoreCacheMemoryConfig){
+    constructor(config?: PackageStoreCacheMemoryConfig, log?: Log){
         if (config){
             this.config = config;
         }
         else{
             this.config = new PackageStoreCacheMemoryConfig();
         }
+
+        this.log = log || new Log();
     }
 
     private getKey(name: string, version?: string): string{
@@ -30,6 +30,10 @@ export class PackageStoreCacheMemorySync implements IPackageStoreCacheSync {
         else{
             return name;
         }
+    }
+
+    getConfig(): PackageStoreCacheMemoryConfig {
+        return this.config
     }
 
     getTotalSize(): number {

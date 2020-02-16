@@ -22,8 +22,8 @@ describe("PackageStore Cache Memory", () => {
     it("should return object on call", function(){
         var packageStoreCacheMemory1 = new PackageStoreCacheMemorySync();
         var packageStoreCacheMemory2 = new PackageStoreCacheMemorySync(new PackageStoreCacheMemoryConfig());
-        chai.expect(packageStoreCacheMemory1.config).to.be.an.instanceof(Object);
-        chai.expect(packageStoreCacheMemory2.config).to.be.an.instanceof(Object);
+        chai.expect(packageStoreCacheMemory1.getConfig()).to.be.an.instanceof(Object);
+        chai.expect(packageStoreCacheMemory2.getConfig()).to.be.an.instanceof(Object);
     })
 })
 

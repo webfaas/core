@@ -14,16 +14,6 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 process.env.VAR1 = "1";
 process.env.VAR2 = "2";
 
-describe("Config - Static Config", () => {
-    var config = new Config(path.join(__dirname, "./data/data-config"), log);
-    
-    it("should return response on call", () => {
-        chai.expect(typeof(Config.getInstance())).to.eq("object");
-        
-        chai.expect(typeof(Config.getInstance())).to.eq("object"); //cache singleton
-    })
-})
-
 describe("Config - Custom Config", () => {
     var configData: any = {};
     configData.attribute1 = "value1";

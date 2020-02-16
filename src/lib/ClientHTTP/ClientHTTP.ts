@@ -17,7 +17,7 @@ export class ClientHTTP  {
     private log: Log;
 
     constructor(config?: ClientHTTPConfig, log?: Log){
-        this.log = log || Log.getInstance();
+        this.log = log || new Log();
 
         if (config){
             this.config = config;

@@ -77,7 +77,7 @@ export class PackageRegistryManager {
     }
 
     constructor(log?: Log){
-        this.log = log || Log.getInstance();
+        this.log = log || new Log();
     }
 
     /**

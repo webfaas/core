@@ -37,7 +37,7 @@ export class ModuleManager {
     private semver: ISemver = new SmallSemver();
     
     constructor(packageStoreManager?: PackageStoreManager, log?: Log){
-        this.log = log || Log.getInstance();
+        this.log = log || new Log();
 
         if (packageStoreManager){
             this.packageStoreManager = packageStoreManager;

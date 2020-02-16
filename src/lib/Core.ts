@@ -3,7 +3,6 @@ import { PackageStoreManager } from "./PackageStoreManager/PackageStoreManager";
 import { ModuleManager } from "./ModuleManager/ModuleManager";
 import { PluginManager } from "./PluginManager/PluginManager";
 import { Log } from "./Log/Log";
-import { InvokeData } from "./ModuleManager/InvokeData";
 import { Config } from "./Config/Config";
 
 /**
@@ -16,6 +15,7 @@ export class Core {
     private pluginManager: PluginManager;
     private log: Log;
     private config: Config;
+    private version: string;
 
     /**
      * return module manager
@@ -34,8 +34,22 @@ export class Core {
     /**
      * return log
      */
-    getLog(){
+    getLog(): Log{
         return this.log;
+    }
+
+    /**
+     * return version
+     */
+    getVersion(): string{
+        return this.version;
+    }
+
+    /**
+     * return config;
+     */
+    getConfig(): Config{
+        return this.config;
     }
 
     async start(){
@@ -52,12 +66,15 @@ export class Core {
 
     constructor() {
         this.config = new Config();
-        this.log = Log.getInstance();
+        this.log = new Log();
         
         this.packageRegistryManager = new PackageRegistryManager(this.log);
         this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
         this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
         this.pluginManager = new PluginManager(this);
+
+        let pjson: any = require("../package.json");
+        this.version = pjson.version;
     }
 }
 

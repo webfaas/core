@@ -5,7 +5,6 @@ import { DefaultWriteLog } from './DefaultWriteLog';
 import { IInvokeContext } from '../InvokeContext/IInvokeContext';
 
 const rootPath = process.cwd();
-var logInstance:Log;
 
 /**
  * Log
@@ -26,13 +25,6 @@ export class Log {
             this.currentWriteLog = new DefaultWriteLog();
         }
         this.currentLevel = LogLevelEnum.INFO;
-    }
-
-    /**
-     * return singleton instance
-     */
-    static getInstance(): Log{
-        return logInstance;
     }
 
     private parseLog(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:IInvokeContext): ILogData{
@@ -120,5 +112,3 @@ export class Log {
         }
     }
 }
-
-logInstance = new Log();
