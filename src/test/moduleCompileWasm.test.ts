@@ -40,6 +40,7 @@ describe("ModuleCompileWasm", () => {
             throw new Error("Sucess");
         }
         catch (errTry) {
+            console.log("erro wasm => ", errTry.message);
             chai.expect(errTry.message.indexOf("compile")).to.gt(-1);
         }
 
@@ -48,6 +49,7 @@ describe("ModuleCompileWasm", () => {
             throw new Error("Sucess");
         }
         catch (errTry) {
+            console.log("erro wasm2 => ", errTry.message);
             chai.expect(errTry.message).to.eq("Error in compile");
         }
     })
