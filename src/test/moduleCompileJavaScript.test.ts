@@ -1,7 +1,7 @@
 import * as chai from "chai";
 import * as mocha from "mocha";
 
-import {ModuleCompile} from "../lib/ModuleCompile/ModuleCompile";
+import { ModuleCompileJavaScript } from "../lib/ModuleCompile/ModuleCompileJavaScript";
 import { SandBox } from "../lib/ModuleCompile/SandBox";
 import { Context } from "vm";
 import { Log } from "../lib/Log/Log";
@@ -11,10 +11,10 @@ import { ModuleCompileManifestData } from "../lib/ModuleCompile/ModuleCompileMan
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
 
-var moduleCompile = new ModuleCompile(log);
-var moduleCompile_default = new ModuleCompile();
+var moduleCompile = new ModuleCompileJavaScript(log);
+var moduleCompile_default = new ModuleCompileJavaScript();
 
-describe("ModuleCompile", () => {
+describe("ModuleCompileJavaScript", () => {
     it("should return response on call", () => {
         chai.expect(typeof moduleCompile.getLog()).to.eq("object");
 

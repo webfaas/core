@@ -1,8 +1,9 @@
-import { IPackageRegistry } from "../../lib/PackageRegistry/IPackageRegistry";
+import * as fs from "fs";
+import * as path from "path";
+
 import { IPackageRegistryResponse } from "../../lib/PackageRegistry/IPackageRegistryResponse";
 import { PackageStore } from "../../lib/PackageStore/PackageStore";
 import { IPackageStoreItemData } from "../../lib/PackageStore/IPackageStoreItemData";
-import { PackageStoreUtil } from "../../lib/Util/PackageStoreUtil";
 
 export namespace PackageRegistryResponseMock{
     function addItemData(name: string, begin: number, fileBuffer: Buffer, dataPackageItemDataMap: Map<string, IPackageStoreItemData>){
@@ -43,19 +44,25 @@ export namespace PackageRegistryResponseMock{
         etag: string;
         packageStore: PackageStore | null = null;
     
-        constructor(name: string, version: string, description: string, moduleText: string){
+        constructor(name: string, version: string, description: string, moduleTextOrBuffer: string | Buffer, fileMainName: string = "index.js"){
             this.etag = "etag" + version;
             
             var itemData: IPackageStoreItemData;
             var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
             var nextPos: number = 0;
 
-            let packageObj = {name:name, version:version, main:"index.js", description: description};
+            let packageObj = {name:name, version:version, main:fileMainName, description: description};
             let packageBuffer = Buffer.from(JSON.stringify(packageObj));
             nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
 
-            let file1Buffer = Buffer.from(moduleText);
-            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+            let file1Buffer: Buffer;
+            if (Buffer.isBuffer(moduleTextOrBuffer)){
+                file1Buffer = moduleTextOrBuffer;
+            }
+            else{
+                file1Buffer = Buffer.from(moduleTextOrBuffer);
+            }
+            nextPos = addItemData(fileMainName, nextPos, file1Buffer, dataPackageItemDataMap);
     
             var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
     
@@ -289,6 +296,17 @@ export namespace PackageRegistryResponseMock{
             var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer, file2Buffer, file3Buffer]);
             
             this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
+        }
+    }
+
+
+    //
+    //WASM
+    //
+    export class MathSumWasm extends AbstractBase{
+        constructor(name: string = "mathsumwasm", version: string = "0.0.1", description: string = "test"){
+            let moduleBuffer = fs.readFileSync(path.join(__dirname, "wasm/sum.wasm"));
+            super(name, version, description, moduleBuffer, "index.wasm");
         }
     }
 }

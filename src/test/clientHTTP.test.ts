@@ -313,7 +313,6 @@ describe("HTTP - Force Error In Response", () => {
     var log = new Log();
     var clientHTTP1 = new ClientHTTP(new ClientHTTPConfig(), log);
     log.write = function(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:any){
-        console.log("mock => ", method, code, message);
         if (method === "request" && code === "PROCESS" && message === "reponse"){
             throw new Error("Error in response");
         }

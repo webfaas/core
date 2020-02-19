@@ -6,11 +6,11 @@ import { PackageStoreManager } from "../PackageStoreManager/PackageStoreManager"
 import { PackageRegistryManager } from "../PackageRegistryManager/PackageRegistryManager";
 import { IPackageStoreCacheSync } from "../PackageStoreCache/IPackageStoreCacheSync";
 import { IManifest } from "../Manifest/IManifest";
-import { ModuleCompile } from "../ModuleCompile/ModuleCompile";
+import { ModuleCompileJavaScript } from "../ModuleCompile/ModuleCompileJavaScript";
+import { ModuleCompileWasm } from "../ModuleCompile/ModuleCompileWasm";
 import { SandBox } from "../ModuleCompile/SandBox";
 import { Context } from "vm";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
-import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { ModuleCompileManifestData } from "../ModuleCompile/ModuleCompileManifestData";
 import { ModuleManagerRequireContextData } from "./ModuleManagerRequireContextData";
 import { ModuleManagerCacheObjectItem } from "./ModuleManagerCacheObjectItem";
@@ -21,6 +21,9 @@ import { PackageStoreCacheMemorySync } from "../PackageStoreCache/Memory/Package
 import { ISemver } from "../Semver/ISemver";
 import { SmallSemver } from "../Semver/SmallSemver";
 import { ModuleNameUtil, IModuleNameData } from "../Util/ModuleNameUtil";
+import { resolve } from "dns";
+import { IRequirePackageInfoTarget } from "./IRequirePackageInfoTarget";
+import { ICodeBufferResponseFromPackageStoreCacheSync } from "./ICodeBufferResponseFromPackageStoreCacheSync";
 
 const nativeModule = require("module");
 
@@ -29,7 +32,8 @@ const nativeModule = require("module");
  */
 export class ModuleManager {
     private log: Log;
-    private moduleCompile: ModuleCompile;
+    private moduleCompileJavaScript: ModuleCompileJavaScript;
+    private moduleCompileWasm: ModuleCompileWasm;
     private packageStoreManager: PackageStoreManager;
     private sandBoxContext: Context = SandBox.SandBoxBuilderContext();
     private cachePackageStoreDependencies: Map<string, IPackageStoreCacheSync> = new Map<string, IPackageStoreCacheSync>();
@@ -48,7 +52,8 @@ export class ModuleManager {
             this.packageStoreManager = new PackageStoreManager(packageRegistryManager, this.log);
         }
 
-        this.moduleCompile = new ModuleCompile(this.log);
+        this.moduleCompileJavaScript = new ModuleCompileJavaScript(this.log);
+        this.moduleCompileWasm = new ModuleCompileWasm(this.log);
 
         this.sandBoxContext = SandBox.SandBoxBuilderContext();
     }
@@ -124,6 +129,111 @@ export class ModuleManager {
         return this.packageStoreManager;
     }
 
+    getRequirePackageInfoTarget(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): IRequirePackageInfoTarget{
+        let packageInfoTarget = {} as IRequirePackageInfoTarget;
+
+        packageInfoTarget.nameParsedObj = ModuleNameUtil.parse(name, "");
+        if (name.substring(0,1) === "."){
+            if (parentModuleCompileManifestData){
+                //internal package
+                packageInfoTarget.packageName = moduleManagerRequireContextData.parentPackageStoreName;
+                packageInfoTarget.packageVersion = moduleManagerRequireContextData.parentPackageStoreVersion;
+                packageInfoTarget.itemKey = path.resolve("/" + parentModuleCompileManifestData.mainFileDirName, name).substring(1);
+            }
+            else{
+                packageInfoTarget.packageName = "";
+                packageInfoTarget.packageVersion = "";
+                packageInfoTarget.itemKey = "";
+            }
+        }
+        else{
+            //external package
+            packageInfoTarget.packageName = packageInfoTarget.nameParsedObj.fullName;
+            packageInfoTarget.packageVersion = version;
+            packageInfoTarget.itemKey = "";
+        }
+
+        return packageInfoTarget;
+    }
+
+    getCodeBufferResponseFromPackageStoreCacheSync(cacheRootPackageStore: IPackageStoreCacheSync, packageInfoTarget: IRequirePackageInfoTarget, moduleManagerRequireContextData: ModuleManagerRequireContextData): ICodeBufferResponseFromPackageStoreCacheSync | null{
+        if (packageInfoTarget.itemKey){
+            //
+            //require internal package
+            //
+            let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(packageInfoTarget.packageName, packageInfoTarget.packageVersion);
+            if (parentPackageStore){
+                let packageStoreItemBufferResponse: PackageStoreItemBufferResponse | null = parentPackageStore.getItemBuffer(packageInfoTarget.itemKey);
+                if (packageStoreItemBufferResponse){
+                    let codeBufferFromPackageStoreCacheSync = {} as ICodeBufferResponseFromPackageStoreCacheSync;
+
+                    codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse = packageStoreItemBufferResponse;
+
+                    codeBufferFromPackageStoreCacheSync.moduleCompileManifestData = new ModuleCompileManifestData(
+                        parentPackageStore.getName(),
+                        parentPackageStore.getVersion(),
+                        packageInfoTarget.itemKey
+                    );
+
+                    return codeBufferFromPackageStoreCacheSync;
+                }
+                else{
+                    return null;
+                }
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            //
+            //require external package
+            //
+
+            //if not version exist, seek version in parent package.json
+            if (packageInfoTarget.packageVersion === "" && moduleManagerRequireContextData.parentPackageStoreName){
+                let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
+                if (parentPackageStore){
+                    let parentPackageManifest: IManifest | null = parentPackageStore.getManifest();
+                    if (parentPackageManifest && parentPackageManifest.dependencies){
+                        packageInfoTarget.packageVersion = parentPackageManifest.dependencies[packageInfoTarget.nameParsedObj.moduleName] || "";
+                    }
+                }
+            }
+
+            let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(packageInfoTarget.nameParsedObj.moduleName, packageInfoTarget.packageVersion);
+            if (packageStore){
+                let packageStoreItemBufferResponse: PackageStoreItemBufferResponse | null
+                if (packageInfoTarget.nameParsedObj.fileName){
+                    packageStoreItemBufferResponse = packageStore.getItemBuffer(packageInfoTarget.nameParsedObj.fileName);
+                }
+                else{
+                    packageStoreItemBufferResponse = packageStore.getMainBuffer();
+                }
+
+                if (packageStoreItemBufferResponse){
+                    let codeBufferFromPackageStoreCacheSync = {} as ICodeBufferResponseFromPackageStoreCacheSync;
+                    
+                    codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse = packageStoreItemBufferResponse;
+
+                    codeBufferFromPackageStoreCacheSync.moduleCompileManifestData = new ModuleCompileManifestData(
+                        packageStore.getName(),
+                        packageStore.getVersion(),
+                        packageInfoTarget.nameParsedObj.fileName || packageStore.getMainFileFullPath()
+                    );
+
+                    return codeBufferFromPackageStoreCacheSync;
+                }
+                else{
+                    return null;
+                }
+            }
+            else{
+                return null;
+            }
+        }
+    }
+
     cachePackageStoreDependenciesItemBuild(): IPackageStoreCacheSync{
         return new PackageStoreCacheMemorySync();
     }
@@ -161,118 +271,72 @@ export class ModuleManager {
         return require(name);
     }
 
-    requireSync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
+    requireSyncFromCache(name: string, packageInfoTarget: IRequirePackageInfoTarget, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
+        //find module in bultin
         if (nativeModule.builtinModules.indexOf(name) > -1){
             return this.requireNativeModule(name, moduleManagerRequireContextData, parentModuleCompileManifestData);
         }
 
-        //find packageStore in cache
-        var cacheRootPackageStore: IPackageStoreCacheSync | undefined = this.cachePackageStoreDependencies.get(moduleManagerRequireContextData.rootPackageStoreKey);
-        if (cacheRootPackageStore){
-            let codeBufferResponse: PackageStoreItemBufferResponse | null = null;
-            //var codeBuffer: Buffer | null = null;
-            var responseObj: Object | null = null;
-            var moduleCompileManifestData: ModuleCompileManifestData | null = null;
-
-            if (name.substring(0,1) === "."){
-                //
-                //require internal package
-                //
-                if (parentModuleCompileManifestData){
-                    let internalFileFullPath: string = path.resolve("/" + parentModuleCompileManifestData.mainFileDirName, name).substring(1);
-
-                    //find in module cache
-                    responseObj = this.getCompiledObjectFromCache(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion, internalFileFullPath);
-                    if (responseObj){
-                        return responseObj;
-                    }
-
-                    let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
-                    if (parentPackageStore){
-                        codeBufferResponse = parentPackageStore.getItemBuffer(internalFileFullPath);
-                        moduleCompileManifestData = new ModuleCompileManifestData(
-                            parentPackageStore.getName(),
-                            parentPackageStore.getVersion(),
-                            internalFileFullPath
-                        );
-                    }
-
-                    if (moduleCompileManifestData && codeBufferResponse){
-                        responseObj = this.compilePackageStoreItemBuffer(codeBufferResponse, moduleManagerRequireContextData, moduleCompileManifestData);
-                        if (responseObj){
-                            this.addCompiledObjectToCache(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion, internalFileFullPath, responseObj);
-                            return responseObj;
-                        }
-                    }
-                }
-            }
-            else{
-                //
-                //require external package
-                //
-
-                var nameParsedObj: IModuleNameData = ModuleNameUtil.parse(name, "");
-                
-                //if not version exist, seek version in parent package.json
-                if (version === "" && moduleManagerRequireContextData.parentPackageStoreName){
-                    let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
-                    if (parentPackageStore){
-                        let parentPackageManifest: IManifest | null = parentPackageStore.getManifest();
-                        if (parentPackageManifest && parentPackageManifest.dependencies){
-                            version = parentPackageManifest.dependencies[nameParsedObj.moduleName] || "";
-                        }
-                    }
-                }
-
-                //find in module cache
-                responseObj = this.getCompiledObjectFromCache(nameParsedObj.fullName, version, "");
-                if (responseObj){
-                    return responseObj;
-                }
-
-                let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(nameParsedObj.moduleName, version);
-                if (packageStore){
-                    if (nameParsedObj.fileName){
-                        codeBufferResponse = packageStore.getItemBuffer(nameParsedObj.fileName);
-                    }
-                    else{
-                        codeBufferResponse = packageStore.getMainBuffer();
-                    }
-                    moduleCompileManifestData = new ModuleCompileManifestData(
-                        packageStore.getName(),
-                        packageStore.getVersion(),
-                        packageStore.getMainFileFullPath()
-                    );
-                }
-
-                if (packageStore && moduleCompileManifestData && codeBufferResponse){
-                    responseObj = this.compilePackageStoreItemBuffer(codeBufferResponse, moduleManagerRequireContextData, moduleCompileManifestData);
-                    if (responseObj){
-                        this.addCompiledObjectToCache(nameParsedObj.fullName, version, "", responseObj);
-                        return responseObj;
-                    }
-                }
-            }
-            
-            return null;
+        //find module in cache
+        let responseObj: Object | null = this.getCompiledObjectFromCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, packageInfoTarget.itemKey);
+        if (responseObj){
+            return responseObj;
         }
         else{
             return null;
         }
     }
 
-    compilePackageStoreItemBuffer(itemBufferResponse: PackageStoreItemBufferResponse, moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData): Object | null{
+    requireSync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
+        let packageInfoTarget: IRequirePackageInfoTarget = this.getRequirePackageInfoTarget(name, version, moduleManagerRequireContextData, parentModuleCompileManifestData);
+
+        if (packageInfoTarget.packageName === ""){
+            return null;
+        }
+        
+        //find module in cache
+        let responseObj: Object | null = this.requireSyncFromCache(name, packageInfoTarget, moduleManagerRequireContextData, parentModuleCompileManifestData);
+        if (responseObj){
+            return responseObj;
+        }
+
+        //find packageStore in cache
+        let cacheRootPackageStore: IPackageStoreCacheSync | undefined = this.cachePackageStoreDependencies.get(moduleManagerRequireContextData.rootPackageStoreKey);
+        if (cacheRootPackageStore){
+            let codeBufferFromPackageStoreCacheSync = this.getCodeBufferResponseFromPackageStoreCacheSync(cacheRootPackageStore, packageInfoTarget, moduleManagerRequireContextData);
+
+            //compile
+            if (codeBufferFromPackageStoreCacheSync){
+                responseObj = this.compilePackageStoreItemBufferSync(codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse, moduleManagerRequireContextData, codeBufferFromPackageStoreCacheSync.moduleCompileManifestData);
+                if (responseObj){
+                    this.addCompiledObjectToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, packageInfoTarget.itemKey, responseObj);
+                    return responseObj;
+                }
+                else{
+                    return null;
+                }
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            return null;
+        }
+    }
+
+    compilePackageStoreItemBufferSync(itemBufferResponse: PackageStoreItemBufferResponse, moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData): Object | null{
         var responseObj: Object | null = null;
         if (itemBufferResponse.extension === ".json"){
             responseObj = JSON.parse(itemBufferResponse.buffer.toString());
         }
         else{
-            responseObj = this.compilePackage(moduleManagerRequireContextData, moduleCompileManifestData, itemBufferResponse.buffer);
+            responseObj = this.compilePackageJavaScriptSync(moduleManagerRequireContextData, moduleCompileManifestData, itemBufferResponse.buffer);
         }
         return responseObj;
     }
 
-    compilePackage(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer): Object | null{
+    compilePackageJavaScriptSync(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer): Object | null{
         try {
             var moduleManagerRequireContextDataDependency: ModuleManagerRequireContextData = new ModuleManagerRequireContextData(moduleManagerRequireContextData.rootPackageStoreKey);
             moduleManagerRequireContextDataDependency.parentPackageStoreName = moduleCompileManifestData.name;
@@ -291,7 +355,8 @@ export class ModuleManager {
                 }
             }
     
-            var newModule = this.moduleCompile.compile(codeBuffer.toString(), moduleCompileManifestData, this.sandBoxContext, globalRequire);
+            var newModule = this.moduleCompileJavaScript.compile(codeBuffer.toString(), moduleCompileManifestData, this.sandBoxContext, globalRequire);
+
             if (newModule.exports){
                 return newModule.exports;
             }
@@ -312,6 +377,22 @@ export class ModuleManager {
             throw errTry;
         }
     }
+
+    /*
+    compilePackageWasmAsync(moduleManagerRequireContextData: ModuleManagerRequireContextData, moduleCompileManifestData: ModuleCompileManifestData, codeBuffer: Buffer): Promise<Object | null>{
+        return new Promise((resolve, reject) => {
+            this.moduleCompileWasm.compile(codeBuffer, moduleCompileManifestData).then((newModule) => {
+                resolve(newModule.exports);
+            }).catch((errCompile)=>{
+                var errDetail: any = {};
+                errDetail.moduleManagerRequireContextData = moduleManagerRequireContextData;
+                errDetail.moduleCompileManifestData = moduleCompileManifestData;
+                this.log.writeError("compilePackageWasmAsync", errCompile, errDetail, __filename);
+                reject(errCompile);
+            });
+        });
+    }
+    */
 
     /**
      * import dependencies in package

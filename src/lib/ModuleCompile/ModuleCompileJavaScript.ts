@@ -11,9 +11,9 @@ const wrapper = [
 ];
 
 /**
- * ModuleCompile
+ * ModuleCompileJavaScript
  */
-export class ModuleCompile {
+export class ModuleCompileJavaScript {
     private log: Log;
     private defaultSandBoxContext: vm.Context;
 
@@ -33,10 +33,10 @@ export class ModuleCompile {
 
     /**
      * return a code compiled
-     * @param code source code
-     * @param manifest manifest data
-     * @param sandboxContext sadbox context
-     * @param invokeContext context invoke
+     * @param code 
+     * @param moduleCompileManifestData 
+     * @param sandboxContext 
+     * @param globalRequire 
      */
     compile(code: string, moduleCompileManifestData: ModuleCompileManifestData, sandboxContext?: vm.Context, globalRequire?: Function): any{
         try {

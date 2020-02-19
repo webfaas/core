@@ -24,7 +24,7 @@ loadDefaultRegistries(packageRegistryManager_default, log);
 var packageStoreManager_default = new PackageStoreManager(packageRegistryManager_default, log);
 
 describe("Module Manager - requireSync", () => {
-    it("requireSync @registry1/mathsum - 0.*", async function(){
+    it("requireSync @registry1/mathsum - 0.0.1", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
         let parentModuleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsum", "0.0.1", "mainfile");
 
@@ -55,7 +55,7 @@ describe("Module Manager - requireSync", () => {
         chai.expect(responseObj3_b(2,3)).to.eq(5);
     })
 
-    it("requireSync ./index - 0.*", async function(){
+    it("requireSync ./index - 0.0.1", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
         let parentModuleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsum", "0.0.1", "mainfile");
 
@@ -106,7 +106,7 @@ describe("Module Manager - requireSync", () => {
         moduleManagerRequireContextData_parentnotexist.parentPackageStoreName = "notexist";
         moduleManagerRequireContextData_parentnotexist.parentPackageStoreVersion = "0.0.1";
             
-        moduleManager_compilePackageStoreItemBuffer_return_null.compilePackageStoreItemBuffer = function(){
+        moduleManager_compilePackageStoreItemBuffer_return_null.compilePackageStoreItemBufferSync = function(){
             return null;
         }
         let responseObj9_a: any = moduleManager_compilePackageStoreItemBuffer_return_null.requireSync("./index.js", "", moduleManagerRequireContextData, parentModuleCompileManifestData);
