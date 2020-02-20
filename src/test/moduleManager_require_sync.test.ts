@@ -44,6 +44,7 @@ describe("Module Manager - requireSync", () => {
         
         //load mathsum to cache
         let responseObj_import: any = await moduleManager1.import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
+        chai.expect(responseObj_import).to.not.null;
         chai.expect(responseObj_import(2,3)).to.eq(5);
 
         //
@@ -52,6 +53,7 @@ describe("Module Manager - requireSync", () => {
         let responseObj3_a: any = moduleManager1.requireSync("@registry1/mathsum", "", moduleManagerRequireContextData_parentnotexist, parentModuleCompileManifestData);
         chai.expect(responseObj3_a).to.null;
         let responseObj3_b: any = moduleManager1.requireSync("@registry1/mathsum", "0.0.1", moduleManagerRequireContextData_parentnotexist, parentModuleCompileManifestData);
+        chai.expect(responseObj3_b).to.not.null;
         chai.expect(responseObj3_b(2,3)).to.eq(5);
     })
 

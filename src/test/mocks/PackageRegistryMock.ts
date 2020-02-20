@@ -83,6 +83,7 @@ export namespace PackageRegistryMock{
             let nameInternalRelativeDependency = "@registry1/internalrelativedependency";
             let nameModuleDependencyNotFound = "@registry1/moduledependencynotfound"
             let nameModuleDependencyNotDeclared = "@registry1/moduledependencynotdeclared";
+            let nameMathSumWasm = "@registry1/mathsumwasm";
 
             let description: string = "registry1 mock";
 
@@ -117,6 +118,9 @@ export namespace PackageRegistryMock{
 
             this.listPackageRegistryResponse.set(nameModuleDependencyNotDeclared, new PackageRegistryResponseMock.Manifest(nameModuleDependencyNotDeclared, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameModuleDependencyNotDeclared + ":0.0.1", new PackageRegistryResponseMock.ModuleDependencyNotDeclared(nameModuleDependencyNotDeclared, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameMathSumWasm, new PackageRegistryResponseMock.Manifest(nameMathSumWasm, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameMathSumWasm + ":0.0.1", new PackageRegistryResponseMock.MathSumWasm(nameMathSumWasm, "0.0.1", description));
         }
     }
     

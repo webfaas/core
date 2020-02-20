@@ -9,6 +9,8 @@ import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { SmallSemver } from "../lib/Semver/SmallSemver";
+import { ModuleManagerRequireContextData } from "../lib/ModuleManager/ModuleManagerRequireContextData";
+import { ModuleCompileManifestData } from "../lib/ModuleCompile/ModuleCompileManifestData";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -95,6 +97,23 @@ describe("Module Manager", () => {
         }
         catch (errTry) {
             chai.expect(errTry).to.be.an.instanceOf(Error);
+        }
+    })
+
+    it("compilePackageWasmAsync - simulate error", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+
+        let moduleManagerRequireContextData = new ModuleManagerRequireContextData("@registry1/mathsumwasm:0.0.1");
+        moduleManagerRequireContextData.parentPackageStoreName = "@registry1/mathsumwasm";
+        moduleManagerRequireContextData.parentPackageStoreVersion = "0.0.1";
+
+        let moduleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsumwasm", "0.0.1", "");
+        try {
+            await moduleManager1.compilePackageWasmAsync(moduleManagerRequireContextData, moduleCompileManifestData, Buffer.from("AAAA"));
+            throw new Error("Sucess");
+        }
+        catch (errTry) {
+            chai.expect(errTry.message.indexOf("expected")).to.gt(-1);
         }
     })
 
