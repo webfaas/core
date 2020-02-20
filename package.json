@@ -18,6 +18,7 @@
     "build": "npm run build:clean && node_modules/.bin/tsc && npm run build:static",
     "build:clean": "rm -rf dist",
     "build:static": "cp package.json dist && cp README.md dist && cp .npmignore dist && cp src/test/data -R dist/test && mkdir -p dist/test/mocks/wasm && cp src/test/mocks/wasm/*.wasm dist/test/mocks/wasm",
+    "setnpmtoken": "echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc",
     "publish": "npm publish dist --access public",
     "pack": "npm pack dist",
     "buildAndPublish": "npm run build && npm run publish",
