@@ -21,19 +21,20 @@ after_script:
 
 before_deploy:
   - cd dist
+  - ls
 
-deploy:
-  provider: script
-  script: bash npm 
-  on:
-    branch: master
-    tags: true
+#deploy:
+#  provider: script
+#  script: bash npm 
+#  on:
+#    branch: master
+#    tags: true
 
 deploy:
   provider: npm
   email: "$NPM_EMAIL"
   api_key: "$NPM_TOKEN"
-  #skip_cleanup: true
+  skip_cleanup: true
   on:
     branch: master
 #    tags: true
