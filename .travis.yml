@@ -22,11 +22,12 @@ after_script:
 before_deploy:
   - cd dist
   - npm run setnpmtoken
+  - npm run publish
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: bash npm run publish
+  script: bash
   on:
     branch: master
 #    tags: true
