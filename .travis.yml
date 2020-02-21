@@ -10,40 +10,26 @@ cache:
   npm: true
   directories:
     - node_modules
-    - dist
 
-#script:
-#  - npm run buildAndTest
+script:
+  - npm run buildAndTest
 
-jobs:
-  include:
-    - stage: compile
-      node_js: "13"
-      script:
-        - npm run build
-    - stage: test
-      script:
-        - npm run test
-    - stage: coverage
-      node_js: "13"
-      script:
-        - npm install --save-dev coveralls
-        - coveralls < ./coverage/lcov.info
-    - stage: deploy
-      node_js: "13"
-      script:
-        - npm run setnpmtoken
-        - npm run publish
+after_script:
+  - |
+    npm install --save-dev coveralls
+    coveralls < ./coverage/lcov.info
 
-#after_script:
-#  - |
-#    # Upload coverage to coveralls
-#    npm install --save-dev coveralls
-#    coveralls < ./coverage/lcov.info
+before_deploy:
+  - cd dist
 
-stages:
-  - compile
-  - test
-  - coverage
-  - name: deploy
-    if: branch = master
+deploy:
+  provider: npm
+  api_key:
+    secure: $NPM_TOKEN
+  on:
+    branch: master
+    tags: true
+    
+#
+#- npm run setnpmtoken
+#        - npm run publish
