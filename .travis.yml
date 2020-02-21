@@ -12,34 +12,30 @@ cache:
     - node_modules
 
 script:
-  #- npm run buildAndTest
-  - echo "****"
-  - echo "$NPM_TESTE"
-  - echo "$NPM_EMAIL"
-  - echo "****"
+  - npm run buildAndTest
+  
+after_script:
+  - |
+    npm install --save-dev coveralls
+    coveralls < ./coverage/lcov.info
 
-#after_script:
-#  - |
-#    npm install --save-dev coveralls
-#    coveralls < ./coverage/lcov.info
+before_deploy:
+  - cd dist
 
-#before_deploy:
-#  - cd dist
+deploy:
+  provider: script
+  script: bash npm 
+  on:
+    branch: master
+    tags: true
 
-#deploy:
-#  provider: script
-#  script: bash npm 
-#  on:
-#    branch: master
-#    tags: true
-
-#deploy:
-  #provider: npm
-  #email: "$NPM_EMAIL"
-  #api_key:
-  #  secure: "$NPM_TOKEN"
-  #on:
-  #  branch: master
+deploy:
+  provider: npm
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_TOKEN"
+  #skip_cleanup: true
+  on:
+    branch: master
 #    tags: true
 #
 #- npm run setnpmtoken
