@@ -23,20 +23,20 @@ before_deploy:
   - cd dist
   - ls
 
-#deploy:
-#  provider: script
-#  script: bash npm 
-#  on:
-#    branch: master
-#    tags: true
-
 deploy:
-  provider: npm
-  email: "$NPM_EMAIL"
-  api_key: "$NPM_API_TOKEN"
-  skip_cleanup: true
+  provider: script
+  script: bash npm run setnpmtoken && npm run publish
   on:
     branch: master
+#    tags: true
+
+#deploy:
+#  provider: npm
+#  email: "$NPM_EMAIL"
+#  api_key: "$NPM_API_TOKEN"
+#  skip_cleanup: true
+#  on:
+#    branch: master
 #    tags: true
 #
 #- npm run setnpmtoken
