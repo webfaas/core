@@ -19,11 +19,6 @@ after_script:
     npm install --save-dev coveralls
     coveralls < ./coverage/lcov.info
 
-#before_deploy:
-#  - cd dist
-#  - npm run setnpmtoken
-#  - npm run publish
-
 deploy:
   provider: script
   skip_cleanup: true
@@ -31,16 +26,4 @@ deploy:
     - npm run setnpmtokenAndPublish
   on:
     branch: master
-#    tags: true
-
-#deploy:
-#  provider: npm
-#  email: "$NPM_EMAIL"
-#  api_key: "$NPM_API_TOKEN"
-#  skip_cleanup: true
-#  on:
-#    branch: master
-#    tags: true
-#
-#- npm run setnpmtoken
-#        - npm run publish
+    tags: true
