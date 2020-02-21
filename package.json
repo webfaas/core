@@ -23,6 +23,7 @@
     "pack": "npm pack dist",
     "buildAndPublish": "npm run build && npm run publish",
     "buildAndTest": "npm run build && npm run test:coverage",
+    "setnpmtokenAndPublish": "npm run setnpmtoken && npm run publish",
     "sonar": "node scripts/sonar-project.js"
   },
   "repository": {

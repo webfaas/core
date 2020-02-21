@@ -28,8 +28,7 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-    - npm run setnpmtoken
-    - npm run publish
+    - npm run setnpmtokenAndPublish
   on:
     branch: master
 #    tags: true
