@@ -25,10 +25,11 @@ before_deploy:
 deploy:
   provider: npm
   api_key:
-    secure: $NPM_TOKEN
+#    secure: $NPM_TOKEN
+    secure: $NPM_TESTE
   on:
     branch: master
-    tags: true
+#    tags: true
     
 #
 #- npm run setnpmtoken
