@@ -24,10 +24,9 @@ before_deploy:
 
 deploy:
   provider: npm
-  email: $NPM_EMAIL
+  email: $NPM_TESTE #$NPM_EMAIL
   api_key:
-#    secure: $NPM_TOKEN
-    secure: $NPM_TESTE
+    secure: $NPM_TOKEN
   on:
     branch: master
 #    tags: true
