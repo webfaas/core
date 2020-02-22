@@ -1,6 +1,6 @@
 {
   "name": "@webfaas/webfaas-core",
-  "version": "0.1.0-ALPHA3",
+  "version": "0.1.0-ALPHA4",
   "description": "WEBFaaS Framework - Core",
   "main": "lib/Core.js",
   "readmeFilename": "README.md",
@@ -23,7 +23,7 @@
     "pack": "npm pack dist",
     "buildAndPublish": "npm run build && npm run publish",
     "buildAndTest": "npm run build && npm run test:coverage",
-    "setnpmtokenAndPublish": "npm run setnpmtoken && npm run publish",
+    "setnpmtokenAndPublish": "npm run setnpmtoken && npm run publish && exit 1",
     "sonar": "node scripts/sonar-project.js"
   },
   "repository": {
