@@ -1,6 +1,6 @@
 {
   "name": "@webfaas/webfaas-core",
-  "version": "0.1.0-ALPHA9",
+  "version": "0.1.0-ALPHA10",
   "description": "WEBFaaS Framework - Core",
   "main": "lib/Core.js",
   "readmeFilename": "README.md",
@@ -18,7 +18,7 @@
     "build": "npm run build:clean && node_modules/.bin/tsc && npm run build:static",
     "build:clean": "rm -rf dist",
     "build:static": "cp package.json dist && cp README.md dist && cp .npmignore dist && cp src/test/data -R dist/test && mkdir -p dist/test/mocks/wasm && cp src/test/mocks/wasm/*.wasm dist/test/mocks/wasm",
-    "setnpmtoken": "echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc",
+    "setnpmtoken": "rm ~/.npmrc && echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc",
     "publish_npm": "cd dist && npm publish --access public",
     "pack": "npm pack dist",
     "buildAndTest": "npm run build && npm run test:coverage",
