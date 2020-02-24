@@ -1,6 +1,6 @@
 {
   "name": "@webfaas/webfaas-core",
-  "version": "0.1.0-ALPHA10",
+  "version": "0.1.0",
   "description": "WEBFaaS Framework - Core",
   "main": "lib/Core.js",
   "readmeFilename": "README.md",
