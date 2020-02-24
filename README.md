@@ -2,10 +2,9 @@
 
 Minimalist FaaS framework for [node](http://nodejs.org).
 
+[![NPM Version][npm-image]][npm-url]
 [![Linux Build][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-
-## work in progress...
 
 ## FaaS Micro Framework
 
@@ -13,64 +12,40 @@ Minimalist FaaS framework for [node](http://nodejs.org).
   * Focus on high performance
   * Input/Output with automatic validation
 
-## Installation
-```bash
-$ npm install @webfaas/core
-```
-
-## Shell
-```bash
-$ node dist/lib/server.js invoke @webfaaslabs/mathsumasync:0.0.2#sum '{"x":2,"y":5}'
-$ node dist/lib/server.js invoke @webfaaslabs/mathsum:0.0.1 '[2,5]'
-```
-
-## Usage
-### Create a subfolder in functions folder and generate package.json
-```bash
-$ npm init
-```
-
-### example package.json
-```json
-{
-  "name": "sum",
-  "version": "1.0.0",
-  "description": "sum x + y",
-  "main": "index.js"
-}
-```
-
-### create file index.js
-
-```javascript
-module.input = {
-    x:{type:"integer", required:true},
-    y:{type:"integer", required:true}
-};
-module.output = {
-    value:{type:"integer"}
-};
-
-module.exports = function(context, message, callBack){
-    callBack(null, {value: message.x + message.y});
-};
-```
-
 ### Example
 ```javascript
-const moduleFactory = require("functions-io-core").buildModuleFactory();
+"use strict";
 
-moduleFactory.requireAsync("uuid", "3.2.1")
-    .then(function(module){
-        console.log("module", module.v4());
-        console.log("module", module.v4());
-        console.log("module", module.v4());
-    }).catch(function(err){
-        console.log("erro", err);
-    });
+import { Core } from "../lib/Core";
+import { PackageRegistryMock } from "../test/mocks/PackageRegistryMock";
+
+const core = new Core();
+
+core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
+
+(async function(){
+    await core.start();
+        
+    var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
+
+    if (response){
+        console.log("response", response);
+    }
+    else{
+        console.log("not response");
+    }
+})();
 ```
+
+## License
+
+[MIT](LICENSE)
+
+[npm-image]: https://img.shields.io/npm/v/@webfaas/webfaas-core.svg
+[npm-url]: https://npmjs.org/package/@webfaas/webfaas-core
 
 [travis-image]: https://img.shields.io/travis/webfaas/core/master.svg?label=linux
 [travis-url]: https://travis-ci.org/webfaas/core
+
 [coveralls-image]: https://img.shields.io/coveralls/github/webfaas/core/master.svg
 [coveralls-url]: https://coveralls.io/github/webfaas/core?branch=master
