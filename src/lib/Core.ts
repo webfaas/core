@@ -86,6 +86,7 @@ export { ModuleNameUtil } from "./Util/ModuleNameUtil";
 export { ClientHTTP } from "./ClientHTTP/ClientHTTP";
 export { ClientHTTPConfig } from "./ClientHTTP/ClientHTTPConfig";
 export { IClientHTTPResponse } from "./ClientHTTP/IClientHTTPResponse";
+export { ClientHTTPUtil } from "./Util/ClientHTTPUtil";
 
 //Log
 export { Log } from "./Log/Log";
