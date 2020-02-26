@@ -5,7 +5,7 @@ import { PackageRegistryMock } from "../test/mocks/PackageRegistryMock";
 
 const core = new Core();
 
-core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
+core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager().addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
 
 process.on("unhandledRejection", (reason, p) => {
     console.log("Unhandled Rejection:", p, "reason:", reason);

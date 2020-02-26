@@ -28,11 +28,11 @@ var packageStoreManager_default = new PackageStoreManager(packageRegistryManager
 describe("Module Manager", () => {
     it("constructor", function(done){
         let moduleManager1 = new ModuleManager();
-        chai.expect(typeof(moduleManager1.getPackageStoreManager())).to.eq("object");
+        chai.expect(typeof(moduleManager1.getModuleManagerImport().getPackageStoreManager())).to.eq("object");
 
         let packageStoreManager2 = new PackageStoreManager();
         let moduleManager2 = new ModuleManager(packageStoreManager2);
-        chai.expect(moduleManager2.getPackageStoreManager()).to.eq(packageStoreManager2);
+        chai.expect(moduleManager2.getModuleManagerImport().getPackageStoreManager()).to.eq(packageStoreManager2);
 
         done();
     })
@@ -40,27 +40,15 @@ describe("Module Manager", () => {
     it("semver", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
         let semver = new SmallSemver();
-        moduleManager1.setSemver(semver);
-        chai.expect(moduleManager1.getSemver()).to.eq(semver);
-    })
-
-    it("addObjectToCache", async function(){
-        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
-
-        moduleManager1.addCompiledObjectToCache("package1", "version1", "item1", "AAA");
-        chai.expect(moduleManager1.getCompiledObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("AAA");
-        moduleManager1.addCompiledObjectToCache("package1", "version1", "item1", "BBB");
-        chai.expect(moduleManager1.getCompiledObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("BBB");
-        chai.expect(moduleManager1.getCacheCompiledObject().size).to.eq(1);
-        moduleManager1.cleanCacheObjectCompiled();
-        chai.expect(moduleManager1.getCacheCompiledObject().size).to.eq(0);
+        moduleManager1.getModuleManagerImport().setSemver(semver);
+        chai.expect(moduleManager1.getModuleManagerImport().getSemver()).to.eq(semver);
     })
 
     it("resolveVersion - @registry1/mathsum", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
 
         try {
-            let responseObj: any = await moduleManager1.resolveVersion("@registry1/mathsum", "99.*");
+            let responseObj: any = await moduleManager1.getModuleManagerImport().resolveVersion("@registry1/mathsum", "99.*");
             chai.expect(responseObj).to.eq(Error);
         }
         catch (errTry) {
@@ -68,7 +56,7 @@ describe("Module Manager", () => {
         }
 
         try {
-            let responseObj: any = await moduleManager1.resolveVersion("@registry1/mathsum", "0.*");
+            let responseObj: any = await moduleManager1.getModuleManagerImport().resolveVersion("@registry1/mathsum", "0.*");
             chai.expect(responseObj).to.eq("0.0.3");
         }
         catch (errTry) {
@@ -79,12 +67,12 @@ describe("Module Manager", () => {
     it("resolveVersion - simulate error", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
 
-        moduleManager1.getSmallManifest = function(){
+        moduleManager1.getModuleManagerImport().getSmallManifest = function(){
             throw new Error("simulate error");
         }
 
         try {
-            let responseObj: any = await moduleManager1.resolveVersion("mathsum", "99.*");
+            let responseObj: any = await moduleManager1.getModuleManagerImport().resolveVersion("mathsum", "99.*");
             chai.expect(responseObj).to.eq(Error);
         }
         catch (errTry) {
@@ -92,7 +80,7 @@ describe("Module Manager", () => {
         }
 
         try {
-            let responseObj: any = await moduleManager1.resolveVersion("mathsum", "0.*");
+            let responseObj: any = await moduleManager1.getModuleManagerImport().resolveVersion("mathsum", "0.*");
             chai.expect(responseObj).to.eq(Error);
         }
         catch (errTry) {
@@ -109,7 +97,7 @@ describe("Module Manager", () => {
 
         let moduleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsumwasm", "0.0.1", "");
         try {
-            await moduleManager1.compilePackageWasmAsync(moduleManagerRequireContextData, moduleCompileManifestData, Buffer.from("AAAA"));
+            await moduleManager1.getModuleManagerCompile().compilePackageWasmAsync(moduleManagerRequireContextData, moduleCompileManifestData, Buffer.from("AAAA"));
             throw new Error("Sucess");
         }
         catch (errTry) {

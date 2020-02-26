@@ -33,11 +33,21 @@ describe("Core", () => {
 
     it("invokeAsync @registry1/mathsum version - 0.0.1", async function(){
         var core = new Core();
-        loadDefaultRegistries(core.getModuleManager().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
+        loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
         
         await core.start();
         var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
 
         chai.expect(response).to.eq(5);
+    })
+
+    it("import @registry1/mathsum version - 0.0.1", async function(){
+        var core = new Core();
+        loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
+        
+        await core.start();
+        var response: any = await core.import("@registry1/mathsum", "0.0.1");
+
+        chai.expect(response(2,3)).to.eq(5);
     })
 })

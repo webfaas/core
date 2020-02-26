@@ -22,7 +22,7 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 
 describe("Module Manager - Invoke Async", () => {
     let moduleManager = new ModuleManager(undefined, log);
-    loadDefaultRegistries(moduleManager.getPackageStoreManager().getPackageRegistryManager(), log)
+    loadDefaultRegistries(moduleManager.getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @registry1/mathsum version - 0.0.1", async function(){
         var response: any = await moduleManager.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
@@ -159,14 +159,14 @@ describe("Module Manager - Invoke Async", () => {
 
 describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleFiles and clean cache", () => {
     let moduleManager = new ModuleManager(undefined, log);
-    loadDefaultRegistries(moduleManager.getPackageStoreManager().getPackageRegistryManager(), log)
+    loadDefaultRegistries(moduleManager.getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @registry1/mathsum version - 0.0.1", async function(){
         var response: any = await moduleManager.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3], "", false);
 
         chai.expect(response).to.eq(5);
 
-        moduleManager.cleanCachePackageStoreDependencies("@registry1/simulateerror", "0.0.3");
+        moduleManager.getModuleManagerCache().cleanCachePackageStoreDependencies("@registry1/simulateerror", "0.0.3");
     })
 
     it("invokeAsync @registry1/syntaxerror - 0.0.1", async function(){

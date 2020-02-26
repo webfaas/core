@@ -28,16 +28,16 @@ describe("Module Manager - Import", () => {
     it("import @registry1/mathsum - 0.*", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
             
-        let responseObj1: any = await moduleManager1.import("@registry1/mathsum", "0.*");
+        let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.*");
         chai.expect(responseObj1(2,3)).to.eq(5);
 
         //force return in cache
-        let responseObj2: any = await moduleManager1.import("@registry1/mathsum", "0.*");
+        let responseObj2: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.*");
         chai.expect(responseObj2(2,3)).to.eq(5);
 
         //notexist
         try {
-            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            let responseObj3: any = await moduleManager1.getModuleManagerImport().import("notexist", "1");
             chai.expect(responseObj3).to.eq(Error);
         }
         catch (errTry) {
@@ -48,16 +48,16 @@ describe("Module Manager - Import", () => {
     it("import @registry1/mathsum - 0.0.3", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
             
-        let responseObj1: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.0.3");
         chai.expect(responseObj1(2,3)).to.eq(5);
 
         //force return in cache
-        let responseObj2: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        let responseObj2: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.0.3");
         chai.expect(responseObj2(2,3)).to.eq(5);
 
         //notexist
         try {
-            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            let responseObj3: any = await moduleManager1.getModuleManagerImport().import("notexist", "1");
             chai.expect(responseObj3).to.eq(Error);
         }
         catch (errTry) {
@@ -68,16 +68,16 @@ describe("Module Manager - Import", () => {
     it("import @registry1/mathsum - 0.0.3", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
             
-        let responseObj1: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.0.3");
         chai.expect(responseObj1(2,3)).to.eq(5);
 
         //force return in cache
-        let responseObj2: any = await moduleManager1.import("@registry1/mathsum", "0.0.3");
+        let responseObj2: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.0.3");
         chai.expect(responseObj2(2,3)).to.eq(5);
 
         //notexist
         try {
-            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            let responseObj3: any = await moduleManager1.getModuleManagerImport().import("notexist", "1");
             chai.expect(responseObj3).to.eq(Error);
         }
         catch (errTry) {
@@ -88,16 +88,16 @@ describe("Module Manager - Import", () => {
     it("import @registry1/hostname - 0.0.1", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
             
-        let responseObj1: any = await moduleManager1.import("@registry1/hostname", "0.0.1");
+        let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/hostname", "0.0.1");
         chai.expect(responseObj1()).to.eq(os.hostname());
 
         //force return in cache
-        let responseObj2: any = await moduleManager1.import("@registry1/hostname", "0.0.1");
+        let responseObj2: any = await moduleManager1.getModuleManagerImport().import("@registry1/hostname", "0.0.1");
         chai.expect(responseObj2()).to.eq(os.hostname());
 
         //notexist
         try {
-            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            let responseObj3: any = await moduleManager1.getModuleManagerImport().import("notexist", "1");
             chai.expect(responseObj3).to.eq(Error);
         }
         catch (errTry) {
@@ -109,7 +109,7 @@ describe("Module Manager - Import", () => {
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
         
         try {
-            let responseObj1: any = await moduleManager1.import("@registry1/syntaxerror", "0.0.1");
+            let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/syntaxerror", "0.0.1");
             throw new Error("Sucess!");
         }
         catch (errTry) {
@@ -118,7 +118,7 @@ describe("Module Manager - Import", () => {
 
         //force return in cache
         try {
-            let responseObj2: any = await moduleManager1.import("@registry1/syntaxerror", "0.0.1");
+            let responseObj2: any = await moduleManager1.getModuleManagerImport().import("@registry1/syntaxerror", "0.0.1");
             throw new Error("Sucess!");
         }
         catch (errTry) {
@@ -127,7 +127,7 @@ describe("Module Manager - Import", () => {
 
         //notexist
         try {
-            let responseObj3: any = await moduleManager1.import("notexist", "1");
+            let responseObj3: any = await moduleManager1.getModuleManagerImport().import("notexist", "1");
             chai.expect(responseObj3).to.eq(Error);
         }
         catch (errTry) {
@@ -139,13 +139,13 @@ describe("Module Manager - Import", () => {
         try {
             let packageStoreManager_simulate = new PackageStoreManager(packageRegistryManager_default, log);
             let moduleManager_simulate = new ModuleManager(packageStoreManager_simulate, log);
-            let packageStore = await moduleManager_simulate.getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
-            moduleManager_simulate.getPackageStoreManager().getPackageStore = async function(){
+            let packageStore = await moduleManager_simulate.getModuleManagerImport().getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
+            moduleManager_simulate.getModuleManagerImport().getPackageStoreManager().getPackageStore = async function(){
                 return null;
             }
             chai.expect(packageStore).to.not.null;
             if (packageStore){
-                await moduleManager_simulate.importDependencies(packageStore);
+                await moduleManager_simulate.getModuleManagerImport().importDependencies(packageStore);
             }
         }
         catch (errTry) {
@@ -156,10 +156,10 @@ describe("Module Manager - Import", () => {
     it("importDependencies - whitout temporaryContextPackageStoreCache ", async function(){
         let packageStoreManager1 = new PackageStoreManager(packageRegistryManager_default, log);
         let moduleManager1 = new ModuleManager(packageStoreManager1, log);
-        let packageStore = await moduleManager1.getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
+        let packageStore = await moduleManager1.getModuleManagerImport().getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
         chai.expect(packageStore).to.not.null;
         if (packageStore){
-            await moduleManager1.importDependencies(packageStore, undefined);
+            await moduleManager1.getModuleManagerImport().importDependencies(packageStore, undefined);
         }
     })
 })

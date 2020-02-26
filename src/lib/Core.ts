@@ -60,8 +60,12 @@ export class Core {
         await this.pluginManager.stop();
     }
 
-    async invokeAsync(name: string, version: string, method?: string, parameter?: any[]): Promise<any>{
-        return await this.moduleManager.invokeAsync(name, version, method, parameter);
+    invokeAsync(name: string, version: string, method?: string, parameter?: any[]): Promise<any>{
+        return this.moduleManager.invokeAsync(name, version, method, parameter);
+    }
+
+    import(name: string, version: string, etag?: string, registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<Object | null>{
+        return this.moduleManager.getModuleManagerImport().import(name, version, etag, registryName, imediateCleanMemoryCacheModuleFiles);
     }
 
     constructor() {

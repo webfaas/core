@@ -25,11 +25,11 @@ describe("Module Manager - smallManifest", () => {
         let moduleManager1 = new ModuleManager(undefined, log);
         let moduleManager2 = new ModuleManager(undefined, log);
 
-        moduleManager1.getPackageStoreManager().getPackageStore = function(){
+        moduleManager1.getModuleManagerImport().getPackageStoreManager().getPackageStore = function(){
             throw new Error("simulate error");
         }
 
-        moduleManager2.getPackageStoreManager().getPackageStore = function(){
+        moduleManager2.getModuleManagerImport().getPackageStoreManager().getPackageStore = function(){
             let customPackageStore: any = {};
             customPackageStore.getManifest = function(){
                 return null;
@@ -38,21 +38,21 @@ describe("Module Manager - smallManifest", () => {
         }
 
         try {
-            let responseObj: any = await moduleManager1.getSmallManifest("package1");
+            let responseObj: any = await moduleManager1.getModuleManagerImport().getSmallManifest("package1");
             chai.expect(responseObj).to.eq(Error);
         }
         catch (errTry) {
             chai.expect(errTry).to.be.an.instanceOf(Error);
         }
 
-        let responseObj1: any = await moduleManager2.getSmallManifest("package1");
+        let responseObj1: any = await moduleManager2.getModuleManagerImport().getSmallManifest("package1");
         chai.expect(responseObj1).to.null;
     })
 
     it("getSmallManifest - simulate zero versions", async function(){
         let moduleManager1 = new ModuleManager(undefined, log);
         
-        moduleManager1.getPackageStoreManager().getPackageStore = function(){
+        moduleManager1.getModuleManagerImport().getPackageStoreManager().getPackageStore = function(){
             let customPackageStore: any = {};
             customPackageStore.getManifest = function(){
                 let manifest: any = {};
@@ -62,7 +62,7 @@ describe("Module Manager - smallManifest", () => {
             return customPackageStore;
         }
 
-        let responseObj: any = await moduleManager1.getSmallManifest("package1");
+        let responseObj: any = await moduleManager1.getModuleManagerImport().getSmallManifest("package1");
         chai.expect(responseObj.name).to.eq("test1");
     })
 })

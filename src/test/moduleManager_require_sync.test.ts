@@ -43,7 +43,7 @@ describe("Module Manager - requireSync", () => {
         chai.expect(responseObj2).to.null;
         
         //load mathsum to cache
-        let responseObj_import: any = await moduleManager1.import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
+        let responseObj_import: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
         chai.expect(responseObj_import).to.not.null;
         chai.expect(responseObj_import(2,3)).to.eq(5);
 
@@ -62,7 +62,7 @@ describe("Module Manager - requireSync", () => {
         let parentModuleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsum", "0.0.1", "mainfile");
 
         //load mathsum to cache
-        let responseObj_import: any = await moduleManager1.import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
+        let responseObj_import: any = await moduleManager1.getModuleManagerImport().import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
         chai.expect(responseObj_import(2,3)).to.eq(5);
 
         let moduleManagerRequireContextData = new ModuleManagerRequireContextData("@registry1/mathsum:0.0.1");
@@ -97,7 +97,7 @@ describe("Module Manager - requireSync", () => {
         let parentModuleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsum", "0.0.1", "mainfile");
 
         //load mathsum to cache
-        let responseObj_import: any = await moduleManager_compilePackageStoreItemBuffer_return_null.import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
+        let responseObj_import: any = await moduleManager_compilePackageStoreItemBuffer_return_null.getModuleManagerImport().import("@registry1/mathsum", "0.0.1", undefined, undefined, false);
         chai.expect(responseObj_import(2,3)).to.eq(5);
 
         let moduleManagerRequireContextData = new ModuleManagerRequireContextData("@registry1/mathsum:0.0.1");
@@ -108,7 +108,7 @@ describe("Module Manager - requireSync", () => {
         moduleManagerRequireContextData_parentnotexist.parentPackageStoreName = "notexist";
         moduleManagerRequireContextData_parentnotexist.parentPackageStoreVersion = "0.0.1";
             
-        moduleManager_compilePackageStoreItemBuffer_return_null.compilePackageStoreItemBufferSync = function(){
+        moduleManager_compilePackageStoreItemBuffer_return_null.getModuleManagerCompile().compilePackageStoreItemBufferSync = function(){
             return null;
         }
         let responseObj9_a: any = moduleManager_compilePackageStoreItemBuffer_return_null.requireSync("./index.js", "", moduleManagerRequireContextData, parentModuleCompileManifestData);
