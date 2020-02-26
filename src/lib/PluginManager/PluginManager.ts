@@ -16,7 +16,7 @@ export class PluginManager {
         }
         else{
             if (process.mainModule){
-                this.rootDir = path.dirname(process.mainModule.filename);
+                this.rootDir = path.dirname((<NodeModule> require.main).filename);
             }
             else{
                 this.rootDir = path.resolve(__dirname, "../../../");
@@ -73,7 +73,7 @@ export class PluginManager {
      * load plugins
      */
     loadPlugins(){
-        this.loadPluginsByFolder(path.join(__dirname, "node_modules"));
+        this.loadPluginsByFolder(path.join(this.rootDir, "node_modules"));
     }
 
     /**
@@ -83,12 +83,18 @@ export class PluginManager {
         try {
             let files = fs.readdirSync(scanFolderName);
             for (let i = 0; i < files.length; i++){
-                let file = path.join(scanFolderName, files[i]);
-                if (file.indexOf("webfaas-plugin-") > -1){
-                    if (fs.statSync(file).isDirectory()){
-                        let pluginFunctionFactory: any = require(file);
-                        let newPlugin = this.instancePluginBuild(pluginFunctionFactory);
-                        this.addPlugin(newPlugin);
+                let file = files[i];
+                let filePath = path.join(scanFolderName, file);
+                if (file.substring(0,1) === "@"){
+                    this.loadPluginsByFolder(filePath);
+                }
+                else{
+                    if (file.indexOf("webfaas-plugin-") === 0){
+                        if (fs.statSync(filePath).isDirectory()){
+                            let pluginFunctionFactory: any = require(filePath);
+                            let newPlugin = this.instancePluginBuild(pluginFunctionFactory);
+                            this.addPlugin(newPlugin);
+                        }
                     }
                 }
             }

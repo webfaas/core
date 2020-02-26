@@ -70,15 +70,21 @@ describe("Package Registry Routing Plugin", () => {
 
         chai.expect(pluginManager.listPlugin.length).to.eq(0);
         pluginManager.loadPluginsByFolder(path.join(__dirname, "mocks", "plugins"));
-        chai.expect(pluginManager.listPlugin.length).to.eq(2);
+        chai.expect(pluginManager.listPlugin.length).to.eq(4);
         
         chai.expect((<any> pluginManager.listPlugin[0]).state).to.eq("");
         chai.expect((<any> pluginManager.listPlugin[1]).state).to.eq("");
+        chai.expect((<any> pluginManager.listPlugin[2]).state).to.eq("");
+        chai.expect((<any> pluginManager.listPlugin[3]).state).to.eq("");
         await pluginManager.start();
         chai.expect((<any> pluginManager.listPlugin[0]).state).to.eq("started");
         chai.expect((<any> pluginManager.listPlugin[1]).state).to.eq("started");
+        chai.expect((<any> pluginManager.listPlugin[2]).state).to.eq("started");
+        chai.expect((<any> pluginManager.listPlugin[3]).state).to.eq("started");
         await pluginManager.stop();
         chai.expect((<any> pluginManager.listPlugin[0]).state).to.eq("stoped");
         chai.expect((<any> pluginManager.listPlugin[1]).state).to.eq("stoped");
+        chai.expect((<any> pluginManager.listPlugin[2]).state).to.eq("stoped");
+        chai.expect((<any> pluginManager.listPlugin[3]).state).to.eq("stoped");
     })
 })
