@@ -2,6 +2,7 @@ import * as chai from "chai";
 import * as mocha from "mocha";
 
 import { ModuleManagerCacheObjectItem } from "../lib/ModuleManager/ModuleManagerCacheObjectItem";
+import { IManifest } from "../lib/Core";
 
 describe("ModuleManagerCacheObjectItem", () => {
     it("should return property on call", function(done){
@@ -23,10 +24,16 @@ describe("ModuleManagerCacheObjectItem", () => {
         chai.expect(moduleManagerCacheObjectItem.getObjectFromCache("key1")).to.eq(newObj1);
         moduleManagerCacheObjectItem.removeObjectFromCache("key1");
         chai.expect(moduleManagerCacheObjectItem.getObjectFromCache("key1")).to.null;
-        chai.expect(moduleManagerCacheObjectItem.getHitCount()).to.eq(0);
+        chai.expect(moduleManagerCacheObjectItem.getHitCount()).to.eq(3);
 
         chai.expect(moduleManagerCacheObjectItem.getObjectFromCache()).to.null;
-        chai.expect(moduleManagerCacheObjectItem.getHitCount()).to.eq(1);
+        chai.expect(moduleManagerCacheObjectItem.getHitCount()).to.eq(4);
+
+        let manifest1 = {} as IManifest;
+        manifest1.name = "name1";
+        moduleManagerCacheObjectItem.setManifest(manifest1);
+        chai.expect(moduleManagerCacheObjectItem.getManifest()?.name).to.eq("name1");
+        chai.expect(moduleManagerCacheObjectItem.getHitCount()).to.eq(4);
 
         done();
     })

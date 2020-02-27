@@ -1,0 +1,6 @@
+/**
+ * InvokeContextData
+ */
+export class InvokeContextData {
+
+}

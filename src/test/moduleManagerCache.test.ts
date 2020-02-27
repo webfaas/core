@@ -7,6 +7,7 @@ import { LogLevelEnum } from "../lib/Log/ILog";
 import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreManager";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { ModuleManagerCache } from "../lib/ModuleManager/ModuleManagerCache";
+import { IManifest } from "../lib/Core";
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
@@ -27,8 +28,16 @@ describe("Module Manager Cache", () => {
         chai.expect(moduleManager1.getModuleManagerCache().getCompiledObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("AAA");
         moduleManager1.getModuleManagerCache().addCompiledObjectToCache("package1", "version1", "item1", "BBB");
         chai.expect(moduleManager1.getModuleManagerCache().getCompiledObjectFromCache("package1", "version1", "item1")?.toString()).to.eq("BBB");
-        chai.expect(moduleManager1.getModuleManagerCache().getCacheCompiledObject().size).to.eq(1);
-        moduleManager1.getModuleManagerCache().cleanCacheObjectCompiled();
-        chai.expect(moduleManager1.getModuleManagerCache().getCacheCompiledObject().size).to.eq(0);
+        chai.expect(moduleManager1.getModuleManagerCache().getCacheModule().size).to.eq(1);
+
+        let manifest1 = {} as IManifest;
+        manifest1.name = "package1";
+        moduleManager1.getModuleManagerCache().addManifestToCache("package1", "version1", manifest1);
+        chai.expect(moduleManager1.getModuleManagerCache().getManifestFromCache("package1", "version1")?.name).to.eq("package1");
+        chai.expect(moduleManager1.getModuleManagerCache().getCacheModule().size).to.eq(1);
+        chai.expect(moduleManager1.getModuleManagerCache().getManifestFromCache("notfound", "version1")).to.null;
+
+        moduleManager1.getModuleManagerCache().cleanCacheModule();
+        chai.expect(moduleManager1.getModuleManagerCache().getCacheModule().size).to.eq(0);
     })
 })

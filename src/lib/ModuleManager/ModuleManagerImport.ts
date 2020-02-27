@@ -182,7 +182,7 @@ export class ModuleManagerImport {
                 if (packageStore){
                     let rootPackageStoreKey: string = packageStore.getKey();
 
-                    let cachePackageStoreDependenciesItem = this.moduleManager.getModuleManagerCache().cachePackageStoreDependenciesItemBuild();
+                    let cachePackageStoreDependenciesItem = this.moduleManager.getModuleManagerCache().cachePackageStoreBuild();
 
                     await this.importDependencies(packageStore, cachePackageStoreDependenciesItem);
 
@@ -191,15 +191,15 @@ export class ModuleManagerImport {
 
                     let moduleManagerRequireContextData: ModuleManagerRequireContextData = new ModuleManagerRequireContextData(rootPackageStoreKey);
                     
-                    //add all files in temporary memory cache
-                    this.moduleManager.getModuleManagerCache().getCachePackageStoreDependencies().set(rootPackageStoreKey, cachePackageStoreDependenciesItem);
+                    //add all files to temporary memory cache
+                    this.moduleManager.getModuleManagerCache().addPackageStoreCacheSyncToCache(rootPackageStoreKey, cachePackageStoreDependenciesItem);
 
                     //responseModuleObj = this.requireSync(nameParsedObj.fullName, versionResolved, moduleManagerRequireContextData);
                     responseModuleObj = await this.moduleManager.requireAsync(nameParsedObj.fullName, versionResolved, moduleManagerRequireContextData);
 
                     if (imediateCleanMemoryCacheModuleFiles){
                         //remove temporary cache
-                        this.moduleManager.getModuleManagerCache().cleanCachePackageStoreDependencies(name, version);
+                        this.moduleManager.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
                     }
 
                     resolve(responseModuleObj);

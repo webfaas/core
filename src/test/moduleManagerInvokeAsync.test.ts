@@ -162,16 +162,16 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
     loadDefaultRegistries(moduleManager.getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @registry1/mathsum version - 0.0.1", async function(){
-        var response: any = await moduleManager.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3], "", false);
+        var response: any = await moduleManager.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3], "", undefined, false);
 
         chai.expect(response).to.eq(5);
 
-        moduleManager.getModuleManagerCache().cleanCachePackageStoreDependencies("@registry1/simulateerror", "0.0.3");
+        moduleManager.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion("@registry1/simulateerror", "0.0.3");
     })
 
     it("invokeAsync @registry1/syntaxerror - 0.0.1", async function(){
         try {
-            let responseObj1: any = await moduleManager.invokeAsync("@registry1/syntaxerror", "0.0.1", "", undefined, "", false);
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/syntaxerror", "0.0.1", "", undefined, "", undefined, false);
             throw new Error("Sucess!");
         }
         catch (errTry) {
@@ -181,7 +181,7 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
 
     it("invokeAsync @registry1/executionerror - 0.0.1", async function(){
         try {
-            let responseObj1: any = await moduleManager.invokeAsync("@registry1/executionerror", "0.0.1", "", undefined, "", false);
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/executionerror", "0.0.1", "", undefined, "", undefined, false);
             throw new Error("Sucess!");
         }
         catch (errTry) {
@@ -191,7 +191,7 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
 
     it("invokeAsync @registry1/modulewhitoutexport - 0.0.1", async function(){
         try {
-            let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1", "", undefined, "", false);
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1", "", undefined, "", undefined, false);
             chai.expect(responseObj1).to.null;
         }
         catch (errTry) {

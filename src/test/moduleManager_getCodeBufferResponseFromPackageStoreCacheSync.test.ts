@@ -35,7 +35,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
         packageInfoTarget1.packageVersion = "0.0.1";
         packageInfoTarget1.itemKey = "index.txt";
         packageInfoTarget1.nameParsedObj = ModuleNameUtil.parse(packageInfoTarget1.packageName, "");
-        let resp1 = moduleManager1.getModuleManagerCache().getCodeBufferResponseFromPackageStoreCacheSync(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
+        let resp1 = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
         chai.expect(resp1).to.not.null;
         if (resp1){
             chai.expect(resp1?.packageStoreItemBufferResponse).to.not.null;
@@ -49,7 +49,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
         packageInfoTarget_notfound.packageVersion = "0.0.1";
         packageInfoTarget_notfound.itemKey = "notfound";
         packageInfoTarget_notfound.nameParsedObj = ModuleNameUtil.parse(packageInfoTarget_notfound.packageName, "");
-        let resp_notfound = moduleManager1.getModuleManagerCache().getCodeBufferResponseFromPackageStoreCacheSync(packageStoreCacheMemorySync1, packageInfoTarget_notfound, moduleManagerRequireContextData);
+        let resp_notfound = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget_notfound, moduleManagerRequireContextData);
         chai.expect(resp_notfound).to.null;
     })
 
@@ -75,7 +75,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
         packageInfoTarget1.packageVersion = "0.0.1";
         packageInfoTarget1.itemKey = "";
         packageInfoTarget1.nameParsedObj = ModuleNameUtil.parse(packageInfoTarget1.packageName, "");
-        let resp1 = moduleManager1.getModuleManagerCache().getCodeBufferResponseFromPackageStoreCacheSync(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
+        let resp1 = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
         chai.expect(resp1).to.not.null;
         if (resp1){
             chai.expect(resp1?.packageStoreItemBufferResponse).to.not.null;
@@ -84,7 +84,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
             }
         }
 
-        let resp_notfound = moduleManager1.getModuleManagerCache().getCodeBufferResponseFromPackageStoreCacheSync(packageStoreCacheMemorySync2, packageInfoTarget1, moduleManagerRequireContextData);
+        let resp_notfound = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync2, packageInfoTarget1, moduleManagerRequireContextData);
         chai.expect(resp_notfound).to.null;
     })
 })
