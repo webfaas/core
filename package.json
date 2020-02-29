@@ -1,6 +1,6 @@
 {
   "name": "@webfaas/webfaas-core",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "WebFaaS Framework - Core",
   "main": "lib/Core.js",
   "readmeFilename": "README.md",
@@ -22,8 +22,7 @@
     "publish_npm": "cd dist && npm publish --access public",
     "pack": "npm pack dist",
     "buildAndTest": "npm run build && npm run test:coverage",
-    "setnpmtokenAndPublish": "npm run setnpmtoken && npm run publish_npm",
-    "sonar": "node scripts/sonar-project.js"
+    "setnpmtokenAndPublish": "npm run setnpmtoken && npm run publish_npm"
   },
   "repository": {
     "type": "git",
@@ -32,13 +31,12 @@
   "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.2",
-    "@types/mocha": "^5.2",
-    "@types/node": "^13.1",
+    "@types/mocha": "^7.0",
+    "@types/node": "^13.7",
     "chai": "^4.2",
-    "mocha": "^6.2",
+    "mocha": "^7.1",
     "nyc": "^15.0",
-    "sonarqube-scanner": "^2.5.0",
-    "typescript": "^3.7",
+    "typescript": "^3.8",
     "typescript-tslint-plugin": "^0.5"
   },
   "engines": {

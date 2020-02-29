@@ -117,7 +117,6 @@ describe("HTTP", () => {
                 clientHTTP2.destroy();
             }
             catch (errTry) {
-                console.log("HTTP ERROR", errTry);
                 chai.expect(errTry).to.null;
             }
             finally{
@@ -193,7 +192,6 @@ describe("HTTPS IGNORE", () => {
                 clientHTTP2.destroy();
             }
             catch (errTry) {
-                console.log("HTTPS ERROR", errTry);
                 chai.expect(errTry).to.null;
             }
             finally{
@@ -277,8 +275,6 @@ describe("HTTPS CERTIFICATE", () => {
                 try {
                     var resp6: IClientHTTPResponse = await clientHTTP3.request("https://localhost:" + serverPort);
 
-                    console.log("resp6", resp6);
-    
                     throw new Error("should error certificate");
                 }
                 catch (errTryCertificate) {
@@ -290,7 +286,6 @@ describe("HTTPS CERTIFICATE", () => {
                 clientHTTP3.destroy();
             }
             catch (errTry) {
-                console.log("HTTPS ERROR", errTry);
                 chai.expect(errTry).to.null;
             }
             finally{

@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Core } from "../Core";
+import { Core, LogLevelEnum } from "../Core";
 import { IPlugin } from "./IPlugin";
+import { LogCodeEnum } from "../Log/ILog";
 
 export class PluginManager {
     core: Core;
@@ -22,8 +23,6 @@ export class PluginManager {
                 this.rootDir = path.resolve(__dirname, "../../../");
             }
         }
-
-        this.loadPlugins();
     }
 
     /**
@@ -79,12 +78,14 @@ export class PluginManager {
     /**
      * load plugins by folder
      */
-    loadPluginsByFolder(scanFolderName: string){
+    loadPluginsByFolder(scanFolderName: string): void{
+        let file: string = "";
+        let filePath: string = "";
         try {
             let files = fs.readdirSync(scanFolderName);
             for (let i = 0; i < files.length; i++){
-                let file = files[i];
-                let filePath = path.join(scanFolderName, file);
+                file = files[i];
+                filePath = path.join(scanFolderName, file);
                 if (file.substring(0,1) === "@"){
                     this.loadPluginsByFolder(filePath);
                 }
@@ -93,14 +94,21 @@ export class PluginManager {
                         if (fs.statSync(filePath).isDirectory()){
                             let pluginFunctionFactory: any = require(filePath);
                             let newPlugin = this.instancePluginBuild(pluginFunctionFactory);
+                            this.core.getLog().write(LogLevelEnum.INFO, "loadPluginsByFolder", LogCodeEnum.PROCESS.toString(), "plugin loaded", {file: file}, __filename);
                             this.addPlugin(newPlugin);
                         }
                     }
                 }
             }
         }
-        catch (error) {
-            return;
+        catch (errTry) {
+            if (errTry.code === "ENOENT"){
+                return;
+            }
+            else{
+                this.core.getLog().writeError("loadPluginsByFolder", errTry, {scanFolderName: scanFolderName, file: file}, __filename);
+                throw errTry;
+            }
         }
     }
 }

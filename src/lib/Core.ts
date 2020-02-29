@@ -18,6 +18,20 @@ export class Core {
     private version: string;
 
     /**
+     * return registry manager
+     */
+    getPackageRegistryManager(): PackageRegistryManager{
+        return this.packageRegistryManager;
+    }
+    
+    /**
+     * return store manager
+     */
+    getPackageStoreManager() : PackageStoreManager{
+        return this.packageStoreManager;
+    }
+
+    /**
      * return module manager
      */
     getModuleManager(): ModuleManager{
@@ -68,17 +82,25 @@ export class Core {
         return this.moduleManager.getModuleManagerImport().import(name, version, etag, registryName, imediateCleanMemoryCacheModuleFiles);
     }
 
-    constructor() {
-        this.config = new Config();
-        this.log = new Log();
-        
-        this.packageRegistryManager = new PackageRegistryManager(this.log);
-        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
-        this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
-        this.pluginManager = new PluginManager(this);
-
+    constructor(config?: Config, log?: Log) {
+        //not change position
         let pjson: any = require("../package.json");
         this.version = pjson.version;
+        //****
+        
+        this.config = config || new Config();
+        this.log = log || new Log();
+        
+        this.packageRegistryManager = new PackageRegistryManager(this.log);
+        let defaultRegistryName: string = this.config.get("registry.default", "");
+        this.packageRegistryManager.setDefaultRegistryName(defaultRegistryName);
+
+        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
+
+        this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
+
+        this.pluginManager = new PluginManager(this);
+        this.pluginManager.loadPlugins();
     }
 }
 

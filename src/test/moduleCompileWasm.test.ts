@@ -16,7 +16,6 @@ var moduleCompile_default = new ModuleCompileWasm();
 var moduleCompile_throwError = new ModuleCompileWasm(logThrowError);
 
 logThrowError.write = function(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:any){
-    console.log("mock => ", method, code, message);
     if (method === "compile" && code === "COMPILE" && message === "compiled"){
         throw new Error("Error in compile");
     }
@@ -40,7 +39,6 @@ describe("ModuleCompileWasm", () => {
             throw new Error("Sucess");
         }
         catch (errTry) {
-            //console.log("erro wasm => ", errTry.message);
             chai.expect(errTry.message.indexOf("expected magic word")).to.gt(-1);
         }
 
