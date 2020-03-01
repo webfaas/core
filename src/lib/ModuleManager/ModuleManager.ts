@@ -54,6 +54,23 @@ export class ModuleManager {
     }
 
     /**
+     * add pre filter
+     * @param filter 
+     */
+    addPreFilterInvokeAsync(filter: IModuleManagerFilter): void{
+        if (filter.priority){
+            for (let i = 0; i < this.preFilterInvokeAsyncList.length; i++){
+                let item = this.preFilterInvokeAsyncList[i];
+                if (filter.priority > item.priority){
+                    this.preFilterInvokeAsyncList.splice(i, 0, filter);
+                    return;
+                }
+            }
+        }
+        this.preFilterInvokeAsyncList.push(filter);
+    }
+
+    /**
      * require sync
      * @param name module name
      * @param version module version
@@ -171,26 +188,26 @@ export class ModuleManager {
         return new Promise((resolve, reject) => {
             this.moduleManagerImport.import(name, version, undefined, registryName, false).then((moduleObj)=>{ //disable imediateCleanMemoryCacheModuleFiles in import
                 if (moduleObj){
+                    //pre filter
+                    Promise.all(this.preFilterInvokeAsyncList.map((item)=>{return item.filter(name, version, method, parameter, registryName)})).then(()=>{
+                        //pre filter - ok
 
-                    /*
-                    Promise.all(this.preFilterInvokeAsyncList.map((item)=>{return item.filter(name, version, method, parameter, registryName)})).then((values)=>{
-                        console.log("Value => ", values);
-                    }).catch((err)=>{
-                        console.log("Erro => ", err);
+                        this.invokeAsyncByModuleObject(moduleObj, method, parameter).then((responseInvokeAsync)=>{
+                            resolve(responseInvokeAsync);
+    
+                            //remove temporary cache
+                            if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
+                        }).catch((errInvokeAsync) => {
+                            //remove temporary cache
+                            if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
+    
+                            reject(errInvokeAsync);
+                        });
+                    }).catch((errPreFilter)=>{
+                        //pre filter - error
+
+                        reject(errPreFilter);
                     })
-                    */
-
-                    this.invokeAsyncByModuleObject(moduleObj, method, parameter).then((responseInvokeAsync)=>{
-                        resolve(responseInvokeAsync);
-
-                        //remove temporary cache
-                        if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
-                    }).catch((errInvokeAsync) => {
-                        //remove temporary cache
-                        if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
-
-                        reject(errInvokeAsync);
-                    });
                 }
                 else{
                     //remove temporary cache

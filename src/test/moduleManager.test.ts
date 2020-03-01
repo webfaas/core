@@ -104,47 +104,4 @@ describe("Module Manager", () => {
             chai.expect(errTry.message.indexOf("expected")).to.gt(-1);
         }
     })
-
-    it("invokeAsyncByModuleObject", async function(){
-        let moduleManager1 = new ModuleManager(undefined, log);
-
-        let moduleObj1 = {};
-        let response1 = await moduleManager1.invokeAsyncByModuleObject(null);
-        chai.expect(response1).to.null;
-
-        try {
-            let moduleObj = {};
-            let responseObj: any = await moduleManager1.invokeAsyncByModuleObject(moduleObj, "methodnotfound", [1,3]);
-            chai.expect(responseObj).to.eq(Error);
-        }
-        catch (errTry) {
-            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.NotFoundError);
-        }
-
-        try {
-            let moduleObj: any = {};
-            moduleObj.testError = function(){
-                throw new Error("simulate error");
-            }
-            let responseObj: any = await moduleManager1.invokeAsyncByModuleObject(moduleObj, "testError");
-            chai.expect(responseObj).to.eq(Error);
-        }
-        catch (errTry) {
-            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.InvokeError);
-        }
-
-        try {
-            let moduleObj: any = {};
-            moduleObj.testErrorAsync = function(){
-                return new Promise((resolve, reject)=>{
-                    throw new Error("simulate error");
-                })
-            }
-            let responseObj: any = await moduleManager1.invokeAsyncByModuleObject(moduleObj, "testErrorAsync");
-            chai.expect(responseObj).to.eq(Error);
-        }
-        catch (errTry) {
-            chai.expect(errTry).to.be.an.instanceOf(WebFaasError.InvokeError);
-        }
-    })
 })
