@@ -1,6 +1,0 @@
-/**
- * InvokeContextData
- */
-export class InvokeContextData {
-
-}

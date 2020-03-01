@@ -10,6 +10,7 @@ import { ModuleManagerRequireContextData } from "../lib/ModuleManager/ModuleMana
 import { IRequirePackageInfoTarget } from "../lib/ModuleManager/IRequirePackageInfoTarget";
 import { PackageStoreCacheMemorySync } from "../lib/PackageStoreCache/Memory/PackageStoreCacheMemorySync";
 import { PackageStore, ModuleNameUtil } from "../lib/Core";
+import { ModuleManagerConvert } from "../lib/ModuleManager/ModuleManagerConvert";
 
 var log = new Log();
 log.changeCurrentLevel(LogLevelEnum.OFF);
@@ -17,7 +18,9 @@ log.changeCurrentLevel(LogLevelEnum.OFF);
 var packageRegistryManager_default: PackageRegistryManager = new PackageRegistryManager(log);
 var packageStoreManager_default = new PackageStoreManager(packageRegistryManager_default, log);
 
-describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () => {
+const moduleManagerConvert = new ModuleManagerConvert();
+
+describe("Module Manager - Convert", () => {
     it("with itemKey", async function(){
         let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
         
@@ -35,7 +38,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
         packageInfoTarget1.packageVersion = "0.0.1";
         packageInfoTarget1.itemKey = "index.txt";
         packageInfoTarget1.nameParsedObj = ModuleNameUtil.parse(packageInfoTarget1.packageName, "");
-        let resp1 = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
+        let resp1 = moduleManagerConvert.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
         chai.expect(resp1).to.not.null;
         if (resp1){
             chai.expect(resp1?.packageStoreItemBufferResponse).to.not.null;
@@ -49,7 +52,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
         packageInfoTarget_notfound.packageVersion = "0.0.1";
         packageInfoTarget_notfound.itemKey = "notfound";
         packageInfoTarget_notfound.nameParsedObj = ModuleNameUtil.parse(packageInfoTarget_notfound.packageName, "");
-        let resp_notfound = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget_notfound, moduleManagerRequireContextData);
+        let resp_notfound = moduleManagerConvert.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget_notfound, moduleManagerRequireContextData);
         chai.expect(resp_notfound).to.null;
     })
 
@@ -75,7 +78,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
         packageInfoTarget1.packageVersion = "0.0.1";
         packageInfoTarget1.itemKey = "";
         packageInfoTarget1.nameParsedObj = ModuleNameUtil.parse(packageInfoTarget1.packageName, "");
-        let resp1 = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
+        let resp1 = moduleManagerConvert.convertToCodeBufferResponse(packageStoreCacheMemorySync1, packageInfoTarget1, moduleManagerRequireContextData);
         chai.expect(resp1).to.not.null;
         if (resp1){
             chai.expect(resp1?.packageStoreItemBufferResponse).to.not.null;
@@ -84,7 +87,7 @@ describe("Module Manager - getCodeBufferResponseFromPackageStoreCacheSync", () =
             }
         }
 
-        let resp_notfound = moduleManager1.convertToCodeBufferResponse(packageStoreCacheMemorySync2, packageInfoTarget1, moduleManagerRequireContextData);
+        let resp_notfound = moduleManagerConvert.convertToCodeBufferResponse(packageStoreCacheMemorySync2, packageInfoTarget1, moduleManagerRequireContextData);
         chai.expect(resp_notfound).to.null;
     })
 })

@@ -1,20 +1,19 @@
-import * as path from "path";
 import { Log } from "../Log/Log";
 import { types } from "util"
 import { PackageStoreManager } from "../PackageStoreManager/PackageStoreManager";
-import { IPackageStoreCacheSync } from "../PackageStoreCache/IPackageStoreCacheSync";
 import { ModuleCompileManifestData } from "../ModuleCompile/ModuleCompileManifestData";
 import { ModuleManagerRequireContextData } from "./ModuleManagerRequireContextData";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
-import { ModuleNameUtil } from "../Util/ModuleNameUtil";
 import { IRequirePackageInfoTarget } from "./IRequirePackageInfoTarget";
 import { ModuleManagerCache } from "./ModuleManagerCache";
 import { ModuleManagerCompile } from "./ModuleManagerCompile";
 import { ModuleManagerImport } from "./ModuleManagerImport";
-import { PackageStore, IManifest } from "../Core";
-import { PackageStoreItemBufferResponse } from "../PackageStore/PackageStoreItemBufferResponse";
-import { ICodeBufferResponseFromPackageStoreCacheSync } from "./ICodeBufferResponseFromPackageStoreCacheSync";
-import { InvokeContextData } from "./InvokeContextData";
+import { IMessageContext } from "./IMessageContext";
+import { ModuleManagerConvert } from "./ModuleManagerConvert";
+import { IRequestContext, IRequestContextStack } from "./IRequestContext";
+import { IModuleManagerFilter } from "./IModuleManagerFilter";
+
+const moduleManagerConvert = new ModuleManagerConvert();
 
 /**
  * manager Module
@@ -24,7 +23,8 @@ export class ModuleManager {
     private moduleManagerCompile: ModuleManagerCompile;
     private moduleManagerCache: ModuleManagerCache;
     private moduleManagerImport: ModuleManagerImport;
-    
+    private preFilterInvokeAsyncList: Array<IModuleManagerFilter> = new Array<IModuleManagerFilter>();
+
     constructor(packageStoreManager?: PackageStoreManager, log?: Log){
         this.log = log || new Log();
         this.moduleManagerCache = new ModuleManagerCache(this.log);
@@ -32,47 +32,36 @@ export class ModuleManager {
         this.moduleManagerImport = new ModuleManagerImport(this, this.log, packageStoreManager);
     }
 
+    /**
+     * return module manager cache
+     */
     getModuleManagerCache(): ModuleManagerCache{
         return this.moduleManagerCache;
     }
 
+    /**
+     * return module manager compile
+     */
     getModuleManagerCompile(): ModuleManagerCompile{
         return this.moduleManagerCompile;
     }
 
+    /**
+     * return module manager import
+     */
     getModuleManagerImport(): ModuleManagerImport{
         return this.moduleManagerImport;
     }
 
-    getRequirePackageInfoTarget(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): IRequirePackageInfoTarget{
-        let packageInfoTarget = {} as IRequirePackageInfoTarget;
-
-        packageInfoTarget.nameParsedObj = ModuleNameUtil.parse(name, "");
-        if (name.substring(0,1) === "."){
-            if (parentModuleCompileManifestData){
-                //internal package
-                packageInfoTarget.packageName = moduleManagerRequireContextData.parentPackageStoreName;
-                packageInfoTarget.packageVersion = moduleManagerRequireContextData.parentPackageStoreVersion;
-                packageInfoTarget.itemKey = path.resolve("/" + parentModuleCompileManifestData.mainFileDirName, name).substring(1);
-            }
-            else{
-                packageInfoTarget.packageName = "";
-                packageInfoTarget.packageVersion = "";
-                packageInfoTarget.itemKey = "";
-            }
-        }
-        else{
-            //external package
-            packageInfoTarget.packageName = packageInfoTarget.nameParsedObj.fullName;
-            packageInfoTarget.packageVersion = version;
-            packageInfoTarget.itemKey = "";
-        }
-
-        return packageInfoTarget;
-    }
-
+    /**
+     * require sync
+     * @param name module name
+     * @param version module version
+     * @param moduleManagerRequireContextData context
+     * @param parentModuleCompileManifestData compile manifest
+     */
     requireSync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Object | null{
-        let packageInfoTarget: IRequirePackageInfoTarget = this.getRequirePackageInfoTarget(name, version, moduleManagerRequireContextData, parentModuleCompileManifestData);
+        let packageInfoTarget: IRequirePackageInfoTarget = moduleManagerConvert.convertToPackageInfoTarget(name, version, moduleManagerRequireContextData, parentModuleCompileManifestData);
 
         if (packageInfoTarget.packageName === ""){
             return null;
@@ -87,7 +76,7 @@ export class ModuleManager {
         //find packageStore in cache
         let cacheRootPackageStore = this.getModuleManagerCache().getPackageStoreCacheSyncFromCache(moduleManagerRequireContextData.rootPackageStoreKey);
         if (cacheRootPackageStore){
-            let codeBufferFromPackageStoreCacheSync = this.convertToCodeBufferResponse(cacheRootPackageStore, packageInfoTarget, moduleManagerRequireContextData);
+            let codeBufferFromPackageStoreCacheSync = moduleManagerConvert.convertToCodeBufferResponse(cacheRootPackageStore, packageInfoTarget, moduleManagerRequireContextData);
 
             //compile
             if (codeBufferFromPackageStoreCacheSync){
@@ -114,9 +103,16 @@ export class ModuleManager {
         }
     }
 
+    /**
+     * reqire async
+     * @param name module name
+     * @param version module version
+     * @param moduleManagerRequireContextData context
+     * @param parentModuleCompileManifestData manifest
+     */
     requireAsync(name: string, version: string, moduleManagerRequireContextData: ModuleManagerRequireContextData, parentModuleCompileManifestData?: ModuleCompileManifestData): Promise<Object | null>{
         return new Promise((resolve, reject)=>{
-            let packageInfoTarget: IRequirePackageInfoTarget = this.getRequirePackageInfoTarget(name, version, moduleManagerRequireContextData, parentModuleCompileManifestData);
+            let packageInfoTarget: IRequirePackageInfoTarget = moduleManagerConvert.convertToPackageInfoTarget(name, version, moduleManagerRequireContextData, parentModuleCompileManifestData);
             
             if (packageInfoTarget.packageName === ""){
                 resolve(null);
@@ -131,7 +127,7 @@ export class ModuleManager {
             //find packageStore in cache
             let cacheRootPackageStore = this.getModuleManagerCache().getPackageStoreCacheSyncFromCache(moduleManagerRequireContextData.rootPackageStoreKey);
             if (cacheRootPackageStore){
-                let codeBufferFromPackageStoreCacheSync = this.convertToCodeBufferResponse(cacheRootPackageStore, packageInfoTarget, moduleManagerRequireContextData);
+                let codeBufferFromPackageStoreCacheSync = moduleManagerConvert.convertToCodeBufferResponse(cacheRootPackageStore, packageInfoTarget, moduleManagerRequireContextData);
     
                 //compile
                 if (codeBufferFromPackageStoreCacheSync){
@@ -162,6 +158,95 @@ export class ModuleManager {
         });
     }
 
+    /**
+     * invoke async
+     * @param name module name
+     * @param version module version
+     * @param method method name
+     * @param parameter parameter
+     * @param registryName registry
+     * @param imediateCleanMemoryCacheModuleFiles clean cache
+     */
+    invokeAsync(name: string, version: string, method?: string, parameter?: any[], registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<any>{
+        return new Promise((resolve, reject) => {
+            this.moduleManagerImport.import(name, version, undefined, registryName, false).then((moduleObj)=>{ //disable imediateCleanMemoryCacheModuleFiles in import
+                if (moduleObj){
+
+                    /*
+                    Promise.all(this.preFilterInvokeAsyncList.map((item)=>{return item.filter(name, version, method, parameter, registryName)})).then((values)=>{
+                        console.log("Value => ", values);
+                    }).catch((err)=>{
+                        console.log("Erro => ", err);
+                    })
+                    */
+
+                    this.invokeAsyncByModuleObject(moduleObj, method, parameter).then((responseInvokeAsync)=>{
+                        resolve(responseInvokeAsync);
+
+                        //remove temporary cache
+                        if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
+                    }).catch((errInvokeAsync) => {
+                        //remove temporary cache
+                        if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
+
+                        reject(errInvokeAsync);
+                    });
+                }
+                else{
+                    //remove temporary cache
+                    if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
+
+                    resolve(null);
+                }
+            }).catch((errImport) => {
+                //remove temporary cache
+                if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
+
+                reject(errImport);
+            });
+        })
+    }
+
+    /**
+     * send message
+     * @param name module name
+     * @param version module version
+     * @param method method
+     * @param requestContext request context
+     * @param data data
+     * @param registryName registry
+     */
+    sendMessage(name: string, version: string, method: string, requestContext:IRequestContext, data: any, registryName?: string): Promise<any>{
+        let self = this;
+
+        let send_requestContext = {} as IRequestContext;
+
+        let messageContext = {} as IMessageContext
+        messageContext.requestContext = requestContext;
+        messageContext.sendMessage = function(send_name: string, send_version: string, send_method: string, send_data: any, send_registryName?: string): Promise<any>{
+            if (!send_requestContext.level){ //first invoke - configure request context
+                send_requestContext.clientContext = requestContext.clientContext;
+                send_requestContext.level = requestContext.level + 1;
+                send_requestContext.requestID = requestContext.requestID;
+                send_requestContext.stack = {} as IRequestContextStack;
+                send_requestContext.stack.name = name;
+                send_requestContext.stack.version = version;
+                send_requestContext.stack.method = method;
+                send_requestContext.stack.stack = requestContext.stack;
+            }
+
+            return self.sendMessage(send_name, send_version, send_method, send_requestContext, send_data, send_registryName);
+        }
+        return this.invokeAsync(name, version, method, [data, messageContext], registryName, true);
+    }
+
+    /**
+     * invoke async in object
+     * @param moduleObj module object
+     * @param method method name
+     * @param parameter parameter
+     * @param invokeContextData context
+     */
     invokeAsyncByModuleObject(moduleObj: any, method?: string, parameter?: any[]): Promise<any>{
         return new Promise((resolve, reject) => {
             if (moduleObj){
@@ -221,118 +306,5 @@ export class ModuleManager {
                 resolve(null);
             }
         })
-    }
-
-    invokeAsync(name: string, version: string, method?: string, parameter?: any[], registryName?: string, invokeContextData?:InvokeContextData, imediateCleanMemoryCacheModuleFiles = true): Promise<any>{
-        return new Promise((resolve, reject) => {
-            this.moduleManagerImport.import(name, version, undefined, registryName, false).then((moduleObj)=>{ //disable imediateCleanMemoryCacheModuleFiles in import
-                if (moduleObj){
-                    this.invokeAsyncByModuleObject(moduleObj, method, parameter).then((responseInvokeAsync)=>{
-                        resolve(responseInvokeAsync);
-
-                        //remove temporary cache
-                        if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
-                    }).catch((errInvokeAsync) => {
-                        //remove temporary cache
-                        if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
-
-                        reject(errInvokeAsync);
-                    });
-                }
-                else{
-                    //remove temporary cache
-                    if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
-
-                    resolve(null);
-                }
-            }).catch((errImport) => {
-                //remove temporary cache
-                if (imediateCleanMemoryCacheModuleFiles) this.getModuleManagerCache().cleanCachePackageStoreByNameAndVersion(name, version);
-
-                reject(errImport);
-            });
-        })
-    }
-
-    convertToCodeBufferResponse(cacheRootPackageStore: IPackageStoreCacheSync, packageInfoTarget: IRequirePackageInfoTarget, moduleManagerRequireContextData: ModuleManagerRequireContextData): ICodeBufferResponseFromPackageStoreCacheSync | null{
-        if (packageInfoTarget.itemKey){
-            //
-            //require internal package
-            //
-            let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(packageInfoTarget.packageName, packageInfoTarget.packageVersion);
-            if (parentPackageStore){
-                let packageStoreItemBufferResponse: PackageStoreItemBufferResponse | null = parentPackageStore.getItemBuffer(packageInfoTarget.itemKey);
-                if (packageStoreItemBufferResponse){
-                    let codeBufferFromPackageStoreCacheSync = {} as ICodeBufferResponseFromPackageStoreCacheSync;
-
-                    codeBufferFromPackageStoreCacheSync.manifest = parentPackageStore.getManifest();
-
-                    codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse = packageStoreItemBufferResponse;
-
-                    codeBufferFromPackageStoreCacheSync.moduleCompileManifestData = new ModuleCompileManifestData(
-                        parentPackageStore.getName(),
-                        parentPackageStore.getVersion(),
-                        packageInfoTarget.itemKey
-                    );
-
-                    return codeBufferFromPackageStoreCacheSync;
-                }
-                else{
-                    return null;
-                }
-            }
-            else{
-                return null;
-            }
-        }
-        else{
-            //
-            //require external package
-            //
-
-            //if not version exist, seek version in parent package.json
-            if (packageInfoTarget.packageVersion === "" && moduleManagerRequireContextData.parentPackageStoreName){
-                let parentPackageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(moduleManagerRequireContextData.parentPackageStoreName, moduleManagerRequireContextData.parentPackageStoreVersion);
-                if (parentPackageStore){
-                    let parentPackageManifest: IManifest | null = parentPackageStore.getManifest();
-                    if (parentPackageManifest && parentPackageManifest.dependencies){
-                        packageInfoTarget.packageVersion = parentPackageManifest.dependencies[packageInfoTarget.nameParsedObj.moduleName] || "";
-                    }
-                }
-            }
-
-            let packageStore: PackageStore | null = cacheRootPackageStore.getPackageStore(packageInfoTarget.nameParsedObj.moduleName, packageInfoTarget.packageVersion);
-            if (packageStore){
-                let packageStoreItemBufferResponse: PackageStoreItemBufferResponse | null
-                if (packageInfoTarget.nameParsedObj.fileName){
-                    packageStoreItemBufferResponse = packageStore.getItemBuffer(packageInfoTarget.nameParsedObj.fileName);
-                }
-                else{
-                    packageStoreItemBufferResponse = packageStore.getMainBuffer();
-                }
-
-                if (packageStoreItemBufferResponse){
-                    let codeBufferFromPackageStoreCacheSync = {} as ICodeBufferResponseFromPackageStoreCacheSync;
-
-                    codeBufferFromPackageStoreCacheSync.manifest = packageStore.getManifest();
-                    
-                    codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse = packageStoreItemBufferResponse;
-
-                    codeBufferFromPackageStoreCacheSync.moduleCompileManifestData = new ModuleCompileManifestData(
-                        packageStore.getName(),
-                        packageStore.getVersion(),
-                        packageInfoTarget.nameParsedObj.fileName || packageStore.getMainFileFullPath()
-                    );
-
-                    return codeBufferFromPackageStoreCacheSync;
-                }
-                else{
-                    return null;
-                }
-            }
-            else{
-                return null;
-            }
-        }
     }
 }

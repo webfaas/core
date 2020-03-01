@@ -77,17 +77,7 @@ export class ModuleManagerCompile {
     
             var newModule = this.moduleCompileJavaScript.compile(codeBuffer.toString(), moduleCompileManifestData, this.sandBoxContext, globalRequire);
 
-            if (newModule.exports){
-                return newModule.exports;
-            }
-            else{
-                if (newModule.__esModule){
-                    return newModule;
-                }
-                else{
-                    return null;
-                }
-            }
+            return newModule.exports;
         }
         catch (errTry) {
             var errDetail: any = {};

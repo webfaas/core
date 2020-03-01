@@ -38,9 +38,16 @@ export class ModuleManagerImport {
         }
     }
 
+    /**
+     * return semver
+     */
     getSemver(): ISemver{
         return this.semver;
     }
+    /**
+     * set semver
+     * @param semver 
+     */
     setSemver(semver: ISemver){
         this.semver = semver;
     }
@@ -52,6 +59,10 @@ export class ModuleManagerImport {
         return this.packageStoreManager;
     }
 
+    /**
+     * return small manifest
+     * @param packageName package name
+     */
     getSmallManifest(packageName: string): Promise<SmallManifest | null>{
         return new Promise(async (resolve, reject) => {
             try {
@@ -84,6 +95,11 @@ export class ModuleManagerImport {
         })
     }
 
+    /**
+     * resolve version semver format
+     * @param packageName name
+     * @param packageVersion version
+     */
     resolveVersion(packageName: string, packageVersion: string): Promise<string>{
         return new Promise(async (resolve, reject) => {
             try {
@@ -115,7 +131,7 @@ export class ModuleManagerImport {
     /**
      * import dependencies in package
      * @param packageStore 
-     * @param contextCache 
+     * @param cachePackageStoreDependenciesItem 
      */
     importDependencies(packageStore: PackageStore, cachePackageStoreDependenciesItem?: IPackageStoreCacheSync): Promise<null>{
         return new Promise(async (resolve, reject) => {
@@ -162,7 +178,9 @@ export class ModuleManagerImport {
      * import module
      * @param name module name
      * @param version module version
-     * @param etag module etag 
+     * @param etag etag
+     * @param registryName registry
+     * @param imediateCleanMemoryCacheModuleFiles clean cache
      */
     import(name: string, version: string, etag?: string, registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<Object | null>{
         return new Promise(async (resolve, reject) => {

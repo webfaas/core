@@ -4,6 +4,11 @@ import { ModuleManager } from "./ModuleManager/ModuleManager";
 import { PluginManager } from "./PluginManager/PluginManager";
 import { Log } from "./Log/Log";
 import { Config } from "./Config/Config";
+import { ISemverData } from "./Semver/ISemverData";
+import { SmallSemver } from "./Semver/SmallSemver";
+import { IRequestContext } from "./ModuleManager/IRequestContext";
+
+const smallSemver: SmallSemver = new SmallSemver();
 
 /**
  * WEBFAAS CORE
@@ -16,6 +21,7 @@ export class Core {
     private log: Log;
     private config: Config;
     private version: string;
+    private versionObj: ISemverData
 
     /**
      * return registry manager
@@ -60,24 +66,67 @@ export class Core {
     }
 
     /**
+     * return version object
+     */
+    getVersionObj(): ISemverData{
+        return this.versionObj
+    }
+
+    /**
      * return config;
      */
     getConfig(): Config{
         return this.config;
     }
 
+    /**
+     * start plugins
+     */
     async start(){
         await this.pluginManager.start();
     }
 
+    /**
+     * stop plugins
+     */
     async stop(){
         await this.pluginManager.stop();
     }
 
-    invokeAsync(name: string, version: string, method?: string, parameter?: any[]): Promise<any>{
-        return this.moduleManager.invokeAsync(name, version, method, parameter);
+    /**
+     * send message
+     * @param name module name
+     * @param version module version
+     * @param method method
+     * @param requestContext request context
+     * @param data data
+     * @param registryName registry
+     */
+    sendMessage(name: string, version: string, method: string, requestContext:IRequestContext, data: any, registryName?: string): Promise<any>{
+        return this.moduleManager.sendMessage(name, version, method, requestContext, data, registryName);
     }
 
+    /**
+     * invoke async
+     * @param name module name
+     * @param version module version
+     * @param method method name
+     * @param parameter parameter
+     * @param registryName registry
+     * @param imediateCleanMemoryCacheModuleFiles clean cache
+     */
+    invokeAsync(name: string, version: string, method?: string, parameter?: any[], registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<any>{
+        return this.moduleManager.invokeAsync(name, version, method, parameter, registryName, imediateCleanMemoryCacheModuleFiles);
+    }
+
+    /**
+     * import module
+     * @param name module name
+     * @param version module version
+     * @param etag etag
+     * @param registryName registry
+     * @param imediateCleanMemoryCacheModuleFiles clean cache
+     */
     import(name: string, version: string, etag?: string, registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<Object | null>{
         return this.moduleManager.getModuleManagerImport().import(name, version, etag, registryName, imediateCleanMemoryCacheModuleFiles);
     }
@@ -86,6 +135,7 @@ export class Core {
         //not change position
         let pjson: any = require("../package.json");
         this.version = pjson.version;
+        this.versionObj = smallSemver.parseVersion(this.version);
         //****
         
         this.config = config || new Config();

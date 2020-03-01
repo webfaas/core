@@ -54,9 +54,11 @@ export class ModuleCompileJavaScript {
                 displayErrors: true
             });
     
-            let newModule = {} as Object;
+            //let newModule = {} as Object;
+            let newModule = {} as any;
+            newModule.exports = {};
             
-            compiledWrapper(newModule, globalRequire || this.defaultGlobalRequire, newModule, moduleCompileManifestData.mainFileFullPath, moduleCompileManifestData.mainFileDirName);
+            compiledWrapper(newModule.exports, globalRequire || this.defaultGlobalRequire, newModule, moduleCompileManifestData.mainFileFullPath, moduleCompileManifestData.mainFileDirName);
     
             //logDetail
             let logDetail = {} as any;

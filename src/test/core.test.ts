@@ -3,6 +3,7 @@ import { Core, LogLevelEnum } from "../lib/Core";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { Log } from "../lib/Log/Log";
+import { IRequestContext } from "../lib/ModuleManager/IRequestContext";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -21,6 +22,9 @@ describe("Core", () => {
         chai.expect(typeof core.getModuleManager()).to.eq("object");
         chai.expect(typeof core.getPluginManager()).to.eq("object");
         chai.expect(core.getVersion().length).to.gt(4);
+        chai.expect(core.getVersionObj().major.length).to.gt(0);
+        chai.expect(core.getVersionObj().minor.length).to.gt(0);
+        chai.expect(core.getVersionObj().patch.length).to.gt(0);
         chai.expect(typeof(core.getConfig())).to.eq("object");
     })
 
@@ -34,6 +38,21 @@ describe("Core", () => {
         var core = new Core(undefined, log);
         await core.stop();
         chai.expect(typeof(core.getModuleManager())).to.eq("object");
+    })
+
+    it("sendMessage @registry1/mathmessage version - 0.0.1", async function(){
+        var core = new Core(undefined, log);
+        loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
+        
+        await core.start();
+        
+        let context = {} as IRequestContext;
+        context.level = 0;
+        context.requestID = "001";
+        context.stack = null;
+        let response: any = await core.sendMessage("@registry1/mathmessage", "0.0.1", "sum", context, {x:2,y:3});
+
+        chai.expect(response).to.eq(5);
     })
 
     it("invokeAsync @registry1/mathsum version - 0.0.1", async function(){

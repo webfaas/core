@@ -181,6 +181,41 @@ export namespace PackageRegistryResponseMock{
         }
     }
 
+    export class MathSumAsyncDependencyVersionEmpty implements IPackageRegistryResponse{
+        etag: string;
+        packageStore: PackageStore | null = null;
+    
+        constructor(name: string = "mathsumasyncdependencyversionempty", version: string = "0.0.1", description: string = "test"){
+            this.etag = "etag" + version;
+            
+            var itemData: IPackageStoreItemData;
+            var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+            var nextPos: number = 0;
+
+            let packageObj = {name:name, version:version, main:"index.js", description: description, dependencies: {"@registry1/mathsum": ""}};
+            let packageBuffer = Buffer.from(JSON.stringify(packageObj));
+            nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
+
+            let moduleText = `
+                const mathSum = require("@registry1/mathsum");
+                function internalsum(event) {
+                    return mathSum(event.x, event.y);
+                }
+                async function sum(event) {
+                    return { result: internalsum(event) };
+                }
+                exports.sum = sum;
+            `
+
+            let file1Buffer = Buffer.from(moduleText);
+            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+    
+            var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
+    
+            this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
+        }
+    }
+
     export class ModuleDependencyNotFound implements IPackageRegistryResponse{
         etag: string;
         packageStore: PackageStore | null = null;
@@ -307,6 +342,79 @@ export namespace PackageRegistryResponseMock{
         constructor(name: string = "mathsumwasm", version: string = "0.0.1", description: string = "test"){
             let moduleBuffer = fs.readFileSync(path.join(__dirname, "wasm/sum.wasm"));
             super(name, version, description, moduleBuffer, "index.wasm");
+        }
+    }
+
+    //
+    //MESSAGE
+    //
+    export class MathMessage implements IPackageRegistryResponse{
+        etag: string;
+        packageStore: PackageStore | null = null;
+    
+        constructor(name: string = "mathmessage", version: string = "0.0.1", description: string = "message test"){
+            this.etag = "etag" + version;
+            
+            var itemData: IPackageStoreItemData;
+            var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+            var nextPos: number = 0;
+
+            let packageObj = {name:name, version:version, main:"index.js", description: description, dependencies: {}};
+            let packageBuffer = Buffer.from(JSON.stringify(packageObj));
+            nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
+
+            let moduleText = `
+            module.exports.sum = async function(event, context){
+                return event.x + event.y;
+            }
+            module.exports.level1 = async function(event, context){
+                let stackText = "";
+                if (context.requestContext.stack){
+                    stackText = context.requestContext.stack.name + ":" + context.requestContext.stack.version + ":" + context.requestContext.stack.method;
+                }
+
+                let responseLevel2 = await context.sendMessage(event.name, event.version, "level2", event);
+
+                return "level1-" + context.requestContext.level + "-" + context.requestContext.requestID + "-[" + stackText + "]" + " > " + responseLevel2;
+            }
+            module.exports.level2 = async function(event, context){
+                let stackText = "";
+                if (context.requestContext.stack){
+                    stackText = context.requestContext.stack.name + ":" + context.requestContext.stack.version + ":" + context.requestContext.stack.method;
+                }
+
+                let responseLevel3 = await context.sendMessage(event.name, event.version, "level3", event);
+
+                return "level2-" + context.requestContext.level + "-" + context.requestContext.requestID + "-[" + stackText + "]" + " > " + responseLevel3;
+            }
+            module.exports.level3 = async function(event, context){
+                let stackText = "";
+                if (context.requestContext.stack){
+                    stackText = context.requestContext.stack.name + ":" + context.requestContext.stack.version + ":" + context.requestContext.stack.method;
+                    if (context.requestContext.stack.stack){
+                        stackText += " > " + context.requestContext.stack.stack.name + ":" + context.requestContext.stack.stack.version + ":" + context.requestContext.stack.stack.method;
+                        if (context.requestContext.stack.stack.stack){
+                            stackText += " > " + context.requestContext.stack.stack.stack.name + ":" + context.requestContext.stack.stack.stack.version + ":" + context.requestContext.stack.stack.stack.method;
+                        }
+                    }
+                }
+
+                return "level3-" + context.requestContext.level + "-" + context.requestContext.requestID + "-[" + stackText + "]";
+            }
+            module.exports.level = async function(event, context){
+                let responseLevel1 = await context.sendMessage(event.name, event.version, "level1", event);
+                let responseLevel2 = await context.sendMessage(event.name, event.version, "level2", event);
+                let responseLevel3 = await context.sendMessage(event.name, event.version, "level3", event);
+
+                return responseLevel1 + "**" + responseLevel2 + "**" + responseLevel3;
+            }
+            `
+            let file1Buffer = Buffer.from(moduleText);
+            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+    
+            var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
+    
+            this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
         }
     }
 }

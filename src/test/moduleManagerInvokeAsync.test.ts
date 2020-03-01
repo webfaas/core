@@ -44,6 +44,16 @@ describe("Module Manager - Invoke Async", () => {
         chai.expect(response2.result).to.eq(5);
     })
 
+    it("invokeAsync @registry1/mathsumasyncdependencyversionempty version - 0.0.1", async function(){
+        try {
+            var response: any = await moduleManager.invokeAsync("@registry1/mathsumasyncdependencyversionempty", "0.0.1", "sum", [{x:2,y:3}]);
+            throw new Error("success");
+        }
+        catch (errTry) {
+            chai.expect(errTry.message).to.eq("VERSION NOT FOUND");
+        }
+    })
+
     it("invokeAsync @registry1/mathsumasync version - 2.0.0", async function(){
         var response: any = await moduleManager.invokeAsync("@registry1/mathsumasync", "2.0.0", "sum", [{x:2,y:3}]);
         chai.expect(response.result).to.eq(5);
@@ -105,7 +115,7 @@ describe("Module Manager - Invoke Async", () => {
     it("invokeAsync @registry1/modulewhitoutexport - 0.0.1", async function(){
         try {
             let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1");
-            chai.expect(responseObj1).to.null;
+            chai.expect(typeof(responseObj1)).to.eq("object");
         }
         catch (errTry) {
             chai.expect(errTry).to.null;
@@ -162,7 +172,7 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
     loadDefaultRegistries(moduleManager.getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), log)
 
     it("invokeAsync @registry1/mathsum version - 0.0.1", async function(){
-        var response: any = await moduleManager.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3], "", undefined, false);
+        var response: any = await moduleManager.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3], "", false);
 
         chai.expect(response).to.eq(5);
 
@@ -171,7 +181,7 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
 
     it("invokeAsync @registry1/syntaxerror - 0.0.1", async function(){
         try {
-            let responseObj1: any = await moduleManager.invokeAsync("@registry1/syntaxerror", "0.0.1", "", undefined, "", undefined, false);
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/syntaxerror", "0.0.1", "", undefined, "", false);
             throw new Error("Sucess!");
         }
         catch (errTry) {
@@ -181,7 +191,7 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
 
     it("invokeAsync @registry1/executionerror - 0.0.1", async function(){
         try {
-            let responseObj1: any = await moduleManager.invokeAsync("@registry1/executionerror", "0.0.1", "", undefined, "", undefined, false);
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/executionerror", "0.0.1", "", undefined, "", false);
             throw new Error("Sucess!");
         }
         catch (errTry) {
@@ -191,8 +201,31 @@ describe("Module Manager - InvokeAsync - disable imediateCleanMemoryCacheModuleF
 
     it("invokeAsync @registry1/modulewhitoutexport - 0.0.1", async function(){
         try {
-            let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1", "", undefined, "", undefined, false);
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/modulewhitoutexport", "0.0.1", "", undefined, "");
+            chai.expect(typeof(responseObj1)).to.eq("object");
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.null;
+        }
+    })
+
+
+    it("invokeAsync @registry1/notfound - imediateCleanMemoryCacheModuleFiles = true", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/notfound", "0.0.1", "", undefined, "", true);
             chai.expect(responseObj1).to.null;
+            chai.expect(moduleManager.getModuleManagerCache().getCacheModule().get("@registry1/notfound:0.0.1")).to.undefined;
+        }
+        catch (errTry) {
+            chai.expect(errTry).to.null;
+        }
+    })
+
+    it("invokeAsync @registry1/notfound - imediateCleanMemoryCacheModuleFiles = false", async function(){
+        try {
+            let responseObj1: any = await moduleManager.invokeAsync("@registry1/notfound", "0.0.1", "", undefined, "", false);
+            chai.expect(responseObj1).to.null;
+            chai.expect(moduleManager.getModuleManagerCache().getCacheModule().get("@registry1/notfound:0.0.1")).to.undefined;
         }
         catch (errTry) {
             chai.expect(errTry).to.null;

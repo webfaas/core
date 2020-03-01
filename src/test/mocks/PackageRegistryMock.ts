@@ -1,8 +1,5 @@
 import { IPackageRegistry } from "../../lib/PackageRegistry/IPackageRegistry";
 import { IPackageRegistryResponse } from "../../lib/PackageRegistry/IPackageRegistryResponse";
-import { PackageStore } from "../../lib/PackageStore/PackageStore";
-import { IPackageStoreItemData } from "../../lib/PackageStore/IPackageStoreItemData";
-import { PackageStoreUtil } from "../../lib/Util/PackageStoreUtil";
 import { PackageRegistryResponseMock } from "./PackageRegistryResponseMock";
 
 export namespace PackageRegistryMock{
@@ -75,6 +72,7 @@ export namespace PackageRegistryMock{
             super();
             let nameMathSum:string = "@registry1/mathsum";
             let nameMathSumAsync:string = "@registry1/mathsumasync";
+            let nameMathSumAsyncDependencyVersionEmpty:string = "@registry1/mathsumasyncdependencyversionempty";
             let nameSimpleText:string = "@registry1/simpletext";
             let nameHostName:string = "@registry1/hostname";
             let nameSyntaxError:string = "@registry1/syntaxerror";
@@ -84,6 +82,7 @@ export namespace PackageRegistryMock{
             let nameModuleDependencyNotFound = "@registry1/moduledependencynotfound"
             let nameModuleDependencyNotDeclared = "@registry1/moduledependencynotdeclared";
             let nameMathSumWasm = "@registry1/mathsumwasm";
+            let nameMathMessage = "@registry1/mathmessage";
 
             let description: string = "registry1 mock";
 
@@ -95,6 +94,9 @@ export namespace PackageRegistryMock{
             this.listPackageRegistryResponse.set(nameMathSumAsync, new PackageRegistryResponseMock.Manifest(nameMathSumAsync, ["1.0.0", "2.0.0"], description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":1.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "1.0.0", {"@registry1/mathsum": "0.0.1"}, description));
             this.listPackageRegistryResponse.set(nameMathSumAsync + ":2.0.0", new PackageRegistryResponseMock.MathSumAsync(nameMathSumAsync, "2.0.0", {"@registry1/mathsum": "0.*"}, description));
+
+            this.listPackageRegistryResponse.set(nameMathSumAsyncDependencyVersionEmpty, new PackageRegistryResponseMock.Manifest(nameMathSumAsyncDependencyVersionEmpty, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameMathSumAsyncDependencyVersionEmpty + ":0.0.1", new PackageRegistryResponseMock.MathSumAsyncDependencyVersionEmpty(nameMathSumAsyncDependencyVersionEmpty, "0.0.1", description));
 
             this.listPackageRegistryResponse.set(nameSimpleText + ":0.0.1", new PackageRegistryResponseMock.SimpleText(nameSimpleText, "0.0.1", description, "AA1", "BB1", "CC1"));
 
@@ -121,6 +123,9 @@ export namespace PackageRegistryMock{
 
             this.listPackageRegistryResponse.set(nameMathSumWasm, new PackageRegistryResponseMock.Manifest(nameMathSumWasm, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameMathSumWasm + ":0.0.1", new PackageRegistryResponseMock.MathSumWasm(nameMathSumWasm, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameMathMessage, new PackageRegistryResponseMock.Manifest(nameMathMessage, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameMathMessage + ":0.0.1", new PackageRegistryResponseMock.MathMessage(nameMathMessage, "0.0.1", description));
         }
     }
     
