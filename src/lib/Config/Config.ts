@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
+import { DirectoryFSUtil } from "../Util/DirectoryFSUtil";
 
 const valueEnvironmentRegex = /\${[a-zA-Z0-9_:]*}/g
 
@@ -106,7 +107,7 @@ export class Config {
      */
     private open(fileOrObject: any): void {
         if (!fileOrObject){
-            fileOrObject = path.join(path.dirname((<NodeModule> require.main).filename), "data-config");
+            fileOrObject = path.join(DirectoryFSUtil.getMainDirectory(), "data-config");
         }
 
         if (typeof(fileOrObject) === "object"){

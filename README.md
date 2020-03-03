@@ -14,8 +14,18 @@ Minimalist FaaS framework for [node](http://nodejs.org).
 
 ### Example
 ```javascript
-"use strict";
+import { Core } from "@webfaas/webfaas-core";
 
+const core = new Core();
+
+(async function(){
+    var response = await core.invokeAsync("@webfaaslabs/mathsum", "0.0.1", "", [2,3], "npm");
+    console.log("2 + 3 = ", response);
+})();
+```
+
+### Example - Mock
+```javascript
 import { Core } from "../lib/Core";
 import { PackageRegistryMock } from "../test/mocks/PackageRegistryMock";
 
@@ -24,8 +34,6 @@ const core = new Core();
 core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
 
 (async function(){
-    await core.start();
-        
     var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
 
     if (response){

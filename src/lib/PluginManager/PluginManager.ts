@@ -3,26 +3,14 @@ import * as path from "path";
 import { Core, LogLevelEnum } from "../Core";
 import { IPlugin } from "./IPlugin";
 import { LogCodeEnum } from "../Log/ILog";
+import { DirectoryFSUtil } from "../Util/DirectoryFSUtil";
 
 export class PluginManager {
     core: Core;
     listPlugin: Array<IPlugin> = new Array<IPlugin>();
-    rootDir: string = "";
-
-    constructor(core: Core, rootDir?: string){
+    
+    constructor(core: Core){
         this.core = core;
-
-        if (rootDir){
-            this.rootDir = rootDir;
-        }
-        else{
-            if (process.mainModule){
-                this.rootDir = path.dirname((<NodeModule> require.main).filename);
-            }
-            else{
-                this.rootDir = path.resolve(__dirname, "../../../");
-            }
-        }
     }
 
     /**
@@ -71,8 +59,9 @@ export class PluginManager {
     /**
      * load plugins
      */
-    loadPlugins(){
-        this.loadPluginsByFolder(path.join(this.rootDir, "node_modules"));
+    loadPlugins(pluginsDir?: string){
+        let targetDir = pluginsDir || DirectoryFSUtil.getMainDirectory();
+        this.loadPluginsByFolder(path.join(targetDir, "node_modules"));
     }
 
     /**

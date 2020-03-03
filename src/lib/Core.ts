@@ -1,7 +1,6 @@
 import { PackageRegistryManager } from "./PackageRegistryManager/PackageRegistryManager";
 import { PackageStoreManager } from "./PackageStoreManager/PackageStoreManager";
 import { ModuleManager } from "./ModuleManager/ModuleManager";
-import { PluginManager } from "./PluginManager/PluginManager";
 import { Log } from "./Log/Log";
 import { Config } from "./Config/Config";
 import { ISemverData } from "./Semver/ISemverData";
@@ -17,7 +16,6 @@ export class Core {
     private packageRegistryManager: PackageRegistryManager;
     private packageStoreManager : PackageStoreManager;
     private moduleManager: ModuleManager;
-    private pluginManager: PluginManager;
     private log: Log;
     private config: Config;
     private version: string;
@@ -42,13 +40,6 @@ export class Core {
      */
     getModuleManager(): ModuleManager{
         return this.moduleManager;
-    }
-
-    /**
-     * return plugin manager
-     */
-    getPluginManager(): PluginManager{
-        return this.pluginManager;
     }
 
     /**
@@ -77,20 +68,6 @@ export class Core {
      */
     getConfig(): Config{
         return this.config;
-    }
-
-    /**
-     * start plugins
-     */
-    async start(){
-        await this.pluginManager.start();
-    }
-
-    /**
-     * stop plugins
-     */
-    async stop(){
-        await this.pluginManager.stop();
     }
 
     /**
@@ -131,7 +108,7 @@ export class Core {
         return this.moduleManager.getModuleManagerImport().import(name, version, etag, registryName, imediateCleanMemoryCacheModuleFiles);
     }
 
-    constructor(config?: Config, log?: Log) {
+    constructor(config?: Config, log?: Log, packageRegistryManager?: PackageRegistryManager, packageStoreManager? : PackageStoreManager, moduleManager?: ModuleManager) {
         //not change position
         let pjson: any = require("../package.json");
         this.version = pjson.version;
@@ -140,17 +117,29 @@ export class Core {
         
         this.config = config || new Config();
         this.log = log || new Log();
-        
-        this.packageRegistryManager = new PackageRegistryManager(this.log);
-        let defaultRegistryName: string = this.config.get("registry.default", "");
-        this.packageRegistryManager.setDefaultRegistryName(defaultRegistryName);
+    
+        if (packageRegistryManager){
+            this.packageRegistryManager = packageRegistryManager;
+        }
+        else{
+            this.packageRegistryManager = new PackageRegistryManager(this.log);
+            let defaultRegistryName: string = this.config.get("registry.default", "");
+            this.packageRegistryManager.setDefaultRegistryName(defaultRegistryName);
+        }
 
-        this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
+        if (packageStoreManager){
+            this.packageStoreManager = packageStoreManager;
+        }
+        else{
+            this.packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
+        }
 
-        this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
-
-        this.pluginManager = new PluginManager(this);
-        this.pluginManager.loadPlugins();
+        if (moduleManager){
+            this.moduleManager = moduleManager;
+        }
+        else{
+            this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
+        }
     }
 }
 
@@ -181,6 +170,7 @@ export { IPackageStoreItemData } from "./PackageStore/IPackageStoreItemData";
 
 //Plugin
 export { IPlugin } from "./PluginManager/IPlugin";
+export { PluginManager } from "./PluginManager/PluginManager";
 
 //ModuleManager
 export { ModuleManager } from "./ModuleManager/ModuleManager";

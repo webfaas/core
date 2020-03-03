@@ -1,9 +1,11 @@
 import * as chai from "chai";
-import { Core, LogLevelEnum } from "../lib/Core";
+import { Core, LogLevelEnum, ModuleManager } from "../lib/Core";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { Log } from "../lib/Log/Log";
 import { IRequestContext } from "../lib/ModuleManager/IRequestContext";
+import { Config } from "../lib/Config/Config";
+import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreManager";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -20,7 +22,6 @@ describe("Core", () => {
         chai.expect(typeof core.getPackageRegistryManager()).to.eq("object");
         chai.expect(typeof core.getPackageStoreManager()).to.eq("object");
         chai.expect(typeof core.getModuleManager()).to.eq("object");
-        chai.expect(typeof core.getPluginManager()).to.eq("object");
         chai.expect(core.getVersion().length).to.gt(4);
         chai.expect(core.getVersionObj().major.length).to.gt(0);
         chai.expect(core.getVersionObj().minor.length).to.gt(0);
@@ -28,23 +29,29 @@ describe("Core", () => {
         chai.expect(typeof(core.getConfig())).to.eq("object");
     })
 
-    it("start", async function(){
-        var core = new Core(undefined, log);
-        await core.start();
-        chai.expect(typeof(core.getModuleManager())).to.eq("object");
-    })
-
-    it("stop", async function(){
-        var core = new Core(undefined, log);
-        await core.stop();
-        chai.expect(typeof(core.getModuleManager())).to.eq("object");
+    it("constructor - full", function(){
+        let config = new Config();
+        let log = new Log();
+        let packageRegistryManager = new PackageRegistryManager(this.log);
+        let packageStoreManager = new PackageStoreManager(this.packageRegistryManager, this.log);
+        let moduleManager = new ModuleManager(this.packageStoreManager, this.log);
+        //let pluginManager = new PluginManager(this);
+        
+        var core = new Core(config, log, packageRegistryManager, packageStoreManager, moduleManager);
+        
+        chai.expect(typeof core.getPackageRegistryManager()).to.eq("object");
+        chai.expect(typeof core.getPackageStoreManager()).to.eq("object");
+        chai.expect(typeof core.getModuleManager()).to.eq("object");
+        chai.expect(core.getVersion().length).to.gt(4);
+        chai.expect(core.getVersionObj().major.length).to.gt(0);
+        chai.expect(core.getVersionObj().minor.length).to.gt(0);
+        chai.expect(core.getVersionObj().patch.length).to.gt(0);
+        chai.expect(typeof(core.getConfig())).to.eq("object");
     })
 
     it("sendMessage @registry1/mathmessage version - 0.0.1", async function(){
         var core = new Core(undefined, log);
         loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
-        
-        await core.start();
         
         let context = {} as IRequestContext;
         context.level = 0;
@@ -59,7 +66,6 @@ describe("Core", () => {
         var core = new Core(undefined, log);
         loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
         
-        await core.start();
         var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
 
         chai.expect(response).to.eq(5);
@@ -69,7 +75,6 @@ describe("Core", () => {
         var core = new Core(undefined, log);
         loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
         
-        await core.start();
         var response: any = await core.import("@registry1/mathsum", "0.0.1");
 
         chai.expect(response(2,3)).to.eq(5);

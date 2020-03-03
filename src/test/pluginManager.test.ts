@@ -3,8 +3,6 @@ import * as mocha from "mocha";
 import * as path from "path";
 
 import { Core, Log, LogLevelEnum } from "../lib/Core";
-import { IPackageRegistry } from "../lib/PackageRegistry/IPackageRegistry";
-import { IPackageRegistryResponse } from "../lib/PackageRegistry/IPackageRegistryResponse";
 import { PluginManager } from "../lib/PluginManager/PluginManager";
 import { IPlugin } from "../lib/PluginManager/IPlugin";
 
@@ -42,15 +40,12 @@ factoryPluginMock_module.default = function(){
 describe("Package Registry Routing Plugin", () => {
     it("constructor", function(){
         const core = new Core(undefined, log);
+        
         const pluginManager1 = new PluginManager(core);
         pluginManager1.loadPlugins();
-        const pluginManager2 = new PluginManager(core, "/tmp");
-        pluginManager2.loadPlugins();
-        const oldMain = process.mainModule;
-        process.mainModule = undefined;
-        const pluginManager3 = new PluginManager(core);
-        pluginManager3.loadPlugins();
-        process.mainModule = oldMain;
+        
+        const pluginManager2 = new PluginManager(core);
+        pluginManager2.loadPlugins("/tmp");
     })
 
     it("should return properties on call", async function(){

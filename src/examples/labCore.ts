@@ -13,8 +13,6 @@ process.on("unhandledRejection", (reason, p) => {
 
 (async function(){
     try {
-        await core.start();
-        
         var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
 
         if (response){
