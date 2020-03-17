@@ -55,7 +55,7 @@ core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().add
 [npm-url]: https://npmjs.org/package/@webfaas/webfaas-core
 
 [license-image]: https://img.shields.io/github/license/github/webfaas/core.svg?style=flat-square
-[license-url]: https://github.com/conao3/setup-cask/blob/master/LICENSE
+[license-url]: https://github.com/webfaas/core/blob/master/LICENSE
 
 [releases-image]: https://img.shields.io/github/tag/webfaas/core.svg?style=flat-square
 [releases-url]: https://github.com/webfaas/core/releases

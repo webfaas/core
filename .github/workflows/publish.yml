@@ -16,5 +16,8 @@ jobs:
       - name: npm install, build, and publish
         run: |
           npm install
+          npm install coveralls
           npm run build
+          npm run test:coverage
+          coveralls < ./coverage/lcov.info
           npm run setnpmtokenAndPublish
