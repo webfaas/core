@@ -1,9 +1,7 @@
 name: Test
 
 on:
-  push:
-    tags-ignore:
-      - '*'
+  push
 
 jobs:
   test:
