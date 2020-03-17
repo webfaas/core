@@ -3,7 +3,9 @@
 Minimalist FaaS framework for [node](http://nodejs.org).
 
 [![NPM Version][npm-image]][npm-url]
-[![Linux Build][travis-image]][travis-url]
+[![License][license-image]][license-url]
+[![Releases][releases-image]][releases-url]
+[![Linux Build][actions-image]][actions-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
 ## FaaS Micro Framework
@@ -52,8 +54,14 @@ core.getModuleManager().getPackageStoreManager().getPackageRegistryManager().add
 [npm-image]: https://img.shields.io/npm/v/@webfaas/webfaas-core.svg
 [npm-url]: https://npmjs.org/package/@webfaas/webfaas-core
 
-[travis-image]: https://img.shields.io/travis/webfaas/core/master.svg?label=linux
-[travis-url]: https://travis-ci.org/webfaas/core
+[license-image]: https://img.shields.io/github/license/github/webfaas/core.svg?style=flat-square
+[license-url]: https://github.com/conao3/setup-cask/blob/master/LICENSE
+
+[releases-image]: https://img.shields.io/github/tag/webfaas/core.svg?style=flat-square
+[releases-url]: https://github.com/webfaas/core/releases
+
+[actions-image]: https://img.shields.io/github/workflow/status/webfaas/core/Test.svg?label=GitHub%20Actions&logo=github&style=flat-square
+[actions-url]: https://github.com/webfaas/core/actions
 
 [coveralls-image]: https://img.shields.io/coveralls/github/webfaas/core/master.svg
 [coveralls-url]: https://coveralls.io/github/webfaas/core?branch=master

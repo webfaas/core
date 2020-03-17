@@ -1,0 +1,20 @@
+name: Publish
+
+on:
+  push:
+    tags:
+       - '*'
+jobs:
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: npm install, build, and publish
+        run: |
+          npm install
+          npm run build
+          npm run setnpmtokenAndPublish

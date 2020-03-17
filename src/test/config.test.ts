@@ -30,6 +30,14 @@ describe("Config - Custom Config", () => {
     })
 })
 
+describe("Config - NotFound", () => {
+    let tempFolder = path.join(os.tmpdir(), "webfaas-core-config-notfound-" + new Date().getTime());
+    
+    it("should return response on call", () => {
+        chai.expect(new Config(path.join(tempFolder, "file1"), log)).to.not.throw;
+    })
+})
+
 describe("Config - Denied", () => {
     let tempFolder = path.join(os.tmpdir(), "webfaas-core-config-denied-000-" + new Date().getTime());
     fs.mkdirSync(tempFolder);

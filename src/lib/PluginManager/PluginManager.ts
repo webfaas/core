@@ -3,7 +3,6 @@ import * as path from "path";
 import { Core, LogLevelEnum } from "../Core";
 import { IPlugin } from "./IPlugin";
 import { LogCodeEnum } from "../Log/ILog";
-import { DirectoryFSUtil } from "../Util/DirectoryFSUtil";
 
 export class PluginManager {
     core: Core;
@@ -54,14 +53,6 @@ export class PluginManager {
             newPlugin = pluginFunctionFactory(this.core);
         }
         return newPlugin;
-    }
-
-    /**
-     * load plugins
-     */
-    loadPlugins(pluginsDir?: string){
-        let targetDir = pluginsDir || DirectoryFSUtil.getMainDirectory();
-        this.loadPluginsByFolder(path.join(targetDir, "node_modules"));
     }
 
     /**

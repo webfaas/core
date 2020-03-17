@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
-import { DirectoryFSUtil } from "../Util/DirectoryFSUtil";
 
 const valueEnvironmentRegex = /\${[a-zA-Z0-9_:]*}/g
 
@@ -106,10 +105,6 @@ export class Config {
      * @param fileOrObject file string or object
      */
     private open(fileOrObject: any): void {
-        if (!fileOrObject){
-            fileOrObject = path.join(DirectoryFSUtil.getMainDirectory(), "data-config");
-        }
-
         if (typeof(fileOrObject) === "object"){
             this.originalConfigObj = fileOrObject;
         }

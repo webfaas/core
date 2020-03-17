@@ -1,5 +1,4 @@
 import * as chai from "chai";
-import * as mocha from "mocha";
 import * as path from "path";
 
 import { Core, Log, LogLevelEnum } from "../lib/Core";
@@ -42,16 +41,11 @@ describe("Package Registry Routing Plugin", () => {
         const core = new Core(undefined, log);
         
         const pluginManager1 = new PluginManager(core);
-        pluginManager1.loadPlugins();
-        
-        const pluginManager2 = new PluginManager(core);
-        pluginManager2.loadPlugins("/tmp");
     })
 
     it("should return properties on call", async function(){
         const core = new Core(undefined, log);
         const pluginManager = new PluginManager(core);
-        pluginManager.loadPlugins();
         const customPlugin1 = new CustomPlugin1();
 
         chai.expect(pluginManager.listPlugin.length).to.eq(0);
@@ -69,8 +63,7 @@ describe("Package Registry Routing Plugin", () => {
     it("loadplugin", async function(){
         const core = new Core(undefined, log);
         const pluginManager = new PluginManager(core);
-        pluginManager.loadPlugins();
-
+        
         chai.expect(pluginManager.listPlugin.length).to.eq(0);
         pluginManager.loadPluginsByFolder(path.join(__dirname, "mocks", "plugins"));
         chai.expect(pluginManager.listPlugin.length).to.eq(4);
@@ -102,5 +95,14 @@ describe("Package Registry Routing Plugin", () => {
         catch (errTry) {
             chai.expect(errTry.message).to.eq("internal plugin error");
         }
+    })
+
+    it("loadplugin - not found", async function(){
+        const core = new Core(undefined, log);
+        const pluginManager = new PluginManager(core);
+
+        chai.expect(pluginManager.listPlugin.length).to.eq(0);
+        pluginManager.loadPluginsByFolder("/tmp/webfaas__plugin_notfound__");
+        chai.expect(pluginManager.listPlugin.length).to.eq(0);
     })
 })
