@@ -1,0 +1,35 @@
+language: node_js
+
+jobs:
+  include:
+    - language: node_js
+      node_js: 10
+      script:
+      - npm run buildAndTest
+
+    - language: node_js
+      node_js: 11
+      script:
+      - npm run buildAndTest
+    
+    - language: node_js
+      node_js: 12
+      script:
+      - npm run buildAndTest
+    
+    - language: node_js
+      node_js: 13
+      script:
+      - npm run buildAndTest
+      after_script:
+      - |
+        npm install --save-dev coveralls
+        coveralls < ./coverage/lcov.info
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - npm run setnpmtokenAndPublish
+        on:
+          branch: master
+          tags: true
