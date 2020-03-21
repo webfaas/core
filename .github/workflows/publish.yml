@@ -8,18 +8,16 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
+    - name: npm install, coverage, and publish
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - name: npm install, coverage, and publish
-      run: |
-        npm install
-        npm install coveralls
-        npm run build
-        npm run test:coverage
-        coveralls < ./coverage/lcov.info
-        npm run setnpmtokenAndPublish
+    - run: npm install
+    - run: npm install coveralls
+    - run: npm run build
+    - run: npm run test:coverage
+    - run: coveralls < ./coverage/lcov.info
+    - run: npm run setnpmtokenAndPublish
