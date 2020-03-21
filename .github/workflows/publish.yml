@@ -3,21 +3,22 @@ name: Publish
 on:
   push:
     tags:
-       - '*'
+      - '*'
+
 jobs:
-  publish:
+  test:
     runs-on: ubuntu-latest
     steps:
-    - name: npm install, coverage, and publish
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - name: Publish
+      uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-      env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     - run: npm install
     - run: npm install coveralls
     - run: npm run build
     - run: npm run test:coverage
     - run: coveralls < ./coverage/lcov.info
     - run: npm run setnpmtokenAndPublish
+      env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
