@@ -22,10 +22,5 @@
     "exclude": [
         "node_modules",
         "**/*.spec.ts"
-    ],
-    "files": [
-        "src/lib/ClientHTTP/ClientHTTP.ts",
-        "src/lib/ClientHTTP/ClientHTTPConfig.ts",
-        "src/lib/ClientHTTP/IClientHTTPResponse.ts"
     ]
 }
