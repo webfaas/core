@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as path from "path";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 
@@ -43,7 +42,7 @@ export class Config {
 
                 let envValue: any = process.env[keyEnv];
                 if (envValue){
-                    selfLog.write(LogLevelEnum.DEBUG, "parseValue", LogCodeEnum.PROCESS.toString(), "keyEnv: " + keyEnv + ", envValue: " + envValue, null, __filename);
+                    selfLog.write(LogLevelEnum.TRACE, "parseValue", LogCodeEnum.PROCESS.toString(), "keyEnv: " + keyEnv + ", envValue: " + envValue, null, __filename);
                     return envValue;
                 }
                 else{
@@ -105,38 +104,36 @@ export class Config {
      * @param fileOrObject file string or object
      */
     private open(fileOrObject: any): void {
-        if (typeof(fileOrObject) === "object"){
-            this.originalConfigObj = fileOrObject;
-        }
-        else{
-            let filePath:string = fileOrObject;
-            try {
-                let stats: fs.Stats = fs.statSync(filePath);
-
-                if (stats.isDirectory()){
-                    filePath = path.join(filePath, "default.json");
-                }
-
-                this.originalConfigObj = require(filePath);
-
-                this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.OPENFILE.toString(), "config file [" + filePath + "] loaded", null, __filename);
+        if (fileOrObject){
+            if (typeof(fileOrObject) === "object"){
+                this.originalConfigObj = fileOrObject;
             }
-            catch (errTry) {
-                if (errTry.code === "ENOENT"){
-                    this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.OPENFILE.toString(), "config file not found [" + filePath + "]", null, __filename);
+            else{
+                let filePath:string = fileOrObject;
+                try {
+                    let stats: fs.Stats = fs.statSync(filePath);
+    
+                    this.originalConfigObj = require(filePath);
+    
+                    this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.OPENFILE.toString(), "config file [" + filePath + "] loaded", null, __filename);
                 }
-                else{
-                    this.log.writeError("open", errTry, null, __filename);
+                catch (errTry) {
+                    if (errTry.code === "ENOENT"){
+                        this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.OPENFILE.toString(), "config file not found [" + filePath + "]", null, __filename);
+                    }
+                    else{
+                        this.log.writeError("open", errTry, null, __filename);
+                    }
                 }
             }
-        }
-
-        if (this.originalConfigObj){
-            this.processConfig(this.originalConfigObj, null);
-            this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.PROCESS.toString(), "config object processed", null, __filename);
-        }
-        else{
-            this.log.write(LogLevelEnum.INFO, "open", LogCodeEnum.PROCESS.toString(), "config object not processed", null, __filename);
+    
+            if (this.originalConfigObj){
+                this.processConfig(this.originalConfigObj, null);
+                this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.PROCESS.toString(), "config object processed", null, __filename);
+            }
+            else{
+                this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.PROCESS.toString(), "config object not processed", null, __filename);
+            }
         }
     }
 

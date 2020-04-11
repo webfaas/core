@@ -12,6 +12,8 @@ import { IMessageContext } from "./IMessageContext";
 import { ModuleManagerConvert } from "./ModuleManagerConvert";
 import { IRequestContext, IRequestContextStack } from "./IRequestContext";
 import { IModuleManagerFilter } from "./IModuleManagerFilter";
+import { ICodeBufferResponseFromPackageStoreCacheSync } from "./ICodeBufferResponseFromPackageStoreCacheSync";
+import { EventEmitter } from "events";
 
 const moduleManagerConvert = new ModuleManagerConvert();
 
@@ -24,12 +26,16 @@ export class ModuleManager {
     private moduleManagerCache: ModuleManagerCache;
     private moduleManagerImport: ModuleManagerImport;
     private preFilterInvokeAsyncList: Array<IModuleManagerFilter> = new Array<IModuleManagerFilter>();
-
+    private event: EventEmitter = new EventEmitter();
+    
     constructor(packageStoreManager?: PackageStoreManager, log?: Log){
         this.log = log || new Log();
         this.moduleManagerCache = new ModuleManagerCache(this.log);
         this.moduleManagerCompile = new ModuleManagerCompile(this, this.log);
         this.moduleManagerImport = new ModuleManagerImport(this, this.log, packageStoreManager);
+
+        this.onProcessModuleCompiledToCache = this.onProcessModuleCompiledToCache.bind(this);
+        this.event.addListener("processModuleCompiledToCache", this.onProcessModuleCompiledToCache);
     }
 
     /**
@@ -85,9 +91,9 @@ export class ModuleManager {
         }
         
         //find module in cache
-        let responseObj: Object | null = this.getModuleManagerCache().getModuleFromAllCache(name, packageInfoTarget, moduleManagerRequireContextData, parentModuleCompileManifestData);
-        if (responseObj){
-            return responseObj;
+        let moduleCompiledObj: Object | null = this.getModuleManagerCache().getModuleFromAllCache(name, packageInfoTarget, moduleManagerRequireContextData, parentModuleCompileManifestData);
+        if (moduleCompiledObj){
+            return moduleCompiledObj;
         }
 
         //find packageStore in cache
@@ -97,19 +103,11 @@ export class ModuleManager {
 
             //compile
             if (codeBufferFromPackageStoreCacheSync){
-                //add manifest to temporary cache
-                this.getModuleManagerCache().addManifestToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, codeBufferFromPackageStoreCacheSync.manifest);
-                
-                responseObj = this.moduleManagerCompile.compilePackageStoreItemBufferSync(codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse, moduleManagerRequireContextData, codeBufferFromPackageStoreCacheSync.moduleCompileManifestData);
-                if (responseObj){
-                    //add compiled module to temporary cache
-                    this.getModuleManagerCache().addCompiledObjectToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, packageInfoTarget.itemKey, responseObj);
+                moduleCompiledObj = this.moduleManagerCompile.compilePackageStoreItemBufferSync(codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse, moduleManagerRequireContextData, codeBufferFromPackageStoreCacheSync.moduleCompileManifestData);
 
-                    return responseObj;
-                }
-                else{
-                    return null;
-                }
+                this.event.emit("processModuleCompiledToCache", packageInfoTarget, codeBufferFromPackageStoreCacheSync, moduleCompiledObj);
+
+                return moduleCompiledObj;
             }
             else{
                 return null;
@@ -148,19 +146,10 @@ export class ModuleManager {
     
                 //compile
                 if (codeBufferFromPackageStoreCacheSync){
-                    //add manifest to temporary cache
-                    this.getModuleManagerCache().addManifestToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, codeBufferFromPackageStoreCacheSync.manifest);
-
                     this.moduleManagerCompile.compilePackageStoreItemBufferAsync(codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse, moduleManagerRequireContextData, codeBufferFromPackageStoreCacheSync.moduleCompileManifestData).then((moduleCompiledObj)=>{
-                        if (moduleCompiledObj){
-                            //add compiled module to temporary cache
-                            this.getModuleManagerCache().addCompiledObjectToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, packageInfoTarget.itemKey, moduleCompiledObj);
+                        this.event.emit("processModuleCompiledToCache", packageInfoTarget, codeBufferFromPackageStoreCacheSync, moduleCompiledObj);
 
-                            resolve(moduleCompiledObj);
-                        }
-                        else{
-                            resolve(null);
-                        }
+                        resolve(moduleCompiledObj);
                     }).catch((errCompile) => {
                         reject(errCompile);
                     });
@@ -323,5 +312,23 @@ export class ModuleManager {
                 resolve(null);
             }
         })
+    }
+
+    /**
+     * Process Event processModuleCompiledToCache
+     * @param packageInfoTarget 
+     * @param codeBufferFromPackageStoreCacheSync 
+     * @param moduleCompiledObj 
+     */
+    onProcessModuleCompiledToCache(packageInfoTarget: IRequirePackageInfoTarget, codeBufferFromPackageStoreCacheSync: ICodeBufferResponseFromPackageStoreCacheSync | null, moduleCompiledObj: Object | null){
+        //add manifest to temporary cache
+        if (codeBufferFromPackageStoreCacheSync){
+            this.getModuleManagerCache().addManifestToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, codeBufferFromPackageStoreCacheSync.manifest);
+        }
+        
+        //add compiled module to temporary cache
+        if (moduleCompiledObj){
+            this.getModuleManagerCache().addCompiledObjectToCache(packageInfoTarget.packageName, packageInfoTarget.packageVersion, packageInfoTarget.itemKey, moduleCompiledObj);
+        }
     }
 }

@@ -8,10 +8,6 @@ Minimalist FaaS framework for [node](http://nodejs.org).
 
 ## FaaS Micro Framework
 
-## Features
-  * Focus on high performance
-  * Input/Output with automatic validation
-
 ### Example
 ```javascript
 import { Core } from "@webfaas/webfaas-core";

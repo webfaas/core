@@ -11,6 +11,7 @@ import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 import { SmallSemver } from "../lib/Semver/SmallSemver";
 import { ModuleManagerRequireContextData } from "../lib/ModuleManager/ModuleManagerRequireContextData";
 import { ModuleCompileManifestData } from "../lib/ModuleCompile/ModuleCompileManifestData";
+import { IRequirePackageInfoTarget } from "../lib/ModuleManager/IRequirePackageInfoTarget";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
     packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
@@ -103,5 +104,11 @@ describe("Module Manager", () => {
         catch (errTry) {
             chai.expect(errTry.message.indexOf("expected")).to.gt(-1);
         }
+    })
+
+    it("processModuleCompiledToCache - default", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+        let packageInfoTarget = {} as IRequirePackageInfoTarget;
+        moduleManager1.onProcessModuleCompiledToCache(packageInfoTarget, null, null);
     })
 })

@@ -49,7 +49,7 @@ describe("Config - Denied", () => {
 })
 
 describe("Config - Default Config", () => {
-    var config = new Config(path.join(__dirname, "./data/data-config"), log);
+    var config = new Config(path.join(__dirname, "./data/data-config/default.json"), log);
     
     it("should return response on call", () => {
         chai.expect(config.get("core.log.level")).to.eq("INFO");
