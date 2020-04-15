@@ -81,4 +81,30 @@ export namespace WebFaasError{
             this.stack = err.stack;
         }
     }
+
+    //
+    //SecurityError
+    //
+    export enum SecurityErrorTypeEnum{
+        MISSINGCREDENTIALS="MISSINGCREDENTIALS",
+        INVALIDCREDENTIALS="INVALIDCREDENTIALS",
+        FORBIDDEN="FORBIDDEN",
+        THROTTLED="THROTTLED",
+        PAYLOADLARGE="PAYLOADLARGE",
+        PAYLOADINVALID="PAYLOADINVALID",
+        UNCLASSIFIED="UNCLASSIFIED"
+    }
+
+    export class SecurityError extends Error {
+        code: string;
+        type:SecurityErrorTypeEnum;
+        
+        constructor(type:SecurityErrorTypeEnum, err: any) {
+            super(err.message || "");
+            this.name = "SecurityError";
+            this.type = type;
+            this.code = err.code || "";
+            this.stack = err.stack;
+        }
+    }
 }

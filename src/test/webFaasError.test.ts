@@ -94,4 +94,24 @@ describe("WebFaasError", () => {
         chai.expect(error1.message).to.eq("");
         chai.expect(error1.code).to.eq("CODE1");
     })
+
+    //
+    //SecurityError
+    //
+    it("SecurityError - complete - should return property", function(){
+        var error1 = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, new Error("message1"));
+
+        chai.expect(error1.name).to.eq("SecurityError");
+        chai.expect(error1.type).to.eq(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED);
+        chai.expect(error1.message).to.eq("message1");
+        chai.expect(error1.code).to.eq("");
+    })
+
+    it("SecurityError - icomplete - should return property", function(){
+        var error1 = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, {code:"CODE1"});
+        chai.expect(error1.name).to.eq("SecurityError");
+        chai.expect(error1.type).to.eq(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED);
+        chai.expect(error1.message).to.eq("");
+        chai.expect(error1.code).to.eq("CODE1");
+    })
 })
