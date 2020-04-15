@@ -246,6 +246,19 @@ export namespace PackageRegistryResponseMock{
         }
     }
 
+    export class InternalRelativeDependencyNotFound extends AbstractBase{
+        constructor(name: string = "internalRelativeDependencyNotFound", version: string = "0.0.1", description: string = "test"){
+            let moduleText = `
+                const file1 = require("./file1")
+                module.exports = function(x,y){
+                    return x + y
+                }
+            `
+
+            super(name, version, description, moduleText);
+        }
+    }
+
     export class InternalRelativeDependency implements IPackageRegistryResponse{
         etag: string;
         packageStore: PackageStore | null = null;
@@ -355,7 +368,6 @@ export namespace PackageRegistryResponseMock{
         constructor(name: string = "mathmessage", version: string = "0.0.1", description: string = "message test"){
             this.etag = "etag" + version;
             
-            var itemData: IPackageStoreItemData;
             var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
             var nextPos: number = 0;
 
@@ -364,49 +376,48 @@ export namespace PackageRegistryResponseMock{
             nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
 
             let moduleText = `
-            module.exports.sum = async function(event, context){
-                return event.x + event.y;
+            module.exports.sum = async function(event){
+                return {payload: event.payload.x + event.payload.y};
             }
-            module.exports.level1 = async function(event, context){
-                let stackText = "";
-                if (context.requestContext.stack){
-                    stackText = context.requestContext.stack.name + ":" + context.requestContext.stack.version + ":" + context.requestContext.stack.method;
-                }
-
-                let responseLevel2 = await context.sendMessage(event.name, event.version, "level2", event);
-
-                return "level1-" + context.requestContext.level + "-" + context.requestContext.requestID + "-[" + stackText + "]" + " > " + responseLevel2;
+            module.exports.sumsync = function(event){
+                return {payload: event.payload.x + event.payload.y};
             }
-            module.exports.level2 = async function(event, context){
-                let stackText = "";
-                if (context.requestContext.stack){
-                    stackText = context.requestContext.stack.name + ":" + context.requestContext.stack.version + ":" + context.requestContext.stack.method;
-                }
-
-                let responseLevel3 = await context.sendMessage(event.name, event.version, "level3", event);
-
-                return "level2-" + context.requestContext.level + "-" + context.requestContext.requestID + "-[" + stackText + "]" + " > " + responseLevel3;
+            module.exports.multiply = async function(event){
+                return {payload: event.payload.x * event.payload.y};
             }
-            module.exports.level3 = async function(event, context){
-                let stackText = "";
-                if (context.requestContext.stack){
-                    stackText = context.requestContext.stack.name + ":" + context.requestContext.stack.version + ":" + context.requestContext.stack.method;
-                    if (context.requestContext.stack.stack){
-                        stackText += " > " + context.requestContext.stack.stack.name + ":" + context.requestContext.stack.stack.version + ":" + context.requestContext.stack.stack.method;
-                        if (context.requestContext.stack.stack.stack){
-                            stackText += " > " + context.requestContext.stack.stack.stack.name + ":" + context.requestContext.stack.stack.stack.version + ":" + context.requestContext.stack.stack.stack.method;
-                        }
-                    }
-                }
-
-                return "level3-" + context.requestContext.level + "-" + context.requestContext.requestID + "-[" + stackText + "]";
+            module.exports.multiplysync = function(event){
+                return {payload: event.payload.x * event.payload.y};
             }
-            module.exports.level = async function(event, context){
-                let responseLevel1 = await context.sendMessage(event.name, event.version, "level1", event);
-                let responseLevel2 = await context.sendMessage(event.name, event.version, "level2", event);
-                let responseLevel3 = await context.sendMessage(event.name, event.version, "level3", event);
+            module.exports.errorasync = async function(event){
+                throw new Error("errorasync");
+            }
+            `
+            let file1Buffer = Buffer.from(moduleText);
+            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+    
+            var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
+    
+            this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
+        }
+    }
 
-                return responseLevel1 + "**" + responseLevel2 + "**" + responseLevel3;
+    export class SimpleMessage implements IPackageRegistryResponse{
+        etag: string;
+        packageStore: PackageStore | null = null;
+    
+        constructor(name: string = "simplemessage", version: string = "0.0.1", description: string = "message test"){
+            this.etag = "etag" + version;
+            
+            var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+            var nextPos: number = 0;
+
+            let packageObj = {name:name, version:version, main:"index.js", description: description, dependencies: {}};
+            let packageBuffer = Buffer.from(JSON.stringify(packageObj));
+            nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
+
+            let moduleText = `
+            module.exports = async function(event){
+                return {payload: 'simple'};
             }
             `
             let file1Buffer = Buffer.from(moduleText);

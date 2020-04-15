@@ -2,6 +2,7 @@
 
 import { Core } from "../lib/Core";
 import { PackageRegistryMock } from "../test/mocks/PackageRegistryMock";
+import { IMessage } from "../lib/MessageManager/IMessage";
 
 const core = new Core();
 
@@ -13,19 +14,14 @@ process.on("unhandledRejection", (reason, p) => {
 
 (async function(){
     try {
-        var response: any = await core.invokeAsync("@registry1/mathsum", "0.0.1", "", [2,3]);
+        let msg = {} as IMessage
+        msg.header.name = "@registry1/mathmessage";
+        msg.header.version = "0.0.1";
+        msg.payload = {x:2, y:3};
+        var response: any = await core.sendMessage(msg);
 
         if (response){
             console.log("response", response);
-        }
-        else{
-            console.log("not response");
-        }
-
-        var response2: any = await core.invokeAsync("@registry1/mathsumasync", "1.0.0", "sum", [{x:10, y:5}]);
-
-        if (response2){
-            console.log("response2", response2);
         }
         else{
             console.log("not response");

@@ -57,8 +57,8 @@ describe("Module Manager Cache", () => {
             chai.expect(moduleObj(2,3)).to.eq(5); //sum
         }
 
-        let response = await moduleManager1.invokeAsync("moduletest1", "1.0.0", undefined, [2,3]);
-        chai.expect(response).to.eq(5); //sum
+        let response: any = await moduleManager1.getModuleManagerImport().import("moduletest1", "1.0.0");
+        chai.expect(response(2,3)).to.eq(5); //sum
     })
 
     it("addLocalDiskModuleToCache - moduletest2", async function(){
@@ -76,8 +76,8 @@ describe("Module Manager Cache", () => {
             chai.expect(moduleObj(2,3)).to.eq(6); //multiply
         }
 
-        let response = await moduleManager1.invokeAsync("moduletest2", "1.0.0", undefined, [2,3]);
-        chai.expect(response).to.eq(6); //multiply
+        let response: any = await moduleManager1.getModuleManagerImport().import("moduletest2", "1.0.0");
+        chai.expect(response(2,3)).to.eq(6); //multiply
     })
 
     it("addLocalDiskModuleToCache - moduletest3 - whitout version", async function(){
@@ -95,7 +95,7 @@ describe("Module Manager Cache", () => {
             chai.expect(moduleObj(2,3)).to.eq(6); //multiply
         }
 
-        let response = await moduleManager1.invokeAsync("moduletest3", "1.0.0", undefined, [2,3]);
-        chai.expect(response).to.eq(6); //multiply
+        let response:any = await moduleManager1.getModuleManagerImport().import("moduletest3", "1.0.0");
+        chai.expect(response(2,3)).to.eq(6); //multiply
     })
 })

@@ -5,7 +5,6 @@ import { ModuleManager } from "../lib/ModuleManager/ModuleManager";
 import { Log } from "../lib/Log/Log";
 import { LogLevelEnum } from "../lib/Log/ILog";
 import { PackageStoreManager } from "../lib/PackageStoreManager/PackageStoreManager";
-import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageRegistryManager";
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 

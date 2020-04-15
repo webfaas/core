@@ -12,9 +12,7 @@ import { PackageRegistryManager } from "../lib/PackageRegistryManager/PackageReg
 import { PackageRegistryMock } from "./mocks/PackageRegistryMock";
 
 function loadDefaultRegistries(packageRegistryManager: PackageRegistryManager, log: Log){
-    packageRegistryManager.addRegistry("REGISTRY1", "REGISTRY3", new PackageRegistryMock.PackageRegistry1());
-    packageRegistryManager.addRegistry("REGISTRY2", "REGISTRY3", new PackageRegistryMock.PackageRegistry2());
-    packageRegistryManager.addRegistry("REGISTRY3", "", new PackageRegistryMock.PackageRegistry3());
+    packageRegistryManager.addRegistry("REGISTRY1", "", new PackageRegistryMock.PackageRegistry1());
 }
 
 var log = new Log();
@@ -135,31 +133,15 @@ describe("Module Manager - Import", () => {
         }
     })
 
-    it("importDependencies - simulate dependency - getPackageStore return null ", async function(){
+    it("import @registry1/internalRelativeDependencyNotFound - 0.0.1", async function(){
+        let moduleManager1 = new ModuleManager(packageStoreManager_default, log);
+        
         try {
-            let packageStoreManager_simulate = new PackageStoreManager(packageRegistryManager_default, log);
-            let moduleManager_simulate = new ModuleManager(packageStoreManager_simulate, log);
-            let packageStore = await moduleManager_simulate.getModuleManagerImport().getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
-            moduleManager_simulate.getModuleManagerImport().getPackageStoreManager().getPackageStore = async function(){
-                return null;
-            }
-            chai.expect(packageStore).to.not.null;
-            if (packageStore){
-                await moduleManager_simulate.getModuleManagerImport().importDependencies(packageStore);
-            }
+            let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/internalRelativeDependencyNotFound", "0.0.1");
+            throw new Error("Sucess!");
         }
         catch (errTry) {
-            chai.expect(errTry.name).to.eq("NotFoundError");
-        }
-    })
-
-    it("importDependencies - whitout temporaryContextPackageStoreCache ", async function(){
-        let packageStoreManager1 = new PackageStoreManager(packageRegistryManager_default, log);
-        let moduleManager1 = new ModuleManager(packageStoreManager1, log);
-        let packageStore = await moduleManager1.getModuleManagerImport().getPackageStoreManager().getPackageStore("@registry1/mathsumasync", "1.0.0");
-        chai.expect(packageStore).to.not.null;
-        if (packageStore){
-            await moduleManager1.getModuleManagerImport().importDependencies(packageStore, undefined);
+            chai.expect(errTry.message).to.include("./file1");
         }
     })
 })

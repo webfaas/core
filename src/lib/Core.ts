@@ -5,7 +5,9 @@ import { Log } from "./Log/Log";
 import { Config } from "./Config/Config";
 import { ISemverData } from "./Semver/ISemverData";
 import { SmallSemver } from "./Semver/SmallSemver";
-import { IRequestContext } from "./ModuleManager/IRequestContext";
+import { MessageManager } from "./MessageManager/MessageManager";
+import { ModuleManagerImport } from "./ModuleManager/ModuleManagerImport";
+import { IMessage } from "./MessageManager/IMessage";
 
 const smallSemver: SmallSemver = new SmallSemver();
 
@@ -16,6 +18,8 @@ export class Core {
     private packageRegistryManager: PackageRegistryManager;
     private packageStoreManager : PackageStoreManager;
     private moduleManager: ModuleManager;
+    private moduleManagerImport: ModuleManagerImport;
+    private messageManager: MessageManager;
     private log: Log;
     private config: Config;
     private version: string;
@@ -40,6 +44,13 @@ export class Core {
      */
     getModuleManager(): ModuleManager{
         return this.moduleManager;
+    }
+
+    /**
+     * return message manager
+     */
+    getMessageManager(): MessageManager{
+        return this.messageManager;
     }
 
     /**
@@ -72,28 +83,10 @@ export class Core {
 
     /**
      * send message
-     * @param name module name
-     * @param version module version
-     * @param method method
-     * @param requestContext request context
-     * @param data data
-     * @param registryName registry
+     * @param msg message
      */
-    sendMessage(name: string, version: string, method: string, requestContext:IRequestContext, data: any, registryName?: string): Promise<any>{
-        return this.moduleManager.sendMessage(name, version, method, requestContext, data, registryName);
-    }
-
-    /**
-     * invoke async
-     * @param name module name
-     * @param version module version
-     * @param method method name
-     * @param parameter parameter
-     * @param registryName registry
-     * @param imediateCleanMemoryCacheModuleFiles clean cache
-     */
-    invokeAsync(name: string, version: string, method?: string, parameter?: any[], registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<any>{
-        return this.moduleManager.invokeAsync(name, version, method, parameter, registryName, imediateCleanMemoryCacheModuleFiles);
+    sendMessage(msg: IMessage): Promise<any>{
+        return this.messageManager.sendMessage(msg);
     }
 
     /**
@@ -105,7 +98,7 @@ export class Core {
      * @param imediateCleanMemoryCacheModuleFiles clean cache
      */
     import(name: string, version: string, etag?: string, registryName?: string, imediateCleanMemoryCacheModuleFiles = true): Promise<Object | null>{
-        return this.moduleManager.getModuleManagerImport().import(name, version, etag, registryName, imediateCleanMemoryCacheModuleFiles);
+        return this.moduleManagerImport.import(name, version, etag, registryName, imediateCleanMemoryCacheModuleFiles);
     }
 
     constructor(config?: Config, log?: Log, packageRegistryManager?: PackageRegistryManager, packageStoreManager? : PackageStoreManager, moduleManager?: ModuleManager) {
@@ -140,6 +133,9 @@ export class Core {
         else{
             this.moduleManager = new ModuleManager(this.packageStoreManager, this.log);
         }
+
+        this.moduleManagerImport = this.moduleManager.getModuleManagerImport();
+        this.messageManager = new MessageManager(this.moduleManager, this.log);
     }
 }
 

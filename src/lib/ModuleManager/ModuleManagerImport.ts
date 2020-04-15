@@ -1,4 +1,3 @@
-import * as path from "path";
 import { Log } from "../Log/Log";
 import { PackageStore } from "../PackageStore/PackageStore";
 import { PackageStoreManager } from "../PackageStoreManager/PackageStoreManager";
@@ -6,14 +5,12 @@ import { PackageRegistryManager } from "../PackageRegistryManager/PackageRegistr
 import { IPackageStoreCacheSync } from "../PackageStoreCache/IPackageStoreCacheSync";
 import { IManifest } from "../Manifest/IManifest";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
-import { ModuleCompileManifestData } from "../ModuleCompile/ModuleCompileManifestData";
 import { ModuleManagerRequireContextData } from "./ModuleManagerRequireContextData";
 import { SmallManifest } from "../Manifest/SmallManifest";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
 import { ISemver } from "../Semver/ISemver";
 import { SmallSemver } from "../Semver/SmallSemver";
 import { ModuleNameUtil, IModuleNameData } from "../Util/ModuleNameUtil";
-import { IRequirePackageInfoTarget } from "./IRequirePackageInfoTarget";
 import { ModuleManager } from "../Core";
 
 /**

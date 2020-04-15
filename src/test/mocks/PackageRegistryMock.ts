@@ -79,10 +79,13 @@ export namespace PackageRegistryMock{
             let nameExecutionError:string = "@registry1/executionerror";
             let nameModuleWhitoutExport:string = "@registry1/modulewhitoutexport";
             let nameInternalRelativeDependency = "@registry1/internalrelativedependency";
+            let nameInternalRelativeDependencyNotFound = "@registry1/internalRelativeDependencyNotFound";
             let nameModuleDependencyNotFound = "@registry1/moduledependencynotfound"
             let nameModuleDependencyNotDeclared = "@registry1/moduledependencynotdeclared";
             let nameMathSumWasm = "@registry1/mathsumwasm";
             let nameMathMessage = "@registry1/mathmessage";
+            let nameSimpleMessage = "@registry1/simplemessage";
+            
 
             let description: string = "registry1 mock";
 
@@ -115,6 +118,9 @@ export namespace PackageRegistryMock{
             this.listPackageRegistryResponse.set(nameInternalRelativeDependency, new PackageRegistryResponseMock.Manifest(nameInternalRelativeDependency, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameInternalRelativeDependency + ":0.0.1", new PackageRegistryResponseMock.InternalRelativeDependency(nameInternalRelativeDependency, "0.0.1", description));
 
+            this.listPackageRegistryResponse.set(nameInternalRelativeDependencyNotFound, new PackageRegistryResponseMock.Manifest(nameInternalRelativeDependencyNotFound, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameInternalRelativeDependencyNotFound + ":0.0.1", new PackageRegistryResponseMock.InternalRelativeDependencyNotFound(nameInternalRelativeDependencyNotFound, "0.0.1", description));
+
             this.listPackageRegistryResponse.set(nameModuleDependencyNotFound, new PackageRegistryResponseMock.Manifest(nameModuleDependencyNotFound, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameModuleDependencyNotFound + ":0.0.1", new PackageRegistryResponseMock.ModuleDependencyNotFound(nameModuleDependencyNotFound, "0.0.1", description));
 
@@ -126,6 +132,9 @@ export namespace PackageRegistryMock{
 
             this.listPackageRegistryResponse.set(nameMathMessage, new PackageRegistryResponseMock.Manifest(nameMathMessage, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameMathMessage + ":0.0.1", new PackageRegistryResponseMock.MathMessage(nameMathMessage, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameSimpleMessage, new PackageRegistryResponseMock.Manifest(nameSimpleMessage, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameSimpleMessage + ":0.0.1", new PackageRegistryResponseMock.SimpleMessage(nameSimpleMessage, "0.0.1", description));
         }
     }
     
