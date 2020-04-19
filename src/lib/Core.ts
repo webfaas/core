@@ -85,7 +85,7 @@ export class Core {
      * send message
      * @param msg message
      */
-    sendMessage(msg: IMessage): Promise<any>{
+    sendMessage(msg: IMessage): Promise<IMessage | null>{
         return this.messageManager.sendMessage(msg);
     }
 
@@ -170,6 +170,12 @@ export { PluginManager } from "./PluginManager/PluginManager";
 
 //ModuleManager
 export { ModuleManager } from "./ModuleManager/ModuleManager";
+
+//MessageManager
+export { MessageManager } from "./MessageManager/MessageManager";
+export { IMessage } from "./MessageManager/IMessage";
+export { IMessageHeaders } from "./MessageManager/IMessageHeaders";
+export { IMessageManagerFilter } from "./MessageManager/IMessageManagerFilter";
 
 //WebFaasError
 export { WebFaasError } from "./WebFaasError/WebFaasError";

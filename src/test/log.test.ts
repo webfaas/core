@@ -1,9 +1,7 @@
 import * as chai from "chai";
-import * as mocha from "mocha";
 
 import {Log} from "../lib/Log/Log";
 import { LogLevelEnum, IWriteLog, ILogData, parseLogLevel } from "../lib/Log/ILog";
-import * as path from "path";
 
 var lastLog: ILogData;
 var lastLogException: Error;
@@ -19,9 +17,6 @@ class CustomWriteLogException implements IWriteLog {
         throw new Error("Exception test");
     }
 }
-
-var log = new Log(new CustomWriteLog());
-var logException = new Log(new CustomWriteLogException());
 
 describe("ILog", () => {
     it("should write log on call string", () => {
@@ -46,6 +41,9 @@ describe("ILog", () => {
 })
 
 describe("Log", () => {
+    var log = new Log(new CustomWriteLog());
+    var logException = new Log(new CustomWriteLogException());
+
     it("should write log on call", () => {
         var now = new Date();
 
@@ -176,5 +174,20 @@ describe("Log", () => {
         chai.expect(lastLog.code).to.eq("test12");
         chai.expect(lastLog.message).to.eq("message12");
         chai.expect(lastLog.method).to.eq("method12");
+    })
+});
+
+describe("Log - Default", () => {
+    var log = new Log();
+    log.changeCurrentLevel(LogLevelEnum.INFO);
+    
+    it("INFO", () => {
+        log.write(LogLevelEnum.INFO, "method1", "test1", "message1");
+        log.write(LogLevelEnum.INFO, "method1", "test1", "message1", {});
+    })
+
+    it("DEBUG", () => {
+        log.write(LogLevelEnum.DEBUG, "method1", "test1", "message1");
+        log.write(LogLevelEnum.DEBUG, "method1", "test1", "message1", {});
     })
 });
