@@ -1,11 +1,10 @@
 import * as chai from "chai";
-import * as mocha from "mocha";
 
 import * as fs from "fs";
 import * as path from "path";
 import * as http from "http";
 import * as https from "https";
-import {ClientHTTP} from "../lib/ClientHTTP/ClientHTTP";
+import { ClientHTTP } from "../lib/ClientHTTP/ClientHTTP";
 import { IClientHTTPResponse } from "../lib/ClientHTTP/IClientHTTPResponse";
 import { ClientHTTPConfig } from "../lib/ClientHTTP/ClientHTTPConfig";
 import { Log } from "../lib/Log/Log";

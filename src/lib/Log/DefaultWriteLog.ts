@@ -9,7 +9,7 @@ export class DefaultWriteLog implements IWriteLog {
         if (logData.level === LogLevelEnum.INFO){
             let detailTexto = "";
             if (logData.detail){
-                let detailTexto = JSON.stringify(logData.detail);
+                detailTexto = JSON.stringify(logData.detail);
             }
             console.log(`${logData.level} ${logData.date.toISOString()} ${logData.method} CODE:${logData.code} MESSAGE:${logData.message} ${detailTexto} `);
         }
