@@ -36,7 +36,7 @@ describe("ModuleCompileWasm", () => {
 
         try {
             var module2 = await moduleCompile.compile(Buffer.from("AAAA"), manifest);
-            throw new Error("Sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.message.indexOf("expected magic word")).to.gt(-1);
@@ -44,7 +44,7 @@ describe("ModuleCompileWasm", () => {
 
         try {
             var module3 = await moduleCompile_throwError.compile(moduleBuffer, manifest);
-            throw new Error("Sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.message).to.eq("Error in compile");

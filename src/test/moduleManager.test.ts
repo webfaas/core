@@ -99,7 +99,7 @@ describe("Module Manager", () => {
         let moduleCompileManifestData = new ModuleCompileManifestData("@registry1/mathsumwasm", "0.0.1", "");
         try {
             await moduleManager1.getModuleManagerCompile().compilePackageWasmAsync(moduleManagerRequireContextData, moduleCompileManifestData, Buffer.from("AAAA"));
-            throw new Error("Sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.message.indexOf("expected")).to.gt(-1);

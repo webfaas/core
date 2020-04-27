@@ -7,7 +7,7 @@ export namespace WebFaasError{
         MANIFEST="MANIFEST",
         VERSION="VERSION",
         DEPENDENCY="DEPENDENCY",
-        FUNCMETHOD="METHOD"
+        METHOD="METHOD"
     }
 
     export class NotFoundError extends Error {
@@ -86,12 +86,12 @@ export namespace WebFaasError{
     //SecurityError
     //
     export enum SecurityErrorTypeEnum{
-        MISSINGCREDENTIALS="MISSINGCREDENTIALS",
-        INVALIDCREDENTIALS="INVALIDCREDENTIALS",
+        MISSING_CREDENTIALS="MISSING_CREDENTIALS",
+        INVALID_CREDENTIALS="INVALID_CREDENTIALS",
         FORBIDDEN="FORBIDDEN",
         THROTTLED="THROTTLED",
-        PAYLOADLARGE="PAYLOADLARGE",
-        PAYLOADINVALID="PAYLOADINVALID",
+        PAYLOAD_LARGE="PAYLOAD_LARGE",
+        PAYLOAD_INVALID="PAYLOAD_INVALID",
         UNCLASSIFIED="UNCLASSIFIED"
     }
 
@@ -105,6 +105,21 @@ export namespace WebFaasError{
             this.type = type;
             this.code = err.code || "";
             this.stack = err.stack;
+        }
+    }
+
+    //
+    //ValidateError
+    //
+    export class ValidateError extends Error {
+        code: string;
+        field: string;
+        
+        constructor(code: string, field: string, message: string) {
+            super(message);
+            this.name = "ValidateError";
+            this.field = field;
+            this.code = code;
         }
     }
 }

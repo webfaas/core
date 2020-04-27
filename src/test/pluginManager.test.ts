@@ -90,7 +90,7 @@ describe("Package Registry Routing Plugin", () => {
         
         try {
             pluginManager.loadPluginsByFolder(path.join(__dirname, "mocks", "pluginserror"));    
-            throw new Error("sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.message).to.eq("internal plugin error");

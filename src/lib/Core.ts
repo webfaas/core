@@ -142,6 +142,7 @@ export class Core {
 //Util
 export { PackageStoreUtil } from "./Util/PackageStoreUtil";
 export { ModuleNameUtil } from "./Util/ModuleNameUtil";
+export { MessageUtil } from "./Util/MessageUtil";
 
 //ClientHTTP
 export { ClientHTTP } from "./ClientHTTP/ClientHTTP";
@@ -174,7 +175,7 @@ export { ModuleManager } from "./ModuleManager/ModuleManager";
 //MessageManager
 export { MessageManager } from "./MessageManager/MessageManager";
 export { IMessage } from "./MessageManager/IMessage";
-export { IMessageHeaders } from "./MessageManager/IMessageHeaders";
+export { IMessageHeaders, IMessageHeadersAuthorization, IMessageHeadersHTTP, IMessageHeadersIdentity } from "./MessageManager/IMessageHeaders";
 export { IMessageManagerFilter } from "./MessageManager/IMessageManagerFilter";
 
 //WebFaasError

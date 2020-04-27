@@ -108,7 +108,7 @@ describe("Module Manager - Import", () => {
         
         try {
             let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/syntaxerror", "0.0.1");
-            throw new Error("Sucess!");
+            throw new Error("Success!");
         }
         catch (errTry) {
             chai.expect(errTry.name).to.eq("CompileError");
@@ -117,7 +117,7 @@ describe("Module Manager - Import", () => {
         //force return in cache
         try {
             let responseObj2: any = await moduleManager1.getModuleManagerImport().import("@registry1/syntaxerror", "0.0.1");
-            throw new Error("Sucess!");
+            throw new Error("Success!");
         }
         catch (errTry) {
             chai.expect(errTry.name).to.eq("CompileError");
@@ -138,7 +138,7 @@ describe("Module Manager - Import", () => {
         
         try {
             let responseObj1: any = await moduleManager1.getModuleManagerImport().import("@registry1/internalRelativeDependencyNotFound", "0.0.1");
-            throw new Error("Sucess!");
+            throw new Error("Success!");
         }
         catch (errTry) {
             chai.expect(errTry.message).to.include("./file1");

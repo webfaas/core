@@ -114,4 +114,16 @@ describe("WebFaasError", () => {
         chai.expect(error1.message).to.eq("");
         chai.expect(error1.code).to.eq("CODE1");
     })
+
+    //
+    //ValidateError
+    //
+    it("ValidateError - complete - should return property", function(){
+        var error1 = new WebFaasError.ValidateError("001", "field1", "message1");
+
+        chai.expect(error1.name).to.eq("ValidateError");
+        chai.expect(error1.message).to.eq("message1");
+        chai.expect(error1.code).to.eq("001");
+        chai.expect(error1.field).to.eq("field1");
+    })
 })

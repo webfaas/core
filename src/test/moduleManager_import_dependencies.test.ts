@@ -33,7 +33,7 @@ describe("Module Manager - Import", () => {
             if (packageStore){
                 await moduleManager_simulate.getModuleManagerImport().importDependencies(packageStore);
             }
-            throw new Error("Sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.name).to.eq("NotFoundError");
@@ -50,7 +50,7 @@ describe("Module Manager - Import", () => {
                 throw new Error("internal error")
             }
             await moduleManager1.getModuleManagerImport().importDependencies(packageStore);
-            throw new Error("Sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.message).to.eq("internal error");
@@ -67,7 +67,7 @@ describe("Module Manager - Import", () => {
                 throw new Error("internal error")
             }
             await moduleManager1.getModuleManagerImport().importDependencies(packageStore);
-            throw new Error("Sucess");
+            throw new Error("Success");
         }
         catch (errTry) {
             chai.expect(errTry.message).to.eq("internal error");
@@ -104,7 +104,7 @@ describe("Module Manager - Import", () => {
         if (packageStore){
             try {
                 await moduleManager1.getModuleManagerImport().importDependencies(packageStore);
-                throw new Error("Sucess");
+                throw new Error("Success");
             }
             catch (errTry) {
                 chai.expect(errTry.message).to.eq("VERSION NOT FOUND");

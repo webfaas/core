@@ -7,6 +7,7 @@ import { ModuleManagerImport } from "../ModuleManager/ModuleManagerImport";
 import { IMessageManagerFilter } from "./IMessageManagerFilter";
 import { LogLevelEnum } from "../Core";
 import { LogCodeEnum } from "../Log/ILog";
+import { MessageUtil } from "../Util/MessageUtil";
 
 /**
  * manager Module
@@ -41,14 +42,7 @@ export class MessageManager {
     }
 
     parseVersion(version: string): string{
-        let versionArray: Array<string> = version.split(".");
-        if (versionArray.length === 1){
-            return version + ".*";
-        }
-        if (versionArray.length === 2){
-            return version + ".*";
-        }
-        return version;
+        return MessageUtil.parseVersion(version);
     }
 
     /**
@@ -64,57 +58,57 @@ export class MessageManager {
             
             //msg
             if (!msg){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("message required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("message required")));
                 return;
             }
             //msg.header
             if (!msg.header){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header required")));
                 return;
             }
             //msg.header.name
             if (typeof(msg.header.name) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.name type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.name type string required")));
                 return;
             }
             if (msg.header.name.length > 214){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.name max length 214")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.name max length 214")));
                 return;
             }
             //msg.header.version
             if (typeof(msg.header.version) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.version type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.version type string required")));
                 return;
             }
             if (msg.header.version.length > 256){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.version max length 256")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.version max length 256")));
                 return;
             }
             //msg.header.method
             if (typeof(msg.header.method) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.method type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.method type string required")));
                 return;
             }
             if (msg.header.method.length > 256){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.method max length 256")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.method max length 256")));
                 return;
             }
             //msg.header.messageID
             if (typeof(msg.header.messageID) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.messageID type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.messageID type string required")));
                 return;
             }
             if (msg.header.messageID.length > 1024){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.messageID max length 1024")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.messageID max length 1024")));
                 return;
             }
             //msg.header.registryName
             if (typeof(msg.header.registryName) !== "string" && typeof(msg.header.registryName) !== "undefined"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.registryName type not string")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.registryName type not string")));
                 return;
             }
             if (msg.header.registryName && msg.header.registryName.length > 1024){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOADINVALID, new TypeError("header.registryName max length 1024")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.registryName max length 1024")));
                 return;
             }
 
@@ -168,7 +162,7 @@ export class MessageManager {
                         else{
                             //method not found
                             this.log.write(LogLevelEnum.ERROR, "sendMessage", LogCodeEnum.PROCESS, "method not found", {header:msg.header}, __filename);
-                            reject(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.FUNCMETHOD, msg.header.method));
+                            reject(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.METHOD, msg.header.method));
                         }
                     }).catch((errPreFilter)=>{
                         //pre filter - error

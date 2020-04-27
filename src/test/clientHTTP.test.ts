@@ -75,7 +75,7 @@ describe("HTTP", () => {
 
                 try {
                     var resp: IClientHTTPResponse = await clientHTTP_destroy.request("http://localhost:" + serverPort + "/destroy");
-                    throw new Error("Sucess!");
+                    throw new Error("Success!");
                 }
                 catch (errTryDestroy) {
                     chai.expect(errTryDestroy.code).to.eq("ECONNRESET");
@@ -88,7 +88,7 @@ describe("HTTP", () => {
                         throw new Error("Crash");
                     }
                     var resp: IClientHTTPResponse = await clientHTTP_simulate_crash1.request("http://localhost:" + serverPort);
-                    throw new Error("Sucess!");
+                    throw new Error("Success!");
                 }
                 catch (errTryCrash) {
                     chai.expect(errTryCrash.message).to.eq("Crash");

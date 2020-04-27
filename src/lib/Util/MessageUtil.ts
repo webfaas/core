@@ -1,0 +1,336 @@
+import { IMessage } from "../MessageManager/IMessage";
+import { IMessageHeaders, IMessageHeadersHTTP, IMessageHeadersAuthorization } from "../MessageManager/IMessageHeaders";
+import { WebFaasError } from "../WebFaasError/WebFaasError";
+
+interface IModuleInfo{
+    name: string;
+    method: string;
+    version: string;
+    path: string;
+}
+
+export interface IMessageError{
+    code: number;
+    message: string;
+    detail: any;
+}
+
+export interface IJsonRpcResponse{
+    jsonrpc: string;
+    result: any;
+    error?: IMessageError;
+    id: string | number | null;
+}
+
+export interface IJsonRpcRequest{
+    jsonrpc?: string;
+    method: string;
+    params: any;
+    id: string | number | null;
+}
+
+export enum JsonRpcErrorTypeEnum{
+    PARSE_ERROR=-32700,
+    INVALID_REQUEST=-32600,
+    METHOD_NOT_FOUND=-32601,
+    INVALID_PARAMS=-32602,
+    INTERNAL_ERROR=-32603,
+    SERVER_ERROR=-32000
+}
+
+export class MessageUtil  {
+    private static parseModuleInfo(urlPath: string, urlBasePath: string): IModuleInfo | null{
+        let result = {} as IModuleInfo;
+        let nameAndMethod: string;
+        let version: string;
+        let lastIndexUsed = 0;
+
+        let context: string = MessageUtil.parseString(urlPath);
+        if (context.substring(0,1) === "/"){
+            context = context.substring(1);
+        }
+        if (urlBasePath){
+            if (urlBasePath.substring(0,1) !== "/"){
+                urlBasePath = "/" + urlBasePath;
+            }
+            context = context.substring(urlBasePath.length);
+        }
+
+        const pathArray = context.split("/");
+        if (pathArray.length === 1){
+            return null;
+        }
+
+        else if (pathArray.length === 2){
+            nameAndMethod = pathArray[0];
+            version = pathArray[1];
+            lastIndexUsed = 1;
+        }
+        else{
+            if (pathArray[0].substring(0,1) === "@"){
+                nameAndMethod = pathArray[0] + "/" + pathArray[1];
+                version = pathArray[2];
+                lastIndexUsed = 2;
+            }
+            else{
+                nameAndMethod = pathArray[0];
+                version = pathArray[1];
+                lastIndexUsed = 1;
+            }
+        }
+
+        let path: string = "";
+        for (let i = lastIndexUsed + 1; i < pathArray.length; i++){
+            path += "/" + pathArray[i];
+        }
+        
+        let nameAndMethodArray = nameAndMethod.split(":");
+        if (nameAndMethodArray.length > 1){
+            result.name = nameAndMethodArray[0];
+            result.method = nameAndMethodArray[1];
+        }
+        else{
+            result.name = nameAndMethodArray[0];
+            result.method = "";
+        }
+        result.version = version;
+        result.path = path;
+
+        return result;
+    };
+
+    private static parseAuthorizationHeader(value: any): IMessageHeadersAuthorization | undefined{
+        let result = {} as IMessageHeadersAuthorization;
+
+        if (value){
+            let authorizationArray = MessageUtil.parseString(value).split(" ");
+            if (authorizationArray.length === 2){
+                result.type = authorizationArray[0].toLowerCase();
+                result.token = authorizationArray[1];
+            }
+            else{
+                return undefined;
+            }
+        }
+        else{
+            return undefined;
+        }
+        
+        return result;
+    };
+
+    public static parseString(value: any): string{
+        if (typeof(value) === "string"){
+            return value;
+        }
+        else{
+            return "";
+        }
+    };
+
+    public static parseVersion(version: string): string{
+        let versionArray: Array<string> = version.split(".");
+        if (versionArray.length === 1){
+            return version + ".*";
+        }
+        if (versionArray.length === 2){
+            return version + ".*";
+        }
+        return version;
+    }
+
+    public static parseMessageByUrlPath(urlPath: string, urlBasePath: string, payload: any, http_method?: string, http_headers?: any): IMessage | null{
+        let msg = {} as IMessage;
+
+        let moduleInfo = MessageUtil.parseModuleInfo(urlPath, urlBasePath);
+
+        if (moduleInfo){
+            msg.header = {} as IMessageHeaders;
+            msg.header.name = moduleInfo.name;
+            msg.header.method = moduleInfo.method;
+            msg.header.version = MessageUtil.parseVersion(moduleInfo.version);
+            msg.header.messageID = "";
+
+            if (http_headers){
+                msg.header.messageID = MessageUtil.parseString(http_headers["X-Request-ID"]);
+                msg.header.authorization = MessageUtil.parseAuthorizationHeader(http_headers["Authorization"]);
+            }
+
+            msg.header.http = {} as IMessageHeadersHTTP;
+            msg.header.http.path = moduleInfo.path;
+            msg.header.http.method = http_method || "GET";
+            msg.header.http.headers = http_headers || null;
+    
+            msg.payload = payload;
+    
+            return msg;
+        }
+        else{
+            return null;
+        }
+    }
+
+    public static parseJsonRpcResponseError(typeError: JsonRpcErrorTypeEnum, message: string): IJsonRpcResponse{
+        let payloadJsonRpc = {} as IJsonRpcResponse;
+        payloadJsonRpc.jsonrpc = "2.0";
+        payloadJsonRpc.error = {} as IMessageError;
+        payloadJsonRpc.error.code = typeError;
+        payloadJsonRpc.error.message = message;
+        payloadJsonRpc.id = null;
+        return payloadJsonRpc;
+    }
+
+    public static parseJsonRpcResponseSuccess(payload: any, id: string | number): IJsonRpcResponse{
+        let payloadJsonRpc = {} as IJsonRpcResponse;
+        payloadJsonRpc.jsonrpc = "2.0";
+        payloadJsonRpc.result = payload;
+        payloadJsonRpc.id = id;
+        return payloadJsonRpc;
+    }
+
+    public static parseJsonRpcRequest(payload: any): IJsonRpcRequest{
+        let payloadObj: IJsonRpcRequest;
+
+        try {
+            payloadObj = JSON.parse(payload);
+        }
+        catch (errParse) {
+            throw new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, errParse.message);
+        }
+
+        if (typeof(payloadObj.method) !== "string"){
+            throw new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.METHOD, "The JSON sent is not a valid Request object.");
+        }
+
+        return payloadObj;
+    }
+
+    public static parseMessageByPayloadJsonRpc(payloadJsonRpc: any, http_urlPath?: string, http_method?: string, http_headers?: any): IMessage | null{
+        let msg = {} as IMessage;
+
+        if (payloadJsonRpc && payloadJsonRpc.method){
+            let moduleInfo = MessageUtil.parseModuleInfo(payloadJsonRpc.method, "");
+
+            if (moduleInfo){
+                msg.header = {} as IMessageHeaders;
+                msg.header.name = moduleInfo.name;
+                msg.header.method = moduleInfo.method;
+                msg.header.version = MessageUtil.parseVersion(moduleInfo.version);
+                msg.header.messageID = payloadJsonRpc.id || "";
+
+                if (http_headers){
+                    msg.header.authorization = MessageUtil.parseAuthorizationHeader(http_headers["Authorization"]);
+                }
+                if (http_urlPath){
+                    msg.header.http = {} as IMessageHeadersHTTP;
+                    msg.header.http.path = http_urlPath;
+                    msg.header.http.method = http_method || "GET";
+                    msg.header.http.headers = http_headers || null;
+                }
+        
+                msg.payload = payloadJsonRpc.params || null;
+        
+                return msg;
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            return null;
+        }
+    }
+
+    public static convertCodeErrorToHttp(errSend: Error): IMessageError{
+        let result = {} as IMessageError;
+        if (errSend instanceof WebFaasError.ClientHttpError){
+            let httpError: WebFaasError.ClientHttpError = errSend;
+            result.code = 502;
+        }
+        else if (errSend instanceof WebFaasError.CompileError){
+            let httpError: WebFaasError.CompileError = errSend;
+            result.code = 501;
+        }
+        else if (errSend instanceof WebFaasError.NotFoundError){
+            let httpError: WebFaasError.NotFoundError = errSend;
+            result.code = 404;
+        }
+        else if (errSend instanceof WebFaasError.ValidateError){
+            let httpError: WebFaasError.ValidateError = errSend;
+            result.code = 400;
+        }
+        else if (errSend instanceof WebFaasError.SecurityError){
+            let httpError: WebFaasError.SecurityError = errSend;
+            let statusCode: number = 400;
+
+            if (httpError.type === WebFaasError.SecurityErrorTypeEnum.MISSING_CREDENTIALS){
+                statusCode = 401;
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.FORBIDDEN){
+                statusCode = 403;
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.INVALID_CREDENTIALS){
+                statusCode = 401;
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID){
+                statusCode = 400;
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE){
+                statusCode = 413;
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.THROTTLED){
+                statusCode = 429;
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED){
+                statusCode = 400;
+            }
+
+            result.code = statusCode;
+        }
+        else{
+            result.code = 500;
+        }
+
+        result.message = errSend.name + " " + errSend.message;
+        result.detail = errSend;
+
+        return result;
+    }
+
+    public static convertCodeErrorToJsonRpc(errSend: Error): IMessageError{
+        let result = {} as IMessageError;
+        if (errSend instanceof WebFaasError.ClientHttpError){
+            let httpError: WebFaasError.ClientHttpError = errSend;
+            result.code = -32600; //Invalid Request
+        }
+        else if (errSend instanceof WebFaasError.NotFoundError){
+            let httpError: WebFaasError.NotFoundError = errSend;
+            result.code = -32601; //Method not found
+        }
+        else if (errSend instanceof WebFaasError.ValidateError){
+            let httpError: WebFaasError.ValidateError = errSend;
+            result.code = -32600; //Invalid Request
+        }
+        else if (errSend instanceof WebFaasError.SecurityError){
+            let httpError: WebFaasError.SecurityError = errSend;
+            let statusCode: number = -32000; //Server error
+
+            if (httpError.type === WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID){
+                statusCode = -32600; //Invalid Request
+            }
+            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE){
+                statusCode = -32600; //Invalid Request
+            }
+            
+            result.code = statusCode;
+        }
+        else{
+            result.code = -32000; //Server error
+        }
+
+        result.message = errSend.name + " " + errSend.message;
+        result.detail = errSend;
+
+        return result;
+    }
+}

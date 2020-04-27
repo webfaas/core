@@ -106,7 +106,7 @@ describe("Package Registry Manager - Mock", () => {
 
     it("should return package item on call - loadDefaultRegistries - direct registry REGISTRYERR", function(done){
         packageRegistryManager_default.getPackageStore("@registryerr/simpletext", "0.0.1", undefined, "REGISTRYERR").then(function(packageStore){
-            throw new Error("sucess!");
+            throw new Error("Success!");
         }).catch(function(error){
             try {
                 chai.expect(error.message).to.eq("getPackage not implemented.");
