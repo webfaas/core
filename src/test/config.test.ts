@@ -15,12 +15,13 @@ process.env.VAR1 = "1";
 process.env.VAR2 = "2";
 
 describe("Config - Custom Config", () => {
-    var configData: any = {};
+    let configData: any = {};
     configData.attribute1 = "value1";
     configData.attribute2 = "value2";
     configData.attribute3 = null;
     configData.attribute4 = undefined;
-    var config = new Config(configData, log);
+    let config = new Config(log);
+    config.read(configData);
     
     it("should return response on call", () => {
         chai.expect(config.get("attribute1")).to.eq("value1");
@@ -30,11 +31,22 @@ describe("Config - Custom Config", () => {
     })
 })
 
+describe("Config - Empty", () => {
+    let config = new Config(log);
+    config.read(null);
+    
+    it("should return response on call", () => {
+        chai.expect(config.get("attribute1")).to.null;
+        chai.expect(config.get("attribute2")).to.null;
+    })
+})
+
 describe("Config - NotFound", () => {
     let tempFolder = path.join(os.tmpdir(), "webfaas-core-config-notfound-" + new Date().getTime());
     
     it("should return response on call", () => {
-        chai.expect(new Config(path.join(tempFolder, "file1"), log)).to.not.throw;
+        let config = new Config(log);
+        chai.expect(config.read(path.join(tempFolder, "file1"))).to.not.throw;
     })
 })
 
@@ -44,12 +56,14 @@ describe("Config - Denied", () => {
     fs.chmodSync(tempFolder, "000");
 
     it("should return response on call", () => {
-        chai.expect(new Config(path.join(tempFolder, "file1"), log)).to.not.throw;
+        let config = new Config(log);
+        chai.expect(config.read(path.join(tempFolder, "file1"))).to.not.throw;
     })
 })
 
 describe("Config - Default Config", () => {
-    var config = new Config(path.join(__dirname, "./data/data-config/default.json"), log);
+    let config = new Config(log);
+    config.read(path.join(__dirname, "./data/data-config/default.json"));
     
     it("should return response on call", () => {
         chai.expect(config.get("core.log.level")).to.eq("INFO");
@@ -64,13 +78,14 @@ describe("Config - Default Config", () => {
 })
 
 describe("Config - Declared Config", () => {
-    var config2 = new Config(path.join(__dirname, "./data/data-config", "config2.json"), log);
+    let config = new Config(log);
+    config.read(path.join(__dirname, "./data/data-config", "config2.json"));
     
     it("should return response on call", () => {
-        chai.expect(config2.get("core.log.level")).to.eq("INFO");
-        chai.expect(config2.get("core.cache.blackListLocalModules")).to.eql(["functions-io-core", "functions-io"]);
-        chai.expect(config2.get("env2.var1")).to.eq("1");
-        chai.expect(config2.get("env2.var2")).to.eq("2");
-        chai.expect(config2.get("env2.varmultiple")).to.eq("TEST 1 TEST 1 TEST 2 TEST 2 TEST 3");
+        chai.expect(config.get("core.log.level")).to.eq("INFO");
+        chai.expect(config.get("core.cache.blackListLocalModules")).to.eql(["functions-io-core", "functions-io"]);
+        chai.expect(config.get("env2.var1")).to.eq("1");
+        chai.expect(config.get("env2.var2")).to.eq("2");
+        chai.expect(config.get("env2.varmultiple")).to.eq("TEST 1 TEST 1 TEST 2 TEST 2 TEST 3");
     })
 })

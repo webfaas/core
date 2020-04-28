@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
 
@@ -16,12 +15,10 @@ export class Config {
      * 
      * @param fileOrObject file string or object
      */
-    constructor(fileOrObject?: any, log?: Log) {
+    constructor(log?: Log) {
         this.originalConfigObj = null;
         this.configByKey = {};
         this.log = log || new Log();
-
-        this.open(fileOrObject);
     }
 
     /**
@@ -100,10 +97,12 @@ export class Config {
     }
 
     /**
-     * Open config from file or object
+     * Read config from file or object
      * @param fileOrObject file string or object
      */
-    private open(fileOrObject: any): void {
+    read(fileOrObject: any): void {
+        this.originalConfigObj = null; //clean
+
         if (fileOrObject){
             if (typeof(fileOrObject) === "object"){
                 this.originalConfigObj = fileOrObject;
@@ -111,28 +110,21 @@ export class Config {
             else{
                 let filePath:string = fileOrObject;
                 try {
-                    let stats: fs.Stats = fs.statSync(filePath);
-    
                     this.originalConfigObj = require(filePath);
-    
-                    this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.OPENFILE.toString(), "config file [" + filePath + "] loaded", null, __filename);
+                    this.log.write(LogLevelEnum.INFO, "read", LogCodeEnum.OPENFILE.toString(), "config file [" + filePath + "] loaded", null, __filename);
                 }
                 catch (errTry) {
-                    if (errTry.code === "ENOENT"){
-                        this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.OPENFILE.toString(), "config file not found [" + filePath + "]", null, __filename);
-                    }
-                    else{
-                        this.log.writeError("open", errTry, null, __filename);
-                    }
+                    this.log.writeError("read", errTry, {file:filePath}, __filename);
                 }
             }
     
             if (this.originalConfigObj){
+                this.configByKey = {}; //clean
                 this.processConfig(this.originalConfigObj, null);
-                this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.PROCESS.toString(), "config object processed", null, __filename);
+                this.log.write(LogLevelEnum.DEBUG, "read", LogCodeEnum.PROCESS.toString(), "config object processed", null, __filename);
             }
             else{
-                this.log.write(LogLevelEnum.DEBUG, "open", LogCodeEnum.PROCESS.toString(), "config object not processed", null, __filename);
+                this.log.write(LogLevelEnum.DEBUG, "read", LogCodeEnum.PROCESS.toString(), "config object not processed", null, __filename);
             }
         }
     }
