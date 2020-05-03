@@ -8,7 +8,7 @@ import { ModuleManagerCompile } from "./ModuleManagerCompile";
 import { ModuleManagerImport } from "./ModuleManagerImport";
 import { ModuleManagerConvert } from "./ModuleManagerConvert";
 import { ICodeBufferResponseFromPackageStoreCacheSync } from "./ICodeBufferResponseFromPackageStoreCacheSync";
-import { EventEmitter } from "events";
+import { EventManager, EventManagerEnum } from "../Event/EventManager";
 
 const moduleManagerConvert = new ModuleManagerConvert();
 
@@ -20,7 +20,6 @@ export class ModuleManager {
     private moduleManagerCompile: ModuleManagerCompile;
     private moduleManagerCache: ModuleManagerCache;
     private moduleManagerImport: ModuleManagerImport;
-    private event: EventEmitter = new EventEmitter();
     
     constructor(packageStoreManager?: PackageStoreManager, log?: Log){
         this.log = log || new Log();
@@ -29,7 +28,7 @@ export class ModuleManager {
         this.moduleManagerImport = new ModuleManagerImport(this, this.log, packageStoreManager);
 
         this.onProcessModuleCompiledToCache = this.onProcessModuleCompiledToCache.bind(this);
-        this.event.addListener("processModuleCompiledToCache", this.onProcessModuleCompiledToCache);
+        EventManager.addListener(EventManagerEnum.PROCESS_MODULE_COMPILED_TO_CACHE, this.onProcessModuleCompiledToCache);
     }
 
     /**
@@ -82,7 +81,7 @@ export class ModuleManager {
             if (codeBufferFromPackageStoreCacheSync){
                 moduleCompiledObj = this.moduleManagerCompile.compilePackageStoreItemBufferSync(codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse, moduleManagerRequireContextData, codeBufferFromPackageStoreCacheSync.moduleCompileManifestData);
 
-                this.event.emit("processModuleCompiledToCache", packageInfoTarget, codeBufferFromPackageStoreCacheSync, moduleCompiledObj);
+                EventManager.emit(EventManagerEnum.PROCESS_MODULE_COMPILED_TO_CACHE, packageInfoTarget, codeBufferFromPackageStoreCacheSync, moduleCompiledObj);
 
                 return moduleCompiledObj;
             }
@@ -124,7 +123,7 @@ export class ModuleManager {
                 //compile
                 if (codeBufferFromPackageStoreCacheSync){
                     this.moduleManagerCompile.compilePackageStoreItemBufferAsync(codeBufferFromPackageStoreCacheSync.packageStoreItemBufferResponse, moduleManagerRequireContextData, codeBufferFromPackageStoreCacheSync.moduleCompileManifestData).then((moduleCompiledObj)=>{
-                        this.event.emit("processModuleCompiledToCache", packageInfoTarget, codeBufferFromPackageStoreCacheSync, moduleCompiledObj);
+                        EventManager.emit(EventManagerEnum.PROCESS_MODULE_COMPILED_TO_CACHE, packageInfoTarget, codeBufferFromPackageStoreCacheSync, moduleCompiledObj);
 
                         resolve(moduleCompiledObj);
                     }).catch((errCompile) => {

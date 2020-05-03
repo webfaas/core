@@ -180,3 +180,6 @@ export { IMessageManagerFilter } from "./MessageManager/IMessageManagerFilter";
 
 //WebFaasError
 export { WebFaasError } from "./WebFaasError/WebFaasError";
+
+//EventManager
+export { EventManager, EventManagerEnum  } from "./Event/EventManager";

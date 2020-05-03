@@ -1,11 +1,21 @@
 import * as chai from "chai";
-import { MessageUtil, JsonRpcErrorTypeEnum, IJsonRpcResponse } from "../lib/Util/MessageUtil";
+import { MessageUtil, JsonRpcErrorTypeEnum, IJsonRpcResponse, IJsonRpcRequest } from "../lib/Util/MessageUtil";
 import { WebFaasError } from "../lib/WebFaasError/WebFaasError";
 
 describe("MessageUtil - jsonRpc", () => {
-    it("parseJsonRpcRequest - PARSE_ERROR", function(){
+    it("parseJsonRpcRequest - PARSE_ERROR - PAYLOAD_INVALID", function(){
         try {
             let msg = MessageUtil.parseJsonRpcRequest("{");
+            throw new Error("Success");
+        }
+        catch (errTry) {
+            chai.expect(errTry.type).to.eq("PAYLOAD_INVALID");
+        }
+    })
+
+    it("parseJsonRpcRequest - PARSE_ERROR - payload null - PAYLOAD_INVALID", function(){
+        try {
+            let msg = MessageUtil.parseJsonRpcRequest(null);
             throw new Error("Success");
         }
         catch (errTry) {
@@ -44,17 +54,17 @@ describe("MessageUtil - jsonRpc", () => {
     })
 
     it("parseMessageByPayloadJsonRpc - {}", function(){
-        let msg = MessageUtil.parseMessageByPayloadJsonRpc({})
+        let msg = MessageUtil.parseMessageByPayloadJsonRpc({} as IJsonRpcRequest)
         chai.expect(msg).to.null;
     })
 
     it("parseMessageByPayloadJsonRpc - {method:method1}", function(){
-        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"method1"});
+        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"method1"} as IJsonRpcRequest);
         chai.expect(msg).to.null;
     })
 
     it("parseMessageByPayloadJsonRpc - module1/version1", function(){
-        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"module1/version1", id:"001"})
+        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"module1/version1", id:"001"} as IJsonRpcRequest)
         let header = msg?.header;
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
@@ -67,7 +77,7 @@ describe("MessageUtil - jsonRpc", () => {
     })
 
     it("parseMessageByPayloadJsonRpc - /path1", function(){
-        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"module1/version1"}, "/path1")
+        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"module1/version1"} as IJsonRpcRequest, "/path1")
         let header = msg?.header;
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
@@ -84,7 +94,7 @@ describe("MessageUtil - jsonRpc", () => {
     })
 
     it("parseMessageByPayloadJsonRpc - /path1 POST Bearer AAA", function(){
-        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"module1/version1", id:"001"}, "/path1", "POST", {"Authorization": "Bearer AAA"})
+        let msg = MessageUtil.parseMessageByPayloadJsonRpc({method:"module1/version1", id:"001"} as IJsonRpcRequest, "/path1", "POST", {"Authorization": "Bearer AAA"})
         let header = msg?.header;
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");

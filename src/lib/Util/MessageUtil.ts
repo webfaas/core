@@ -170,11 +170,11 @@ export class MessageUtil  {
         }
     }
 
-    public static parseJsonRpcResponseError(typeError: JsonRpcErrorTypeEnum, message: string): IJsonRpcResponse{
+    public static parseJsonRpcResponseError(typeErrorOrCode: JsonRpcErrorTypeEnum | number, message: string): IJsonRpcResponse{
         let payloadJsonRpc = {} as IJsonRpcResponse;
         payloadJsonRpc.jsonrpc = "2.0";
         payloadJsonRpc.error = {} as IMessageError;
-        payloadJsonRpc.error.code = typeError;
+        payloadJsonRpc.error.code = typeErrorOrCode;
         payloadJsonRpc.error.message = message;
         payloadJsonRpc.id = null;
         return payloadJsonRpc;
@@ -191,8 +191,12 @@ export class MessageUtil  {
     public static parseJsonRpcRequest(payload: any): IJsonRpcRequest{
         let payloadObj: IJsonRpcRequest;
 
+        if (!payload){
+            throw new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "payload required");
+        }
+
         try {
-            payloadObj = JSON.parse(payload);
+            payloadObj = JSON.parse(payload.toString());
         }
         catch (errParse) {
             throw new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, errParse.message);
@@ -205,18 +209,18 @@ export class MessageUtil  {
         return payloadObj;
     }
 
-    public static parseMessageByPayloadJsonRpc(payloadJsonRpc: any, http_urlPath?: string, http_method?: string, http_headers?: any): IMessage | null{
+    public static parseMessageByPayloadJsonRpc(payloadJsonRpcRequest: IJsonRpcRequest, http_urlPath?: string, http_method?: string, http_headers?: any): IMessage | null{
         let msg = {} as IMessage;
 
-        if (payloadJsonRpc && payloadJsonRpc.method){
-            let moduleInfo = MessageUtil.parseModuleInfo(payloadJsonRpc.method, "");
+        if (payloadJsonRpcRequest && payloadJsonRpcRequest.method){
+            let moduleInfo = MessageUtil.parseModuleInfo(payloadJsonRpcRequest.method, "");
 
             if (moduleInfo){
                 msg.header = {} as IMessageHeaders;
                 msg.header.name = moduleInfo.name;
                 msg.header.method = moduleInfo.method;
                 msg.header.version = MessageUtil.parseVersion(moduleInfo.version);
-                msg.header.messageID = payloadJsonRpc.id || "";
+                msg.header.messageID = (payloadJsonRpcRequest.id || "").toString();
 
                 if (http_headers){
                     msg.header.authorization = MessageUtil.parseAuthorizationHeader(http_headers["Authorization"]);
@@ -228,7 +232,7 @@ export class MessageUtil  {
                     msg.header.http.headers = http_headers || null;
                 }
         
-                msg.payload = payloadJsonRpc.params || null;
+                msg.payload = payloadJsonRpcRequest.params || null;
         
                 return msg;
             }

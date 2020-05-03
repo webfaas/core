@@ -11,6 +11,8 @@ export interface IMessageHeadersHTTP{
     path: string;
     method: string;
     headers: any;
+    statusCode?: number;
+    contentType?: string;
 }
 
 export interface IMessageHeadersIdentity{
