@@ -26,14 +26,15 @@ export namespace WebFaasError{
     //ClientHttpError
     //
     export class ClientHttpError extends Error {
-        code: string;
+        code?: string;
         url: string;
         method: string;
     
-        constructor(err: any, url: string, method?: string) {
-            super(err.message || "");
+        constructor(err: Error, url: string, method?: string) {
+            super(err.message);
+            let genericErr: any = err;
             this.name = "ClientHttpError";
-            this.code = err.code || "";
+            this.code = genericErr.code;
             this.stack = err.stack;
             this.url = url;
             this.method = method || "GET";
@@ -44,12 +45,12 @@ export namespace WebFaasError{
     //CompileError
     //
     export class CompileError extends Error {
-        code: string;
-        
-        constructor(err: any) {
-            super(err.message || "");
+        code?: string;
+        constructor(err: Error) {
+            super(err.message);
+            let genericErr: any = err;
             this.name = "CompileError";
-            this.code = err.code || "";
+            this.code = genericErr.code;
             this.stack = err.stack;
         }
     }
@@ -58,12 +59,12 @@ export namespace WebFaasError{
     //FileError
     //
     export class FileError extends Error {
-        code: string;
-        
-        constructor(err: any) {
-            super(err.message || "");
+        code?: string;
+        constructor(err: Error) {
+            super(err.message);
+            let genericErr: any = err;
             this.name = "FileError";
-            this.code = err.code || "";
+            this.code = genericErr.code;
             this.stack = err.stack;
         }
     }
@@ -72,12 +73,12 @@ export namespace WebFaasError{
     //InvokeError
     //
     export class InvokeError extends Error {
-        code: string;
-        
-        constructor(err: any) {
-            super(err.message || "");
+        code?: string;
+        constructor(err: Error) {
+            super(err.message);
+            let genericErr: any = err;
             this.name = "InvokeError";
-            this.code = err.code || "";
+            this.code = genericErr.code;
             this.stack = err.stack;
         }
     }
@@ -96,15 +97,12 @@ export namespace WebFaasError{
     }
 
     export class SecurityError extends Error {
-        code: string;
         type:SecurityErrorTypeEnum;
         
-        constructor(type:SecurityErrorTypeEnum, err: any) {
-            super(err.message || "");
+        constructor(type:SecurityErrorTypeEnum, message: string) {
+            super(message);
             this.name = "SecurityError";
             this.type = type;
-            this.code = err.code || "";
-            this.stack = err.stack;
         }
     }
 

@@ -269,7 +269,7 @@ describe("MessageUtil - UrlPath", () => {
     //
 
     it("convertCodeErrorToHttp - ClientHttpError", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.ClientHttpError("err1", "url1", "method1"));
+        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"));
         chai.expect(msg).to.not.null;
         chai.expect(msg.code).to.eq(502);
     })
@@ -281,7 +281,7 @@ describe("MessageUtil - UrlPath", () => {
     })
 
     it("convertCodeErrorToHttp - CompileError", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.CompileError("err1"));
+        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.CompileError(new Error("err1")));
         chai.expect(msg).to.not.null;
         chai.expect(msg.code).to.eq(501);
     })

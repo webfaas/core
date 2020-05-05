@@ -46,11 +46,22 @@ describe("MessageUtil - jsonRpc", () => {
         chai.expect(msg.result).to.eq("AA");
     })
 
-    it("parseJsonRpcResponseError", function(){
-        let msg = MessageUtil.parseJsonRpcResponseError(JsonRpcErrorTypeEnum.PARSE_ERROR, "message1");
+    it("parseJsonRpcResponseError - Error", function(){
+        let msg = MessageUtil.parseJsonRpcResponseError(JsonRpcErrorTypeEnum.PARSE_ERROR, new Error("message1"));
         chai.expect(msg.error).to.not.null;
         chai.expect(msg.error?.code).to.eq(JsonRpcErrorTypeEnum.PARSE_ERROR);
         chai.expect(msg.error?.message).to.eq("message1");
+        chai.expect(msg.error?.detail.name).to.eq("Error");
+    })
+
+    it("parseJsonRpcResponseError - WebFaasError.ClientHttpError", function(){
+        let msg = MessageUtil.parseJsonRpcResponseError(JsonRpcErrorTypeEnum.PARSE_ERROR, new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"));
+        chai.expect(msg.error).to.not.null;
+        chai.expect(msg.error?.code).to.eq(JsonRpcErrorTypeEnum.PARSE_ERROR);
+        chai.expect(msg.error?.message).to.eq("err1");
+        chai.expect(msg.error?.detail.name).to.eq("ClientHttpError");
+        chai.expect(msg.error?.detail.method).to.eq("method1");
+        chai.expect(msg.error?.detail.url).to.eq("url1");
     })
 
     it("parseMessageByPayloadJsonRpc - {}", function(){
@@ -118,7 +129,7 @@ describe("MessageUtil - jsonRpc", () => {
     //
 
     it("convertCodeErrorToJsonRpc - ClientHttpError", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.ClientHttpError("err1", "url1", "method1"));
+        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"));
         chai.expect(msg).to.not.null;
         chai.expect(msg.code).to.eq(-32600);
     })
@@ -130,7 +141,7 @@ describe("MessageUtil - jsonRpc", () => {
     })
 
     it("convertCodeErrorToJsonRpc - CompileError", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.CompileError("err1"));
+        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.CompileError(new Error("err1")));
         chai.expect(msg).to.not.null;
         chai.expect(msg.code).to.eq(-32000);
     })

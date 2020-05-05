@@ -9,10 +9,15 @@ interface IModuleInfo{
     path: string;
 }
 
+export interface IMessageErrorDetail{
+    name: string;
+    [header: string]: any;
+}
+
 export interface IMessageError{
     code: number;
     message: string;
-    detail: any;
+    detail: IMessageErrorDetail;
 }
 
 export interface IJsonRpcResponse{
@@ -170,12 +175,16 @@ export class MessageUtil  {
         }
     }
 
-    public static parseJsonRpcResponseError(typeErrorOrCode: JsonRpcErrorTypeEnum | number, message: string): IJsonRpcResponse{
+    public static parseJsonRpcResponseError(typeErrorOrCode: JsonRpcErrorTypeEnum | number, err: Error): IJsonRpcResponse{
         let payloadJsonRpc = {} as IJsonRpcResponse;
         payloadJsonRpc.jsonrpc = "2.0";
         payloadJsonRpc.error = {} as IMessageError;
         payloadJsonRpc.error.code = typeErrorOrCode;
-        payloadJsonRpc.error.message = message;
+        payloadJsonRpc.error.message = err.message;
+        payloadJsonRpc.error.detail = Object.assign({}, err);
+        if (!payloadJsonRpc.error.detail.name){
+            payloadJsonRpc.error.detail.name = err.name;
+        }
         payloadJsonRpc.id = null;
         return payloadJsonRpc;
     }

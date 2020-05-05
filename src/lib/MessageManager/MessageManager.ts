@@ -58,57 +58,57 @@ export class MessageManager {
             
             //msg
             if (!msg){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("message required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "message required"));
                 return;
             }
             //msg.header
             if (!msg.header){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header required"));
                 return;
             }
             //msg.header.name
             if (typeof(msg.header.name) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.name type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.name type string required"));
                 return;
             }
             if (msg.header.name.length > 214){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.name max length 214")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.name max length 214"));
                 return;
             }
             //msg.header.version
             if (typeof(msg.header.version) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.version type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.version type string required"));
                 return;
             }
             if (msg.header.version.length > 256){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.version max length 256")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.version max length 256"));
                 return;
             }
             //msg.header.method
             if (typeof(msg.header.method) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.method type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.method type string required"));
                 return;
             }
             if (msg.header.method.length > 256){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.method max length 256")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.method max length 256"));
                 return;
             }
             //msg.header.messageID
             if (typeof(msg.header.messageID) !== "string"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.messageID type string required")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.messageID type string required"));
                 return;
             }
             if (msg.header.messageID.length > 1024){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.messageID max length 1024")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.messageID max length 1024"));
                 return;
             }
             //msg.header.registryName
             if (typeof(msg.header.registryName) !== "string" && typeof(msg.header.registryName) !== "undefined"){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.registryName type not string")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.registryName type not string"));
                 return;
             }
             if (msg.header.registryName && msg.header.registryName.length > 1024){
-                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, new TypeError("header.registryName max length 1024")));
+                reject(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "header.registryName max length 1024"));
                 return;
             }
 

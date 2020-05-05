@@ -23,22 +23,16 @@ describe("WebFaasError", () => {
 
         chai.expect(error1.name).to.eq("ClientHttpError");
         chai.expect(error1.message).to.eq("message1");
-        chai.expect(error1.code).to.eq("");
         chai.expect(error1.url).to.eq("url1");
         chai.expect(error1.method).to.eq("GET");
     })
 
     it("ClientHttpError - icomplete - should return property", function(){
-        var error1 = new WebFaasError.ClientHttpError({code:"CODE1"}, "url1", "GET");
+        var error1 = new WebFaasError.ClientHttpError(new Error(), "url1");
         chai.expect(error1.name).to.eq("ClientHttpError");
         chai.expect(error1.message).to.eq("");
-        chai.expect(error1.code).to.eq("CODE1");
         chai.expect(error1.url).to.eq("url1");
         chai.expect(error1.method).to.eq("GET");
-
-        var error2 = new WebFaasError.ClientHttpError({}, "url1");
-        chai.expect(error2.method).to.eq("GET");
-        chai.expect(error2.code).to.eq("");
     })
 
     //
@@ -49,14 +43,6 @@ describe("WebFaasError", () => {
 
         chai.expect(error1.name).to.eq("CompileError");
         chai.expect(error1.message).to.eq("message1");
-        chai.expect(error1.code).to.eq("");
-    })
-
-    it("CompileError - icomplete - should return property", function(){
-        var error1 = new WebFaasError.CompileError({code:"CODE1"});
-        chai.expect(error1.name).to.eq("CompileError");
-        chai.expect(error1.message).to.eq("");
-        chai.expect(error1.code).to.eq("CODE1");
     })
 
     //
@@ -67,14 +53,6 @@ describe("WebFaasError", () => {
 
         chai.expect(error1.name).to.eq("FileError");
         chai.expect(error1.message).to.eq("message1");
-        chai.expect(error1.code).to.eq("");
-    })
-
-    it("FileError - icomplete - should return property", function(){
-        var error1 = new WebFaasError.FileError({code:"CODE1"});
-        chai.expect(error1.name).to.eq("FileError");
-        chai.expect(error1.message).to.eq("");
-        chai.expect(error1.code).to.eq("CODE1");
     })
 
     //
@@ -85,34 +63,17 @@ describe("WebFaasError", () => {
 
         chai.expect(error1.name).to.eq("InvokeError");
         chai.expect(error1.message).to.eq("message1");
-        chai.expect(error1.code).to.eq("");
-    })
-
-    it("InvokeError - icomplete - should return property", function(){
-        var error1 = new WebFaasError.InvokeError({code:"CODE1"});
-        chai.expect(error1.name).to.eq("InvokeError");
-        chai.expect(error1.message).to.eq("");
-        chai.expect(error1.code).to.eq("CODE1");
     })
 
     //
     //SecurityError
     //
     it("SecurityError - complete - should return property", function(){
-        var error1 = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, new Error("message1"));
+        var error1 = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "message1");
 
         chai.expect(error1.name).to.eq("SecurityError");
         chai.expect(error1.type).to.eq(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED);
         chai.expect(error1.message).to.eq("message1");
-        chai.expect(error1.code).to.eq("");
-    })
-
-    it("SecurityError - icomplete - should return property", function(){
-        var error1 = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, {code:"CODE1"});
-        chai.expect(error1.name).to.eq("SecurityError");
-        chai.expect(error1.type).to.eq(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED);
-        chai.expect(error1.message).to.eq("");
-        chai.expect(error1.code).to.eq("CODE1");
     })
 
     //

@@ -116,6 +116,7 @@ describe("HTTP", () => {
                 clientHTTP2.destroy();
             }
             catch (errTry) {
+                console.log("Err HTTP test", errTry.message);
                 chai.expect(errTry).to.null;
             }
             finally{
@@ -191,6 +192,7 @@ describe("HTTPS IGNORE", () => {
                 clientHTTP2.destroy();
             }
             catch (errTry) {
+                console.log("Err HTTPS test", errTry.message);
                 chai.expect(errTry).to.null;
             }
             finally{
