@@ -265,86 +265,60 @@ describe("MessageUtil - UrlPath", () => {
     })
 
     //
-    //convertCodeErrorToHttp
+    //convertErrorToCodeHttp
     //
 
-    it("convertCodeErrorToHttp - ClientHttpError", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(502);
+    it("convertErrorToCodeHttp - ClientHttpError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"))).to.eq(502);
     })
 
-    it("convertCodeErrorToHttp - ValidateError", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.ValidateError("001", "field1", "message1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(400);
+    it("convertErrorToCodeHttp - ValidateError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.ValidateError("001", "field1", "message1"))).to.eq(400);
     })
 
-    it("convertCodeErrorToHttp - CompileError", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.CompileError(new Error("err1")));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(501);
+    it("convertErrorToCodeHttp - CompileError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.CompileError(new Error("err1")))).to.eq(501);
     })
 
-    it("convertCodeErrorToHttp - NotFoundError", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.MANIFEST, "file1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(404);
+    it("convertErrorToCodeHttp - NotFoundError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.MANIFEST, "file1"))).to.eq(404);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - MISSING_CREDENTIALS", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.MISSING_CREDENTIALS, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(401);
+    it("convertErrorToCodeHttp - SecurityError - MISSING_CREDENTIALS", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.MISSING_CREDENTIALS, "err1"))).to.eq(401);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - FORBIDDEN", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.FORBIDDEN, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(403);
+    it("convertErrorToCodeHttp - SecurityError - FORBIDDEN", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.FORBIDDEN, "err1"))).to.eq(403);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - INVALID_CREDENTIALS", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.INVALID_CREDENTIALS, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(401);
+    it("convertErrorToCodeHttp - SecurityError - INVALID_CREDENTIALS", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.INVALID_CREDENTIALS, "err1"))).to.eq(401);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - PAYLOAD_INVALID", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(400);
+    it("convertErrorToCodeHttp - SecurityError - PAYLOAD_INVALID", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "err1"))).to.eq(400);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - PAYLOAD_LARGE", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(413);
+    it("convertErrorToCodeHttp - SecurityError - PAYLOAD_LARGE", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE, "err1"))).to.eq(413);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - THROTTLED", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.THROTTLED, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(429);
+    it("convertErrorToCodeHttp - SecurityError - THROTTLED", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.THROTTLED, "err1"))).to.eq(429);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - UNCLASSIFIED", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(400);
+    it("convertErrorToCodeHttp - SecurityError - UNCLASSIFIED", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "err1"))).to.eq(400);
     })
 
-    it("convertCodeErrorToHttp - SecurityError - NOT MAPPED", function(){
+    it("convertErrorToCodeHttp - SecurityError - NOT MAPPED", function(){
         let securityError:any = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "err1");
         securityError.type = -1000;
-        let msg = MessageUtil.convertCodeErrorToHttp(securityError);
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(400);
+        chai.expect(MessageUtil.convertErrorToCodeHttp(securityError)).to.eq(400);
     })
 
-    it("convertCodeErrorToHttp - Internal Server Error", function(){
-        let msg = MessageUtil.convertCodeErrorToHttp(new Error("err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(500);
+    it("convertErrorToCodeHttp - Internal Server Error", function(){
+        chai.expect(MessageUtil.convertErrorToCodeHttp(new Error("err1"))).to.eq(500);
     })
 })

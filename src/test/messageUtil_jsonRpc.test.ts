@@ -125,86 +125,60 @@ describe("MessageUtil - jsonRpc", () => {
     })
 
     //
-    //convertCodeErrorToJsonRpc
+    //convertErrorToCodeJsonRpc
     //
 
-    it("convertCodeErrorToJsonRpc - ClientHttpError", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32600);
+    it("convertErrorToCodeJsonRpc - ClientHttpError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.ClientHttpError(new Error("err1"), "url1", "method1"))).to.eq(-32600);
     })
 
     it("convertCodeErrorToHttp - ValidateError", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.ValidateError("001", "field1", "message1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32600);
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.ValidateError("001", "field1", "message1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - CompileError", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.CompileError(new Error("err1")));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - CompileError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.CompileError(new Error("err1")))).to.eq(-32000);
     })
 
-    it("convertCodeErrorToJsonRpc - NotFoundError", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.MANIFEST, "file1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32601);
+    it("convertErrorToCodeJsonRpc - NotFoundError", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.NotFoundError(WebFaasError.NotFoundErrorTypeEnum.MANIFEST, "file1"))).to.eq(-32601);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - MISSING_CREDENTIALS", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.MISSING_CREDENTIALS, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - SecurityError - MISSING_CREDENTIALS", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.MISSING_CREDENTIALS, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - FORBIDDEN", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.FORBIDDEN, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - SecurityError - FORBIDDEN", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.FORBIDDEN, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - INVALID_CREDENTIALS", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.INVALID_CREDENTIALS, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - SecurityError - INVALID_CREDENTIALS", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.INVALID_CREDENTIALS, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - PAYLOAD_INVALID", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32600);
+    it("convertErrorToCodeJsonRpc - SecurityError - PAYLOAD_INVALID", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - PAYLOAD_LARGE", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32600);
+    it("convertErrorToCodeJsonRpc - SecurityError - PAYLOAD_LARGE", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - THROTTLED", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.THROTTLED, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - SecurityError - THROTTLED", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.THROTTLED, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - UNCLASSIFIED", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - SecurityError - UNCLASSIFIED", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "err1"))).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - SecurityError - NOT MAPPED", function(){
+    it("convertErrorToCodeJsonRpc - SecurityError - NOT MAPPED", function(){
         let securityError:any = new WebFaasError.SecurityError(WebFaasError.SecurityErrorTypeEnum.UNCLASSIFIED, "err1");
         securityError.type = -1000;
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(securityError);
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(securityError)).to.eq(-32600);
     })
 
-    it("convertCodeErrorToJsonRpc - Internal Server Error", function(){
-        let msg = MessageUtil.convertCodeErrorToJsonRpc(new Error("err1"));
-        chai.expect(msg).to.not.null;
-        chai.expect(msg.code).to.eq(-32000);
+    it("convertErrorToCodeJsonRpc - Internal Server Error", function(){
+        chai.expect(MessageUtil.convertErrorToCodeJsonRpc(new Error("err1"))).to.eq(-32000);
     })
 })

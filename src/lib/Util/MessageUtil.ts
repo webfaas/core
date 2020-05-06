@@ -254,23 +254,18 @@ export class MessageUtil  {
         }
     }
 
-    public static convertCodeErrorToHttp(errSend: Error): IMessageError{
-        let result = {} as IMessageError;
+    public static convertErrorToCodeHttp(errSend: Error): number{
         if (errSend instanceof WebFaasError.ClientHttpError){
-            let httpError: WebFaasError.ClientHttpError = errSend;
-            result.code = 502;
+            return 502;
         }
         else if (errSend instanceof WebFaasError.CompileError){
-            let httpError: WebFaasError.CompileError = errSend;
-            result.code = 501;
+            return 501;
         }
         else if (errSend instanceof WebFaasError.NotFoundError){
-            let httpError: WebFaasError.NotFoundError = errSend;
-            result.code = 404;
+            return 404;
         }
         else if (errSend instanceof WebFaasError.ValidateError){
-            let httpError: WebFaasError.ValidateError = errSend;
-            result.code = 400;
+            return 400;
         }
         else if (errSend instanceof WebFaasError.SecurityError){
             let httpError: WebFaasError.SecurityError = errSend;
@@ -298,52 +293,28 @@ export class MessageUtil  {
                 statusCode = 400;
             }
 
-            result.code = statusCode;
+            return statusCode;
         }
         else{
-            result.code = 500;
+            return 500;
         }
-
-        result.message = errSend.name + " " + errSend.message;
-        result.detail = errSend;
-
-        return result;
     }
 
-    public static convertCodeErrorToJsonRpc(errSend: Error): IMessageError{
-        let result = {} as IMessageError;
+    public static convertErrorToCodeJsonRpc(errSend: Error): number{
         if (errSend instanceof WebFaasError.ClientHttpError){
-            let httpError: WebFaasError.ClientHttpError = errSend;
-            result.code = -32600; //Invalid Request
+            return -32600; //Invalid Request
         }
         else if (errSend instanceof WebFaasError.NotFoundError){
-            let httpError: WebFaasError.NotFoundError = errSend;
-            result.code = -32601; //Method not found
+            return -32601; //Method not found
         }
         else if (errSend instanceof WebFaasError.ValidateError){
-            let httpError: WebFaasError.ValidateError = errSend;
-            result.code = -32600; //Invalid Request
+            return -32600; //Invalid Request
         }
         else if (errSend instanceof WebFaasError.SecurityError){
-            let httpError: WebFaasError.SecurityError = errSend;
-            let statusCode: number = -32000; //Server error
-
-            if (httpError.type === WebFaasError.SecurityErrorTypeEnum.PAYLOAD_INVALID){
-                statusCode = -32600; //Invalid Request
-            }
-            else if (httpError.type === WebFaasError.SecurityErrorTypeEnum.PAYLOAD_LARGE){
-                statusCode = -32600; //Invalid Request
-            }
-            
-            result.code = statusCode;
+            return -32600; //Invalid Request
         }
         else{
-            result.code = -32000; //Server error
+            return -32000; //Server error
         }
-
-        result.message = errSend.name + " " + errSend.message;
-        result.detail = errSend;
-
-        return result;
     }
 }
