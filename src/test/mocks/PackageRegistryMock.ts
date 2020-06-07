@@ -17,7 +17,9 @@ export namespace PackageRegistryMock{
             throw new Error("Method not implemented.");
         }
         stop(): Promise<any> {
-            throw new Error("Method not implemented.");
+            return new Promise((resolve, reject)=>{
+                resolve();
+            })
         }
     }
 
