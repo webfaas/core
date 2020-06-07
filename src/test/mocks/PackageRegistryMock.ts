@@ -85,8 +85,8 @@ export namespace PackageRegistryMock{
             let nameMathSumWasm = "@registry1/mathsumwasm";
             let nameMathMessage = "@registry1/mathmessage";
             let nameSimpleMessage = "@registry1/simplemessage";
+            let nameContextMessage = "@registry1/contextmessage";
             
-
             let description: string = "registry1 mock";
 
             this.listPackageRegistryResponse.set(nameMathSum, new PackageRegistryResponseMock.Manifest(nameMathSum, ["0.0.1", "0.0.2", "0.0.3"], description));
@@ -135,6 +135,9 @@ export namespace PackageRegistryMock{
 
             this.listPackageRegistryResponse.set(nameSimpleMessage, new PackageRegistryResponseMock.Manifest(nameSimpleMessage, ["0.0.1"], description));
             this.listPackageRegistryResponse.set(nameSimpleMessage + ":0.0.1", new PackageRegistryResponseMock.SimpleMessage(nameSimpleMessage, "0.0.1", description));
+
+            this.listPackageRegistryResponse.set(nameContextMessage, new PackageRegistryResponseMock.Manifest(nameContextMessage, ["0.0.1"], description));
+            this.listPackageRegistryResponse.set(nameContextMessage + ":0.0.1", new PackageRegistryResponseMock.ContextMessage(nameContextMessage, "0.0.1", description));
         }
     }
     

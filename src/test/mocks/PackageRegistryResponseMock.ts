@@ -428,4 +428,35 @@ export namespace PackageRegistryResponseMock{
             this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
         }
     }
+
+    export class ContextMessage implements IPackageRegistryResponse{
+        etag: string;
+        packageStore: PackageStore | null = null;
+    
+        constructor(name: string = "contextmessage", version: string = "0.0.1", description: string = "message test"){
+            this.etag = "etag" + version;
+            
+            var dataPackageItemDataMap: Map<string, IPackageStoreItemData> = new Map<string, IPackageStoreItemData>();
+            var nextPos: number = 0;
+
+            let packageObj = {name:name, version:version, main:"index.js", description: description, dependencies: {}};
+            let packageBuffer = Buffer.from(JSON.stringify(packageObj));
+            nextPos = addItemData("package.json", nextPos, packageBuffer, dataPackageItemDataMap);
+
+            let moduleText = `
+            module.exports.request = async function(event, ctx){
+                let url = event.payload.url;
+                let cn = ctx.getConnection("http");
+                let response = await cn.request(url);
+                return {payload: response};
+            }
+            `
+            let file1Buffer = Buffer.from(moduleText);
+            nextPos = addItemData("index.js", nextPos, file1Buffer, dataPackageItemDataMap);
+    
+            var bufferTotal: Buffer = Buffer.concat([packageBuffer, file1Buffer]);
+    
+            this.packageStore = new PackageStore(name, version, this.etag, bufferTotal, dataPackageItemDataMap);
+        }
+    }
 }

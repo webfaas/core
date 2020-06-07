@@ -340,3 +340,17 @@ describe("Message Manager - sendMessage - validate", () => {
         }
     })
 })
+
+describe("Message Manager - context", () => {
+    it("sendMessage mathmessage.sum async", async function(){
+        let moduleManager = new ModuleManager(packageStoreManager_default, log);
+        let messageManager = new MessageManager(moduleManager, log);
+
+        let msg = {} as IMessage;
+        msg.header = {name: "@registry1/contextmessage", version: "0.0.1", method: "request", messageID: "", tenantID: ""};
+        msg.payload = {url:"http://echo-api.3scale.net/"};
+        let responseObj: any = await messageManager.sendMessage(msg);
+        chai.expect(responseObj.payload.statusCode).to.eq(200);
+        chai.expect(responseObj.payload.data.toString()).to.include("echo-api.3scale.net");
+    })
+})

@@ -2,7 +2,7 @@ import { Config } from "../Config/Config";
 import { IMessageConnectionFactory } from "./connection/IMessageConnectionFactory";
 import { MessageConnectionHTTPFactory } from "./connection/http/MessageConnectionHTTPFactory";
 import { IInvokeContext } from "../InvokeContext/IInvokeContext";
-import { Log } from "../Core";
+import { Log, LogLevelEnum } from "../Core";
 
 export class MessageManagerTenant{
     tenantID: string;
