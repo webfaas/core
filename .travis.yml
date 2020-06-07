@@ -21,6 +21,11 @@ jobs:
       node_js: 13
       script:
       - npm run buildAndTest
+    
+    - language: node_js
+      node_js: 14
+      script:
+      - npm run buildAndTest
       after_script:
       - |
         npm install --save-dev coveralls
