@@ -41,5 +41,10 @@ listSIG.forEach(function (sig) {
     let processAny = process as any;
     processAny.on(sig, function () {
         EventManager.emit(EventManagerEnum.QUIT, sig);
+        console.log("ABORTING...");
+        setInterval(()=>{
+            console.log("ABORTED!!!");
+            process.exit(1);
+        }, 1000);
     });
 });
