@@ -27,7 +27,7 @@ describe("Message Manager - sendMessage", () => {
         let messageManager = new MessageManager(moduleManager, log);
 
         let msg = {} as IMessage;
-        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: ""};
+        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: "", tenantID: ""};
         msg.payload = {x:2,y:3}
         let responseObj: any = await messageManager.sendMessage(msg);
         chai.expect(responseObj.payload).to.eq(5);
@@ -38,7 +38,7 @@ describe("Message Manager - sendMessage", () => {
         let messageManager = new MessageManager(moduleManager, log);
 
         let msg = {} as IMessage;
-        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sumsync", messageID: ""};
+        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sumsync", messageID: "", tenantID: ""};
         msg.payload = {x:2,y:3}
         let responseObj: any = await messageManager.sendMessage(msg);
         chai.expect(responseObj.payload).to.eq(5);
@@ -49,7 +49,7 @@ describe("Message Manager - sendMessage", () => {
         let messageManager = new MessageManager(moduleManager, log);
 
         let msg = {} as IMessage;
-        msg.header = {name: "@registry1/simplemessage", version: "0.0.1", method: "", messageID: ""};
+        msg.header = {name: "@registry1/simplemessage", version: "0.0.1", method: "", messageID: "", tenantID: ""};
         msg.payload = null;
         let responseObj: any = await messageManager.sendMessage(msg);
         chai.expect(responseObj.payload).to.eq("simple");
@@ -61,7 +61,7 @@ describe("Message Manager - sendMessage", () => {
 
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/modulenotexist", version: "0.0.1", method: "", messageID: ""};
+            msg.header = {name: "@registry1/modulenotexist", version: "0.0.1", method: "", messageID: "", tenantID: ""};
             msg.payload = null;
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");
@@ -77,7 +77,7 @@ describe("Message Manager - sendMessage", () => {
 
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/executionerror", version: "0.0.1", method: "", messageID: ""};
+            msg.header = {name: "@registry1/executionerror", version: "0.0.1", method: "", messageID: "", tenantID: ""};
             msg.payload = null;
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");
@@ -96,7 +96,7 @@ describe("Message Manager - sendMessage", () => {
 
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/executionerror", version: "0.0.1", method: "", messageID: ""};
+            msg.header = {name: "@registry1/executionerror", version: "0.0.1", method: "", messageID: "", tenantID: ""};
             msg.payload = null;
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");
@@ -117,7 +117,7 @@ describe("Message Manager - sendMessage", () => {
 
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/executionerror", version: "0.0.1", method: "", messageID: ""};
+            msg.header = {name: "@registry1/executionerror", version: "0.0.1", method: "", messageID: "", tenantID: ""};
             msg.payload = null;
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");
@@ -133,7 +133,7 @@ describe("Message Manager - sendMessage", () => {
         
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "methodnotfound", messageID: ""};
+            msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "methodnotfound", messageID: "", tenantID: ""};
             msg.payload = null;
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");
@@ -149,7 +149,7 @@ describe("Message Manager - sendMessage", () => {
         
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "errorasync", messageID: ""};
+            msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "errorasync", messageID: "", tenantID: ""};
             msg.payload = null;
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");

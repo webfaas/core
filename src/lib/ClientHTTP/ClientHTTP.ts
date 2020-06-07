@@ -5,9 +5,9 @@ import { ClientHTTPConfig } from "./ClientHTTPConfig";
 import { IClientHTTPResponse } from "./IClientHTTPResponse";
 import { Log } from "../Log/Log";
 import { LogLevelEnum, LogCodeEnum } from "../Log/ILog";
-import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 import { IncomingHttpHeaders } from "http";
 import { WebFaasError } from "../WebFaasError/WebFaasError";
+import { IInvokeContext } from "../InvokeContext/IInvokeContext";
 
 export class ClientHTTP  {
     listHttpAgent: Map<string, http.Agent> = new Map<string, http.Agent>();

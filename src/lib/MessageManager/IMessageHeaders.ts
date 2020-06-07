@@ -26,6 +26,7 @@ export interface IMessageHeadersIdentity{
 }
 
 export interface IMessageHeaders {
+    "tenantID": string;
     "messageID": string;
     "name": string;
     "version": string;

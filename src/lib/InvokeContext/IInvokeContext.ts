@@ -1,3 +1,4 @@
 export interface IInvokeContext {
-    data: any
+    tenantID: string;
+    getConnection(name: string): any
 }

@@ -8,6 +8,8 @@ import { IMessageManagerFilter } from "./IMessageManagerFilter";
 import { LogLevelEnum } from "../Core";
 import { LogCodeEnum } from "../Log/ILog";
 import { MessageUtil } from "../Util/MessageUtil";
+import { MessageManagerTenant } from "./MessageManagerTenant";
+import { Config } from "../Config/Config";
 
 /**
  * manager Module
@@ -17,11 +19,39 @@ export class MessageManager {
     private moduleManager: ModuleManager;
     private moduleManagerImport: ModuleManagerImport;
     private preFilterInvokeAsyncList: Array<IMessageManagerFilter> = new Array<IMessageManagerFilter>();
+    private listTenant: Map<string, MessageManagerTenant> = new Map<string, MessageManagerTenant>();
+    private defaultTenant: MessageManagerTenant;
     
     constructor(moduleManager: ModuleManager, log: Log){
         this.moduleManager = moduleManager;
         this.moduleManagerImport = this.moduleManager.getModuleManagerImport();
         this.log = log;
+        
+        let defaultConfig = new Config();
+        this.defaultTenant = new MessageManagerTenant("default", defaultConfig, this.log);
+    }
+
+    /**
+     * return tenant
+     * @param name tenant name
+     */
+    getTenant(name: string): MessageManagerTenant{
+        let tenant = this.listTenant.get(name);
+        if (tenant){
+            return tenant;
+        }
+        else{
+            return this.defaultTenant;
+        }
+    }
+
+    /**
+     * add tenant
+     * @param name tenant name
+     * @param tenant tenant
+     */
+    addTenant(name: string, tenant: MessageManagerTenant){
+        this.listTenant.set(name, tenant);
     }
 
     /**
@@ -41,6 +71,10 @@ export class MessageManager {
         this.preFilterInvokeAsyncList.push(filter);
     }
 
+    /**
+     * parse version
+     * @param version 
+     */
     parseVersion(version: string): string{
         return MessageUtil.parseVersion(version);
     }
@@ -128,10 +162,12 @@ export class MessageManager {
                         else{
                             targetInvoke = moduleObj;
                         }
-                        
-                        let startTime_invoke = new Date().getTime();
+
                         if (targetInvoke){
-                            let responseSyncCallInvoke = targetInvoke(msg);
+                            let tenant = this.getTenant(msg.header.tenantID);
+                            
+                            let startTime_invoke = new Date().getTime();
+                            let responseSyncCallInvoke = targetInvoke(msg, tenant.invokeContext);
                             if (types.isPromise(responseSyncCallInvoke)){
                                 Promise.resolve(responseSyncCallInvoke).then((responseAsyncCallInvoke: any) => {
                                     let endTime_invoke = new Date().getTime();

@@ -69,7 +69,7 @@ export class Log {
      * @param filename name of file
      * @param invokeContext context invoke
      */
-    write(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:any){
+    write(level:LogLevelEnum, method:string, code:string, message:string, detail?:any, filename?:string, invokeContext?:IInvokeContext){
         try {
             if ((this.currentLevel !== LogLevelEnum.OFF) && (this.currentLevel >= level)){
                 var logData: ILogData;
@@ -94,7 +94,7 @@ export class Log {
      * @param filename name of file
      * @param invokeContext context invoke
      */
-    writeError(method:string, error:Error, detail?:any, filename?:string, invokeContext?:any){
+    writeError(method:string, error:Error, detail?:any, filename?:string, invokeContext?:IInvokeContext){
         try {
             if ((this.currentLevel !== LogLevelEnum.OFF) && (this.currentLevel >= LogLevelEnum.ERROR)){
                 var logData: ILogData;

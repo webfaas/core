@@ -102,7 +102,7 @@ describe("Message Manager - filter", () => {
         messageManager.addPreFilterInvokeAsync(new Filter6());
 
         let msg = {} as IMessage;
-        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: ""};
+        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: "", tenantID: ""};
         msg.payload = {x:2,y:3}
         let responseObj: any = await messageManager.sendMessage(msg);
         chai.expect(responseObj.payload).to.eq(5);
@@ -188,7 +188,7 @@ describe("Message Manager - filter", () => {
         messageManager.addPreFilterInvokeAsync(new Filter6());
         try {
             let msg = {} as IMessage;
-            msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: ""};
+            msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: "", tenantID: ""};
             msg.payload = {x:2,y:3}
             let responseObj: any = await messageManager.sendMessage(msg);
             throw Error("success");

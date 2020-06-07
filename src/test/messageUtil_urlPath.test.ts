@@ -12,7 +12,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.null;
@@ -27,7 +27,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.null;
@@ -42,7 +42,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.null;
@@ -61,7 +61,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.null;
@@ -78,7 +78,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.null;
@@ -149,7 +149,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("@scope1/module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.null;
@@ -216,7 +216,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.not.null;
@@ -233,7 +233,7 @@ describe("MessageUtil - UrlPath", () => {
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("get");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.not.null;
@@ -245,17 +245,17 @@ describe("MessageUtil - UrlPath", () => {
     })
 
     it("parseModuleheader - Bearer AAA", function(){
-        let msg = MessageUtil.parseMessageByUrlPath("module1/version1", "", null, "", {"Authorization": "Bearer AAA"});
+        let msg = MessageUtil.parseMessageByUrlPath("module1/version1", "", null, "POST", {"Authorization": "Bearer AAA"});
         let header = msg?.header;
         chai.expect(header).to.not.null;
         chai.expect(header?.name).to.eq("module1");
         chai.expect(header?.version).to.eq("version1.*");
-        chai.expect(header?.method).to.eq("");
+        chai.expect(header?.method).to.eq("post");
         chai.expect(header?.messageID).to.eq("");
         chai.expect(header?.http).to.not.undefined;
         chai.expect(header?.http?.headers).to.not.null;
         chai.expect(header?.http?.headers["Authorization"]).to.eq("Bearer AAA");
-        chai.expect(header?.http?.method).to.eq("GET");
+        chai.expect(header?.http?.method).to.eq("POST");
         chai.expect(header?.http?.path).to.eq("");
         chai.expect(header?.identity).to.undefined;
         

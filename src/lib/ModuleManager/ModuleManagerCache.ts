@@ -8,6 +8,8 @@ import { IRequirePackageInfoTarget } from "./IRequirePackageInfoTarget";
 import { PackageStoreCacheMemorySync } from "../PackageStoreCache/Memory/PackageStoreCacheMemorySync";
 import { IManifest } from "../Manifest/IManifest";
 import * as path from "path";
+import { LogLevelEnum } from "../Core";
+import { LogCodeEnum } from "../Log/ILog";
 
 const nativeModule = require("module");
 
@@ -129,6 +131,8 @@ export class ModuleManagerCache {
         this.localDiskModule.set(key, folderPath);
         this.addManifestToCache(packageName, packageVersion, manifest);
         this.addCompiledObjectToCache(packageName, packageVersion, "", moduleObj);
+
+        this.log.write(LogLevelEnum.INFO, "addLocalDiskModuleToCache", LogCodeEnum.PROCESS.toString(), folderPath, {name: packageName, version: packageVersion}, __filename);
     }
 
     cleanCachePackageStoreByNameAndVersion(packageName: string, packageVersion: string) {

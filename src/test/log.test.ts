@@ -123,7 +123,7 @@ describe("Log", () => {
         //LogLevelEnum.INFO
         log.changeCurrentLevel(LogLevelEnum.INFO);
 
-        log.writeError("method8", new Error("message8"), {message:"message8"}, "file8", null);
+        log.writeError("method8", new Error("message8"), {message:"message8"}, "file8");
         chai.expect(lastLog.level).to.eq(LogLevelEnum.ERROR);
         chai.expect(lastLog.date.getFullYear()).to.eq(now.getFullYear());
         chai.expect(lastLog.code).to.eq("Error");
@@ -131,7 +131,8 @@ describe("Log", () => {
         chai.expect(lastLog.method).to.eq("method8");
         chai.expect(lastLog.filename).to.eq("file8");
 
-        log.write(LogLevelEnum.INFO, "method9", "test9", "message9", {message:"message9"}, "file9", {info:"info9"});
+        let ctx = {tenantID:"id1"} as any;
+        log.write(LogLevelEnum.INFO, "method9", "test9", "message9", {message:"message9"}, "file9", ctx);
         chai.expect(lastLog.level).to.eq(LogLevelEnum.INFO);
         chai.expect(lastLog.date.getFullYear()).to.eq(now.getFullYear());
         chai.expect(lastLog.code).to.eq("test9");
@@ -144,10 +145,7 @@ describe("Log", () => {
         chai.expect(lastLog.filename).to.eq("file9");
         chai.expect(lastLog.invokeContext).to.not.null;
         if (lastLog.invokeContext){
-            chai.expect(lastLog.invokeContext.data).to.not.null;
-            if (lastLog.invokeContext.data){
-                chai.expect(lastLog.invokeContext.data.info).to.eq("info9");
-            }
+            chai.expect(lastLog.invokeContext.tenantID).to.eq("id1");
         }
 
         //force exception
@@ -156,7 +154,7 @@ describe("Log", () => {
             lastLogException = message;
         };
         
-        chai.expect(logException.writeError("method10", new Error("message10"), {message:"message10"}, "file10", null)).to.not.throw;
+        chai.expect(logException.writeError("method10", new Error("message10"), {message:"message10"}, "file10")).to.not.throw;
         chai.expect(lastLogException.message).to.eq("Exception test");
 
         chai.expect(logException.write(LogLevelEnum.INFO, "method11", "test11", "message11")).to.not.throw;

@@ -55,7 +55,7 @@ describe("Core", () => {
         loadDefaultRegistries(core.getModuleManager().getModuleManagerImport().getPackageStoreManager().getPackageRegistryManager(), core.getLog())
         
         let msg = {} as IMessage;
-        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: ""};
+        msg.header = {name: "@registry1/mathmessage", version: "0.0.1", method: "sum", messageID: "", tenantID: ""};
         msg.payload = {x:2,y:3}
         let response: any = await core.sendMessage(msg);
 

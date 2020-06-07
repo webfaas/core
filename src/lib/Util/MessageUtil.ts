@@ -163,10 +163,14 @@ export class MessageUtil  {
 
             msg.header.http = {} as IMessageHeadersHTTP;
             msg.header.http.path = moduleInfo.path;
-            msg.header.http.method = http_method || "GET";
+            msg.header.http.method = (http_method || "GET").toUpperCase();
             msg.header.http.headers = http_headers || null;
     
             msg.payload = payload;
+
+            if (!msg.header.method){
+                 msg.header.method = msg.header.http.method.toLowerCase();
+            }
     
             return msg;
         }
