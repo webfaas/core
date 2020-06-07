@@ -5,14 +5,14 @@ import { IMessage } from "./IMessage";
 import { ModuleManager } from "../ModuleManager/ModuleManager";
 import { ModuleManagerImport } from "../ModuleManager/ModuleManagerImport";
 import { IMessageManagerFilter } from "./IMessageManagerFilter";
-import { LogLevelEnum } from "../Core";
+import { LogLevelEnum, EventManager, EventManagerEnum } from "../Core";
 import { LogCodeEnum } from "../Log/ILog";
 import { MessageUtil } from "../Util/MessageUtil";
 import { MessageManagerTenant } from "./MessageManagerTenant";
 import { Config } from "../Config/Config";
 
 /**
- * manager Module
+ * Message Manager
  */
 export class MessageManager {
     private log: Log;
@@ -29,6 +29,10 @@ export class MessageManager {
         
         let defaultConfig = new Config();
         this.defaultTenant = new MessageManagerTenant("default", defaultConfig, this.log);
+
+        EventManager.addListener(EventManagerEnum.QUIT, ()=>{
+            this.stop();
+        });
     }
 
     /**
@@ -214,6 +218,12 @@ export class MessageManager {
                 this.log.writeError("sendMessage:import", errImport, {header:msg.header}, __filename);
                 reject(errImport);
             });
+        })
+    }
+
+    stop(){
+        this.listTenant.forEach((tenant) => {
+            tenant.stop();
         })
     }
 }

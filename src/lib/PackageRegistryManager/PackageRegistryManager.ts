@@ -3,6 +3,7 @@ import { IPackageRegistryResponse } from "../PackageRegistry/IPackageRegistryRes
 import { PackageRegistryManagerItem } from "./PackageRegistryManagerItem";
 import { PackageStore } from "../PackageStore/PackageStore";
 import { Log } from "../Log/Log";
+import { EventManager, EventManagerEnum } from "../Core";
 
 /**
  * manager PackageRegistry pool
@@ -11,6 +12,13 @@ export class PackageRegistryManager {
     private log: Log;
     private defaultRegistryName: string = "";
     private listRegistry: Map<string, PackageRegistryManagerItem> = new Map<string, PackageRegistryManagerItem>();
+    
+    constructor(log?: Log){
+        this.log = log || new Log();
+        EventManager.addListener(EventManagerEnum.QUIT, ()=>{
+            this.stop();
+        });
+    }
 
     /**
      * return default registry name
@@ -76,10 +84,6 @@ export class PackageRegistryManager {
         return item;
     }
 
-    constructor(log?: Log){
-        this.log = log || new Log();
-    }
-
     /**
      * add registry
      * @param name  name of registry
@@ -142,6 +146,12 @@ export class PackageRegistryManager {
             else{
                 reject(new Error("PackageRegistryManager not configured"));
             }
+        })
+    }
+
+    stop(){
+        this.listRegistry.forEach((item)=>{
+            item.registry.stop();
         })
     }
 }

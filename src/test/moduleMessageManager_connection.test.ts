@@ -54,7 +54,7 @@ describe("Message Manager - Connection", () => {
         let cn_notexist = tenant.invokeContext.getConnection("notexist");
         chai.expect(cn_notexist).to.null;
 
-        tenant.stop();
+        process.emit("SIGILL", "SIGILL"); //force stop tenant
     })
 
     it("http default tenant", async function(){
@@ -70,6 +70,6 @@ describe("Message Manager - Connection", () => {
             chai.expect(cn_http.getTenantID()).to.eq("default");
         }
 
-        tenant.stop();
+        process.emit("SIGILL", "SIGILL"); //force stop tenant
     })
 })
